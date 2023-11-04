@@ -244,7 +244,6 @@ class Store extends CI_Controller
     
                 $this->db->insert('tbl_store', $store);
                 $storeId = $this->db->insert_id();
-
                 $res_message = 'Store added successfully';
             }
             

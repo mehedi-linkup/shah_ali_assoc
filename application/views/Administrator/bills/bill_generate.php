@@ -50,6 +50,9 @@
 	td, td input{
 		font-size: 10px !important;
 	}
+	.btn-danger, .btn-danger.focus, .btn-danger:focus {
+		background-color: #29b0fc!important;
+	}
 </style>
 <div id="storePayment">
 	<div class="row"style="border-bottom:1px solid #ccc;padding: 10px 0;">
@@ -77,8 +80,8 @@
 		<div class="col-md-12">
 			
 			<div style="margin-top: -15px; margin-bottom: 2px;">
-				<label>Salary Date</label>
-				<input style="height: 25px;" type="date" v-model="salaryPayment.payment_date">
+				<label>Payment Date</label>
+				<input style="height: 25px;" type="date" v-model="billPayment.payment_date">
 			</div>
 
 			<div class="table-responsive">
@@ -86,42 +89,48 @@
 					<thead>
 						<tr>
 							<th>SL</th>
-							<th>Employee Id</th>
-							<th>Name</th>
-							<th>Department</th>
-							<th>Designation</th>
-							<th>Salary</th>
-							<th>Ovetime / Other Benefit</th>
-							<th>Deduction</th>
+							<th>Store No.</th>
+							<th>Store Name</th>
+							<th>Floor</th>
+							<th>Renter</th>
+							<th>Prev. Unit</th>
+							<th>Cur. Unit</th>
+							<th>Elctr. Unit</th>
+							<th>Elctr. Bill</th>
+							<th>Generator</th>
+							<th>Ac</th>
+							<th>Others</th>
 							<th>Net Payable</th>
 							<th>Paid</th>
-							<th>Comment</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(employee, i) in stores" v-bind:style="{background: employee.net_payable != employee.payment ? 'orange' : ''}">
+						<tr v-for="(store, i) in stores" v-bind:style="{background: store.net_payable != store.payment ? 'orange' : ''}">
 							<td>{{ ++i }}</td>
-							<td>{{ employee.Employee_ID }}</td>
-							<td>{{ employee.Employee_Name }}</td>
-							<td>{{ employee.Department_Name }}</td>
-							<td>{{ employee.Designation_Name }}</td>
-							<td style="text-align: center;">{{ employee.salary }}</td>
-							<td><input style="width: 100px;height: 20px; text-align:center;" type="number" v-model="employee.benefit" v-on:input="calculateNetPayable(employee)"></td>
-							<td><input style="width: 100px;height: 20px; text-align:center;" type="number" v-model="employee.deduction" v-on:input="calculateNetPayable(employee)"></td>
-							<td style="text-align: center;">{{employee.net_payable}}</td>
-							<td><input style="width: 100px;height: 20px; text-align:center;" type="number" v-model="employee.payment" v-on:input="checkPayment(employee)"></td>
-							<td><textarea style="height: 23px;" cols="" rows="1" v-model="employee.comment"></textarea></td>
+							<td>{{ store.Store_No }}</td>
+							<td>{{ store.Store_Name }}</td>
+							<td>{{ store.Floor_Name }}</td>
+							<td>{{ store.Renter_Name }}</td>
+							<td style="text-align: center;">{{ store.electricity }}</td>
+							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.electricity" v-on:input="calculateNetPayable(store)"></td>
+							<td style="text-align: center;">{{ store.electricity }}</td>
+							<td style="text-align: center;">{{ store.electricity }}</td>
+							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.generator" v-on:input="calculateNetPayable(store)"></td>
+							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.ac" v-on:input="calculateNetPayable(store)"></td>
+							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.others" v-on:input="calculateNetPayable(store)"></td>
+							<td style="text-align: center;">{{store.net_payable}}</td>
+							<td><input style="width: 100px;height: 20px; text-align:center;" type="number" v-model="store.payment" v-on:input="checkPayment(store)"></td>
 						</tr>
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="9" style="text-align: right;">Total=</td>
+							<td colspan="10" style="text-align: right;">Total=</td>
 							<td>{{ stores.reduce((prev, curr)=>{ return prev + parseFloat(curr.payment) }, 0) }}</td>
 							<td></td>
 						</tr>
 						<tr>
-							<td colspan="11">
-								<button type="button" @click="SaveSalaryPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-success pull-right">
+							<td colspan="12">
+								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-success pull-right">
 									Save
 									<i class="ace-icon fa fa-arrow-right icon-on-right bigger-110"></i>
 								</button>
@@ -146,7 +155,7 @@
 		el: '#storePayment',
 		data() {
 			return {
-				salaryPayment: {
+				billPayment: {
 					id: null,
 					payment_date: moment().format("YYYY-MM-DD"),
 					month_id: null,
@@ -180,7 +189,7 @@
 				}
 				let month_id = this.month.month_id;
 
-				this.salaryPayment.month_id = month_id;
+				this.billPayment.month_id = month_id;
 
 				await axios.post('/check_payment_month', {month_id})
 				.then(res=>{
@@ -189,37 +198,41 @@
 						this.payment = true;
 					}
 				})
+
+				console.log(this.payment);
+
 				
-				if(this.payment){
-					await axios.post('/get_bill_payments/', {month_id: month_id, details: true}).then(res => {
-						let payment = res.data[0];
-						this.salaryPayment.id = payment.id;
-						this.salaryPayment.payment_date = payment.payment_date;
-						this.salaryPayment.month_id = payment.month_id;
-						this.stores = payment.details;
-					})
-				} else {
-					await axios.get('/get_stores').then(res => {
-						let stores = res.data;
+				// if(this.payment){
+				// 	await axios.post('/get_bill_payments/', {month_id: month_id, details: true}).then(res => {
+				// 		let payment = res.data[0];
+				// 		this.billPayment.id = payment.id;
+				// 		this.billPayment.payment_date = payment.payment_date;
+				// 		this.billPayment.month_id = payment.month_id;
+				// 		this.stores = payment.details;
+				// 	})
+				// } else {
+				// 	await axios.get('/get_stores').then(res => {
+				// 		let stores = res.data;
 
-						stores.map(employee=>{
-							employee.salary = employee.salary_range;
-							employee.benefit = 0;
-							employee.deduction = 0;
-							employee.net_payable = employee.salary_range;
-							employee.payment = employee.salary_range;
-							employee.comment = '';
-							return employee;
-						});
+				// 		stores.map(store=>{
+				// 			store.electricity = 0;
+				// 			store.generator = 0;
+				// 			store.ac = 0;
+				// 			store.others = 0;
+				// 			store.net_payable = store.salary_range;
+				// 			store.payment = store.salary_range;
+				// 			store.comment = '';
+				// 			return store;
+				// 		});
 
-						this.stores = stores;
-						this.salaryPayment.payment_date = moment().format("YYYY-MM-DD");
-					})
+				// 		this.stores = stores;
+				// 		this.billPayment.payment_date = moment().format("YYYY-MM-DD");
+				// 	})
 
-					.catch(function (error) {
-						console.log(error);
-					});
-				}	
+				// 	.catch(function (error) {
+				// 		console.log(error);
+				// 	});
+				// }	
 			},
 
 			getMonths() {
@@ -228,16 +241,16 @@
 				})
 			},
 
-			SaveSalaryPayment() {
+			SaveBillPayment() {
 				
 				let data = {
-					payment: this.salaryPayment,
+					payment: this.billPayment,
 					stores: this.stores,
 					
 				}
-				let url = '/add_salary_payment';
+				let url = '/add_bill_payment';
 				if(this.payment) {
-					url = '/update_salary_payment';
+					url = '/update_bill_payment';
 				}
 				axios.post(url , data)
 				.then(res => {
@@ -250,7 +263,7 @@
 			},
 
 			resetForm(){
-				this.salaryPayment = {
+				this.billPayment = {
 					id: null,
 					payment_date: moment().format("YYYY-MM-DD"),
 					month_id: null,

@@ -101,9 +101,9 @@
 				</div>
 
 				<div class="form-group clearfix">
-					<label class="control-label col-md-4">No of Employee:</label>
+					<label class="control-label col-md-4">Website:</label>
 					<div class="col-md-7">
-						<input type="text" class="form-control" v-model="store.employee_number" required>
+						<input type="text" class="form-control" v-model="store.Store_Web" placeholder="www.example.com">
 					</div>
 				</div>
 
@@ -171,9 +171,9 @@
 				</div>
 
 				<div class="form-group clearfix">
-					<label class="control-label col-md-4">Website:</label>
+					<label class="control-label col-md-4">Start Unit:</label>
 					<div class="col-md-7">
-						<input type="text" class="form-control" v-model="store.Store_Web" placeholder="www.example.com" required>
+						<input type="text" class="form-control" v-model="store.Start_Unit" placeholder="" required>
 					</div>
 				</div>
 
@@ -302,7 +302,7 @@
                     Store_No: '',
 					Store_Name: '',
                     Store_TIN: '',
-					employee_number: '',
+					Start_Unit: '',
 					Store_Description: '',
 					Store_Mobile: '',
 					Store_Email: '',

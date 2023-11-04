@@ -1876,19 +1876,16 @@ class Bills extends CI_Controller {
 
         $clauses = "";
 
-        echo json_encode($data);
-        return;
-
         if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
-            $clauses .= " and ep.payment_date between '$data->dateFrom' and '$data->dateTo'";
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
         }
 
         if(isset($data->user_id) && $data->user_id != ''){
-            $clauses .= " and ep.saved_by = '$data->user_id'";
+            $clauses .= " and bs.process_by = '$data->user_id'";
         }
 
         if(isset($data->month_id) && $data->month_id != ''){
-            $clauses .= " and ep.month_id = '$data->month_id'";
+            $clauses .= " and bs.month_id = '$data->month_id'";
         }
 
         $sheets = $this->db->query("
