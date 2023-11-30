@@ -960,7 +960,15 @@ class Page extends CI_Controller {
             $res = ['success'=>false, 'message'=>''];
             try{
                 $floorObj = json_decode($this->input->post('data'));
-            
+
+                $floorCount = $this->db->query("select * from tbl_floor where Floor_Ranking = ? and Floor_branchid = ?", [$floorObj->Floor_Ranking, $this->session->userdata("BRANCHid")])->num_rows();
+
+                if($floorCount > 0){
+                    $res = ['success'=>false, 'message'=>'Ranking already exists'];
+                    echo Json_encode($res);
+                    exit;
+                }
+                
                 $floor = (array)$floorObj;
 
                 unset($floor['Floor_SlNo']);
@@ -983,6 +991,15 @@ class Page extends CI_Controller {
 
             try{
                 $floorObj = json_decode($this->input->post('data'));
+
+                
+                $floorCount = $this->db->query("select * from tbl_floor where Floor_Ranking = ? and Floor_SlNo != ? and Floor_branchid = ?", [$floorObj->Floor_Ranking, $floorObj->Floor_SlNo,  $this->session->userdata("BRANCHid")])->num_rows();
+
+                if($floorCount > 0){
+                    $res = ['success'=>false, 'message'=>'Ranking already exists'];
+                    echo Json_encode($res);
+                    exit;
+                }
      
                 $floor = (array)$floorObj;
 
@@ -1024,7 +1041,7 @@ class Page extends CI_Controller {
                 from tbl_floor f
                 where f.status = 'a'
                 and (f.Floor_branchid = ? or f.Floor_branchid = 0)
-                order by f.Floor_SlNo desc
+                order by f.Floor_Ranking asc
             ", $this->session->userdata('BRANCHid'))->result();
             echo json_encode($floors);
         }

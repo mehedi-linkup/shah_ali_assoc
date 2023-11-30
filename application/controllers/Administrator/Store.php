@@ -40,7 +40,14 @@ class Store extends CI_Controller
 
     public function getStores(){
         $data = json_decode($this->input->raw_input_stream);
-
+       
+        $clauses = "";
+        if(isset($data->FloorId) && $data->FloorId != null){
+            $clauses .= " and Store_Floor  = '$data->FloorId'";
+        }
+        if(isset($data->GradeId) && $data->GradeId != null){
+            $clauses .= " and Store_Grade  = '$data->GradeId'";
+        }
         $storeTypeClause = "";
         if(isset($data->storeType) && $data->storeType != null){
             $storeTypeClause = " and Store_Type  = '$data->storeType'";
@@ -50,6 +57,7 @@ class Store extends CI_Controller
                 s.*,
                 t.ProductType_Name,
                 f.Floor_Name,
+                f.Floor_Ranking,
                 g.Grade_Name,
                 o.Owner_Name,
                 r.Renter_Name,
@@ -62,7 +70,7 @@ class Store extends CI_Controller
             left join tbl_renter r on r.Renter_SlNo = s.renter_id
             where s.status = 'a'
             and (s.Store_branchid = ? or s.Store_branchid = 0)
-            $storeTypeClause
+            $storeTypeClause $clauses
             order by s.Store_SlNo desc
         ", $this->session->userdata('BRANCHid'))->result();
         echo json_encode($owners);
@@ -246,6 +254,13 @@ class Store extends CI_Controller
                 $storeId = $this->db->insert_id();
                 $res_message = 'Store added successfully';
             }
+
+            $storeMeterCount = $this->db->query("select * from tbl_store where meter_no = ? and Store_branchid = ?", [$storeObj->meter_no, $this->session->userdata("BRANCHid")])->num_rows();
+            if($storeMeterCount > 0){
+                $res = ['success'=>false, 'message'=>'Meter number already exists'];
+                echo Json_encode($res);
+                exit;
+            }
             
 
             if(!empty($_FILES)) {
@@ -294,6 +309,16 @@ class Store extends CI_Controller
                 echo Json_encode($res);
                 exit;
             }
+            
+            $storeMeterCount = $this->db->query("select * from tbl_store where meter_no = ? and Store_SlNo != ? and Store_branchid = ?", [$storeObj->meter_no, $storeObj->Store_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
+
+            if($storeMeterCount > 0){
+                $res = ['success'=>false, 'message'=>'Meter number already exists'];
+                echo Json_encode($res);
+                exit;
+            }
+
+            
             $store = (array)$storeObj;
             $storeId = $storeObj->Store_SlNo;
 
@@ -785,6 +810,69 @@ class Store extends CI_Controller
         $data['title'] = "Customer Payment History";
         $data['content'] = $this->load->view('Administrator/reports/customer_payment_history', $data, TRUE);
         $this->load->view('Administrator/index', $data);
+    }
+
+    public function storeBillReport()
+    {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Store Wise Report";
+        $data['content'] = $this->load->view('Administrator/store/store_bills_report', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function getStoreBills(){
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+        if(isset($data->storeId) && $data->storeId != ''){
+            $clauses .= " and s.Store_SlNo = '$data->storeId'";
+        }
+
+        if(isset($data->month) && $data->month != ''){
+            $clauses .= " and bs.month_id = '$data->month'";
+        }
+
+        // if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        //     $clauses .= " and ep.payment_date between '$data->dateFrom' and '$data->dateTo'";
+        // }
+
+        $bills = $this->db->query("
+            select 
+                bsd.*,
+                bs.process_date,
+                bs.last_date,
+                s.Store_No,
+                s.Store_Name,
+                s.meter_no,
+                o.Owner_Name,
+                re.Renter_Name,
+                m.month_name,
+                ifnull(sum(upd.electricity_bill), 0) as electricity_bill_payment,
+                ifnull(sum(upd.generator_bill), 0) as generator_bill_payment,
+                ifnull(sum(upd.ac_bill), 0) as ac_bill_payment,
+                ifnull(sum(upd.others_bill), 0) as others_bill_payment,
+                ifnull(sum(upd.late_fee), 0) as late_fee,
+                ifnull(sum(upd.payment), 0) as total_payment,
+                upd.comment as payment_comment
+            from tbl_bill_sheet_details bsd
+            join tbl_bill_sheet bs on bs.id = bsd.bill_id
+            left join tbl_utility_payment up on up.month_id = bs.month_id
+            left join tbl_utility_payment_details upd on upd.utility_payment_id = up.id
+            join tbl_month m on m.month_id = bs.month_id
+            join tbl_store s on s.Store_SlNo = bsd.store_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            where bsd.branch_id = ?
+            and bsd.status = 'a'
+            $clauses
+            group by bsd.id
+            order by bsd.id desc
+        ", $this->session->userdata('BRANCHid'))->result();
+
+        echo json_encode($bills);
     }
 
 }

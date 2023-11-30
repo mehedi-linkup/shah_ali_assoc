@@ -729,7 +729,7 @@ class Employee extends CI_Controller
         $data = json_decode($this->input->raw_input_stream);
         $monthId = $data->month_id;
 
-        $query = $this->db->query("SELECT month_id FROM tbl_employee_payment WHERE month_id = ? and branch_id = ? and status = 'a'",[$monthId, $this->session->userdata("BRANCHid")]);
+        $query = $this->db->query("SELECT month_id FROM tbl_bill_sheet WHERE month_id = ? and branch_id = ? and status = 'a'",[$monthId, $this->session->userdata("BRANCHid")]);
         if($query->num_rows() > 0 ) {
             echo json_encode(['success' => true]);
             exit();

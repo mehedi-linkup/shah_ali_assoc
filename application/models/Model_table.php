@@ -54,14 +54,14 @@ class Model_Table extends CI_Model{
 		return $invoice;
     }
     
-    public function generatePurchaseInvoice(){
+    public function generateUtilityInvoice(){
         $invoice = date('Y') . "000001";
         $year = date('Y');
-        $purchases = $this->db->query("select * from tbl_purchasemaster pm where pm.PurchaseMaster_InvoiceNo like '$year%'");
-        if($purchases->num_rows() != 0){
-            $newPurchaseId = $purchases->num_rows() + 1;
+        $payments = $this->db->query("select * from tbl_utility_payment up where up.invoice like '$year%'");
+        if($payments->num_rows() != 0){
+            $newPaymentId = $payments->num_rows() + 1;
             $zeros = array('0', '00', '000', '0000', '00000');
-            $invoice = date('Y') . (strlen($newPurchaseId) > count($zeros) ? $newPurchaseId : $zeros[count($zeros) - strlen($newPurchaseId)] . $newPurchaseId);
+            $invoice = date('Y') . (strlen($newPaymentId) > count($zeros) ? $newPaymentId : $zeros[count($zeros) - strlen($newPaymentId)] . $newPaymentId);
         }
 
         return $invoice;

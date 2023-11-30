@@ -14,7 +14,9 @@
 
 		<!-- bootstrap & fontawesome -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/font-awesome/4.5.0/css/font-awesome.min.css" />
+		<!-- <link rel="stylesheet" href="<?php echo base_url(); ?>assets/font-awesome/4.5.0/css/font-awesome.min.css" /> -->
+		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/font-awesome/css/font-awesome.min.css" />
+
 
 		<!-- page specific plugin styles -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap-duallistbox.min.css" />
@@ -57,6 +59,8 @@
 
 		<!-- inline styles related to this page -->
 
+		<!-- <script src="<?php echo base_url();?>assets/fontawesome5/js/all.min.js"></script> -->
+
 		<!-- ace settings handler -->
 		<script src="<?php echo base_url(); ?>assets/js/ace-extra.min.js"></script>
 
@@ -74,7 +78,7 @@
 	</head>
 
 	<body class="skin-2">
-		<div id="navbar" class="navbar navbar-default ace-save-state navbar-fixed-top" style="background:-webkit-linear-gradient(top,#0068a7 0%,#2ab2ff 100%);">
+		<div id="navbar" class="navbar navbar-default ace-save-state navbar-fixed-top" style="background:green">
 			<div class="navbar-container ace-save-state" id="navbar-container">
 				<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar">
 					<span class="sr-only">Toggle sidebar</span>
@@ -126,7 +130,7 @@
 					<?php endif; ?>
 
 						<li class="clock_li">
-							<a class="clock" style="background: radial-gradient(ellipse at top left, #a5a5a5 0%,#003778 45%);">
+							<a class="clock" style="background:green">
 								<span style="font-size:15px;"><i class="ace-icon fa fa-clock-o"></i></span> <span style="font-size:12px;"><?php  date_default_timezone_set('Asia/Dhaka'); echo date("l, d F Y"); ?>,&nbsp;<span id="timer" style="font-size:12px;"></span></span>
 							</a>
 						</li>

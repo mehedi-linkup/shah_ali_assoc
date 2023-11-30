@@ -9,9 +9,15 @@
 		<div class="row" style="margin-top: 10px;margin-bottom:15px;border-bottom: 1px solid #ccc;padding-bottom:15px;">
 			<div class="col-md-5 col-md-offset-3">
 				<div class="form-group clearfix">
-					<label class="control-label col-md-4">Level Name:</label>
+					<label class="control-label col-md-4">Floor Name:</label>
 					<div class="col-md-7">
 						<input type="text" class="form-control" v-model="floor.Floor_Name" placeholder="level name" required>
+					</div>
+				</div>
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Ranking :</label>
+					<div class="col-md-7">
+						<input type="number" class="form-control" v-model="floor.Floor_Ranking" placeholder="" required>
 					</div>
 				</div>
 				<div class="form-group clearfix">
@@ -49,6 +55,7 @@
 						<template scope="{ row }">
 							<tr>
 								<td>{{ row.Floor_Name }}</td>
+								<td>{{ row.Floor_Ranking }}</td>
 								<td>{{ row.Floor_Store }}</td>
 								<td>{{ row.Floor_Description }}</td>
 								<td>
@@ -85,12 +92,14 @@
 				floor: {
 					Floor_SlNo: 0,
 					Floor_Name: '',
+					Floor_Ranking: '',
 					Floor_Store: '',
 					Floor_Description: ''
 				},
 				floors: [],
 				columns: [
                     { label: 'Floor Name', field: 'Floor_Name', align: 'center' },
+                    { label: 'Ranking', field: 'Floor_Ranking', align: 'center' },
                     { label: 'Total Store', field: 'Floor_Store', align: 'center' },
                     { label: 'Description', field: 'Floor_Description', align: 'center' },
                     { label: 'Action', align: 'center', filterable: false }

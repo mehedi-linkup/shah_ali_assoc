@@ -15,7 +15,7 @@ class Bills extends CI_Controller {
         $this->load->model('SMS_model', 'sms', true);
     }
     
-    public function index($generateOrPayment = 'generate')  {
+    public function index($generateOrPayment = 'generate') {
         $access = $this->mt->userAccess();
         if(!$access){
             redirect(base_url());
@@ -1881,7 +1881,7 @@ class Bills extends CI_Controller {
         }
 
         if(isset($data->user_id) && $data->user_id != ''){
-            $clauses .= " and bs.process_by = '$data->user_id'";
+            $clauses .= " and bs.added_by = '$data->user_id'";
         }
 
         if(isset($data->month_id) && $data->month_id != ''){
@@ -1895,7 +1895,7 @@ class Bills extends CI_Controller {
 
             from tbl_bill_sheet bs
             join tbl_month m on m.month_id = bs.month_id
-            left join tbl_user u on u.User_SlNo = bs.process_by
+            left join tbl_user u on u.User_SlNo = bs.added_by
 
             where bs.status = 'a'
             and bs.branch_id = ?
@@ -1903,26 +1903,214 @@ class Bills extends CI_Controller {
             order by bs.id desc
         ", $this->session->userdata("BRANCHid"))->result();
 
-        if(isset($sheets->details)){
+        if(isset($data->details)){
             foreach($sheets as $payment){
                 $payment->details = $this->db->query("
-                    SELECT pd.*,
-                    e.Employee_ID,
-                    e.Employee_Name,
-                    d.Department_Name,
-                    de.Designation_Name
+                    SELECT bd.*,
+                    s.Store_SlNo,
+                    s.Store_No,
+                    s.Store_Name,
+                    s.Store_Floor,
+                    o.Owner_Name,
+                    re.Renter_Name,
+                    f.Floor_Name,
+                    f.Floor_Ranking
 
-                    from tbl_employee_payment_details pd
-                    join tbl_employee e on e.Employee_SlNo = pd.employee_id
-                    left join tbl_department d on d.Department_SlNo = e.Department_ID
-                    left join tbl_designation de on de.Designation_SlNo = e.Designation_ID
-
-                    where pd.status = 'a'
-                    and pd.payment_id = '$payment->id'
+                    from tbl_bill_sheet_details bd
+                    join tbl_store s on s.Store_SlNo = bd.store_id
+                    left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                    left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                    left join tbl_floor f on f.Floor_SlNo = s.Store_Floor
+                    where bd.status = 'a'
+                    and bd.bill_id = '$payment->id'
                 ")->result();
             }
         }
 
-        echo json_encode($payments);
+        echo json_encode($sheets);
+    }
+    public function saveBill()
+    {
+        $res = ["success" => false, 'message' => ''];
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+
+            // echo json_encode($data);
+            // return;
+
+            $billObj = $data->payment;
+            $stores = $data->stores;
+            
+            $bill = (array)$billObj;
+            unset($bill['id']);
+            $bill['added_by'] = $this->session->userdata("userId");
+            $bill['added_at'] = date("Y-m-d H:i:s");
+            $bill['branch_id'] = $this->session->userdata("BRANCHid");
+            $bill['status'] = 'a';
+
+            $this->db->insert('tbl_bill_sheet', $bill);
+            $bill_id = $this->db->insert_id();
+           
+            $total_amount = 0;
+
+            foreach($stores as $str){
+                $store = [
+                  'bill_id'          => $bill_id,
+                  'store_id'         => $str->Store_SlNo,
+                  'electricity_bill' => $str->electricity_bill,
+                  'generator_bill'   => $str->generator_bill,
+                  'ac_bill'          => $str->ac_bill,
+                  'others_bill'      => $str->others_bill,
+                  'previous_unit'    => $str->previous_unit,
+                  'current_unit'     => $str->current_unit,
+                  'electricity_unit' => $str->electricity_unit,
+                  'net_payable'      => $str->net_payable,
+                  'saved_by'         => $this->session->userdata("userId"),
+                  'saved_at'         => date("Y-m-d H:i:s"),
+                  'branch_id'        => $this->session->userdata("BRANCHid"),
+                  'status'           => 'a',
+                ];
+
+                $this->db->insert('tbl_bill_sheet_details', $store);
+
+                $total_amount += $str->net_payable;
+            }
+
+            $this->db->where('id', $bill_id)->update('tbl_bill_sheet', ['total_amount' => $total_amount]);
+
+            $res = ["success" => true, 'message' => 'Bill Generate Success', 'billId'=>$bill_id];
+
+            echo json_encode($res);
+
+        } catch (\Exception $e) {
+            $res = ["success" => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function updateBill()
+    {
+        $res = ["success" => false, 'message' => ''];
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+
+            // echo json_encode($data);
+            // return;
+
+            $billObj = $data->payment;
+            $stores = $data->stores;
+            $bill_id = $billObj->id;
+
+            $bill = (array)$billObj;
+            unset($bill['id']);
+            $bill['updated_by'] = $this->session->userdata("userId");
+            $bill['updated_at'] = date("Y-m-d H:i:s");
+
+            $this->db->where('id', $bill_id);
+            $this->db->update('tbl_bill_sheet', $bill);
+
+            $total_amount = 0;
+
+            foreach($stores as $str){
+                $store = [
+                    'bill_id'          => $bill_id,
+                    'store_id'         => $str->Store_SlNo,
+                    'electricity_bill' => $str->electricity_bill,
+                    'generator_bill'   => $str->generator_bill,
+                    'ac_bill'          => $str->ac_bill,
+                    'others_bill'      => $str->others_bill,
+                    'previous_unit'    => $str->previous_unit,
+                    'current_unit'     => $str->current_unit,
+                    'electricity_unit' => $str->electricity_unit,
+                    'net_payable'      => $str->net_payable,
+                    'updated_by'      => $this->session->userdata("userId"),
+                    'updated_at'      => date("Y-m-d H:i:s"),
+                    'branch_id'        => $this->session->userdata("BRANCHid"),
+                    'status'           => 'a',
+                ];
+
+                $this->db->where('id', $str->id);
+                $this->db->update('tbl_bill_sheet_details', $store);
+
+                $total_amount += $str->net_payable;
+
+            }
+
+            $this->db->where('id', $bill_id)->update('tbl_bill_sheet', ['total_amount' => $total_amount]);
+
+            $res = ["success" => true, 'message' => 'Bill Update Success', 'billId' => $bill_id];
+            echo json_encode($res);
+
+        } catch (\Exception $e) {
+            $res = ["success" => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function billSheet($billSheetId) {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Sheet";
+        $data['billSheetId'] = $billSheetId;
+        $data['content'] = $this->load->view("Administrator/bills/bill_sheet", $data, true);
+        $this->load->view("Administrator/index", $data);
+
+    }
+
+    public function getBillSheet() {
+        $data = json_decode($this->input->raw_input_stream);
+      
+        $res = [];
+
+        $clauses = "";
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        if(isset($data->id) && $data->id != '') {
+            $clauses .= " and bs.id = '$data->id'";
+            $res['billDetails'] = $this->db->query("
+                select
+                    bsd.*,
+                    s.Store_No,
+                    s.Store_Name,
+                    o.Owner_Name,
+                    re.Renter_Name
+                from tbl_bill_sheet_details bsd
+                join tbl_store s on s.Store_SlNo = bsd.store_id
+                left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                where bsd.bill_id = ?
+            ", $data->id)->result();
+        }
+
+        $res['billSheets'] = $this->db->query("
+            select
+                bs.*,
+                m.month_name,
+                u.user_name as added_by,
+                (
+                    select ifnull(sum(bsd.net_payable), 0)
+                    from tbl_bill_sheet_details bsd
+                    where bsd.bill_id = bs.id
+                ) as total_amount
+            from tbl_bill_sheet bs
+            join tbl_month m on m.month_id = bs.month_id
+            left join tbl_user u on u.User_SlNo = bs.added_by 
+            where branch_id = ?
+            $clauses
+        ", $this->session->userdata("BRANCHid") )->result();
+
+        echo json_encode($res);
+    }
+
+    public function billSheetRecord() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Sheet Record";
+        $data['content'] = $this->load->view('Administrator/bills/bill_sheet_record', $data, true);
+        $this->load->view('Administrator/index', $data);
     }
 }

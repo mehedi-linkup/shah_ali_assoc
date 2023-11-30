@@ -48,11 +48,17 @@
 		padding: 0px 10px;
 	}
 	td, td input{
-		font-size: 10px !important;
+		font-size: 11px !important;
 	}
 	.btn-danger, .btn-danger.focus, .btn-danger:focus {
 		background-color: #29b0fc!important;
+		border-color: #29b0fc !important;
 	}
+	.btn-danger:hover {
+		border-color: #D15B47 !important;
+	}
+
+
 </style>
 <div id="storePayment">
 	<div class="row"style="border-bottom:1px solid #ccc;padding: 10px 0;">
@@ -80,8 +86,10 @@
 		<div class="col-md-12">
 			
 			<div style="margin-top: -15px; margin-bottom: 2px;">
-				<label>Payment Date</label>
-				<input style="height: 25px;" type="date" v-model="billPayment.payment_date">
+				<label>Process Date</label>
+				<input style="height: 25px;" type="date" v-model="billPayment.process_date">
+				<label>Last Date</label>
+				<input style="height: 25px;" type="date" v-model="billPayment.last_date">
 			</div>
 
 			<div class="table-responsive">
@@ -91,7 +99,7 @@
 							<th>SL</th>
 							<th>Store No.</th>
 							<th>Store Name</th>
-							<th>Floor</th>
+							<!-- <th>Floor</th> -->
 							<th>Renter</th>
 							<th>Prev. Unit</th>
 							<th>Cur. Unit</th>
@@ -101,36 +109,41 @@
 							<th>Ac</th>
 							<th>Others</th>
 							<th>Net Payable</th>
-							<th>Paid</th>
+							<!-- <th>Paid</th> -->
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(store, i) in stores" v-bind:style="{background: store.net_payable != store.payment ? 'orange' : ''}">
-							<td>{{ ++i }}</td>
-							<td>{{ store.Store_No }}</td>
-							<td>{{ store.Store_Name }}</td>
-							<td>{{ store.Floor_Name }}</td>
-							<td>{{ store.Renter_Name }}</td>
-							<td style="text-align: center;">{{ store.electricity }}</td>
-							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.electricity" v-on:input="calculateNetPayable(store)"></td>
-							<td style="text-align: center;">{{ store.electricity }}</td>
-							<td style="text-align: center;">{{ store.electricity }}</td>
-							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.generator" v-on:input="calculateNetPayable(store)"></td>
-							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.ac" v-on:input="calculateNetPayable(store)"></td>
-							<td><input style="width:100px;height:20px;text-align:center;" type="number" v-model="store.others" v-on:input="calculateNetPayable(store)"></td>
-							<td style="text-align: center;">{{store.net_payable}}</td>
-							<td><input style="width: 100px;height: 20px; text-align:center;" type="number" v-model="store.payment" v-on:input="checkPayment(store)"></td>
-						</tr>
+						<template v-for="store in stores">
+							<tr>
+								<td colspan="12" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
+							</tr>
+							<tr v-for="(store, i) in store.stores" v-bind:style="{background: store.net_payable!=0 ? '#709fd9' : ''}">
+								<td>{{ ++i }}</td>
+								<td>{{ store.Store_No }}</td>
+								<td>{{ store.Store_Name }}</td>
+								<!-- <td>{{ store.Floor_Name }}</td> -->
+								<td>{{ store.Renter_Name }}</td>
+								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.previous_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td style="text-align: center;">{{ store.electricity_unit }}</td>
+								<td style="text-align: center;">{{ store.electricity_bill }}</td>
+								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.generator_bill" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.ac_bill" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.others_bill" v-on:input="calculateNetPayable(store)"></td>
+								<td style="text-align: center;">{{store.net_payable}}</td>
+								<!-- <td><input style="width: 80px;height: 20px; text-align:center;" type="number" v-model="store.payment" v-on:input="checkPayment(store)"></td> -->
+							</tr>
+						</template>
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="10" style="text-align: right;">Total=</td>
-							<td>{{ stores.reduce((prev, curr)=>{ return prev + parseFloat(curr.payment) }, 0) }}</td>
+							<td colspan="11" style="text-align: center;font-weight: 700">Total</td>
+							<td style="font-weight: 700">{{ parseFloat(stores.reduce((prev, curr)=>{ return +prev + +curr.stores.reduce((p, c) => { return +p + +c.net_payable }, 0) }, 0) ).toFixed(2) }}</td>
 							<td></td>
 						</tr>
 						<tr>
 							<td colspan="12">
-								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-success pull-right">
+								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-danger pull-right">
 									Save
 									<i class="ace-icon fa fa-arrow-right icon-on-right bigger-110"></i>
 								</button>
@@ -148,6 +161,7 @@
 <script src="<?php echo base_url(); ?>assets/js/vue/vuejs-datatable.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/vue/vue-select.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/moment.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/lodash.min.js"></script>
 
 <script>
 	Vue.component('v-select', VueSelect.VueSelect);
@@ -157,7 +171,8 @@
 			return {
 				billPayment: {
 					id: null,
-					payment_date: moment().format("YYYY-MM-DD"),
+					process_date: moment().format("YYYY-MM-DD"),
+					last_date: moment().format("YYYY-MM-DD"),
 					month_id: null,
 				},
 				stores: [],
@@ -170,19 +185,32 @@
 			this.getMonths();
 		},
 		methods: {
-			checkPayment(employee){
-				if(parseFloat(employee.payment) > parseFloat(employee.net_payable)){
-					alert("Can not paid greater than net payable");
-					employee.payment = employee.net_payable;
-				}
-			},
-			calculateNetPayable(employee){
-				let payable = ((parseFloat(employee.salary) + parseFloat(employee.benefit)) - parseFloat(employee.deduction)).toFixed(2);
+			// checkPayment(employee){
+			// 	if(parseFloat(employee.payment) > parseFloat(employee.net_payable)){
+			// 		alert("Can not paid greater than net payable");
+			// 		employee.payment = employee.net_payable;
+			// 	}
+			// },
+			calculateNetPayable(store){
+				setTimeout(() => {
+					if(+store.current_unit < +store.previous_unit) {
+						store.current_unit = store.previous_unit
+						store.electricity_unit = 0;
+						store.electricity_bill = 0;
+						store.net_payable = parseFloat(store.generator_bill + store.ac_bill + store.others_bill).toFixed(2)
+					}
+				}, 2000);
 
-				employee.net_payable = payable;
-				employee.payment = payable;
+				store.electricity_unit = store.current_unit - store.previous_unit;
+				store.electricity_bill = parseFloat(store.electricity_unit * 4.83).toFixed(2);
+
+				let payable = ( parseFloat(store.electricity_bill) + parseFloat(store.generator_bill) + parseFloat(store.ac_bill) + parseFloat(store.others_bill) ).toFixed(2);
+
+				store.net_payable = payable;
+				// store.payment = payable;
 			},
 			async getStores() {
+				
 				if(this.month == null && this.month.month_id == ''){
 					alert("Select Month");
 					return;
@@ -198,41 +226,67 @@
 						this.payment = true;
 					}
 				})
-
-				console.log(this.payment);
-
 				
-				// if(this.payment){
-				// 	await axios.post('/get_bill_payments/', {month_id: month_id, details: true}).then(res => {
-				// 		let payment = res.data[0];
-				// 		this.billPayment.id = payment.id;
-				// 		this.billPayment.payment_date = payment.payment_date;
-				// 		this.billPayment.month_id = payment.month_id;
-				// 		this.stores = payment.details;
-				// 	})
-				// } else {
-				// 	await axios.get('/get_stores').then(res => {
-				// 		let stores = res.data;
+				if(this.payment){
+					await axios.post('/get_bill_payments/', {month_id: month_id, details: true}).then(res => {
+						let payment = res.data[0];
+						this.billPayment.id = payment.id;
+						this.billPayment.process_date = payment.process_date;
+						this.billPayment.last_date = payment.last_date;
+						this.billPayment.month_id = payment.month_id;
 
-				// 		stores.map(store=>{
-				// 			store.electricity = 0;
-				// 			store.generator = 0;
-				// 			store.ac = 0;
-				// 			store.others = 0;
-				// 			store.net_payable = store.salary_range;
-				// 			store.payment = store.salary_range;
-				// 			store.comment = '';
-				// 			return store;
-				// 		});
+						let stores = _.chain(payment.details).groupBy('Store_Floor')
+							.map(store => {
+									return {
+										floor_name: store[0].Floor_Name,
+										floor_ranking: store[0].Floor_Ranking,
+										stores: store
+									}
+								}).value()
 
-				// 		this.stores = stores;
-				// 		this.billPayment.payment_date = moment().format("YYYY-MM-DD");
-				// 	})
 
-				// 	.catch(function (error) {
-				// 		console.log(error);
-				// 	});
-				// }	
+						stores = _.orderBy(stores, ['floor_ranking'], ['asc'])
+
+						this.stores = stores;
+						// this.stores = payment.details;
+					})
+				} else {
+					await axios.get('/get_stores').then(res => {
+						let stores = res.data;
+
+						stores.map(store => {
+							store.previous_unit = 0;
+							store.current_unit = 0;
+							store.electricity_unit = 0;
+							store.electricity_bill = 0;
+							store.generator_bill = 0;
+							store.ac_bill = 0;
+							store.others_bill = 0;
+							store.net_payable = 0;
+							return store;
+						});
+						stores = _.chain(stores).groupBy('Store_Floor')
+							.map(store => {
+									return {
+										floor_name: store[0].Floor_Name,
+										floor_ranking: store[0].Floor_Ranking,
+										stores: store
+									}
+								}).value()
+
+
+						stores = _.orderBy(stores, ['floor_ranking'], ['asc'])
+
+						this.stores = stores;
+
+						this.billPayment.process_date = moment().format("YYYY-MM-DD");
+						this.billPayment.last_date = moment().format("YYYY-MM-DD");
+					})
+
+					.catch(function (error) {
+						console.log(error);
+					});
+				}	
 			},
 
 			getMonths() {
@@ -242,22 +296,37 @@
 			},
 
 			SaveBillPayment() {
-				
+				let stores = _.chain(this.stores)
+					.flatMap(function(item) {
+						return item.stores.map(function(store) {
+						return store;
+						});
+					})
+					.value();
+
 				let data = {
 					payment: this.billPayment,
-					stores: this.stores,
+					stores: stores,
 					
 				}
+				
 				let url = '/add_bill_payment';
 				if(this.payment) {
 					url = '/update_bill_payment';
 				}
 				axios.post(url , data)
-				.then(res => {
+				.then(async res => {
 					let r = res.data;
-					alert(r.message);
 					if(r.success) {
-						this.resetForm();
+						let conf = confirm(`${r.message}, Do you want to view sheet?`);
+						if(conf){
+							window.open('/bill_sheet/'+r.billId, '_blank');
+							await new Promise(r => setTimeout(r, 1000));
+							this.resetForm();
+						} else {
+							this.resetForm();
+						}
+						
 					}
 				})
 			},
@@ -265,7 +334,8 @@
 			resetForm(){
 				this.billPayment = {
 					id: null,
-					payment_date: moment().format("YYYY-MM-DD"),
+					process_date: moment().format("YYYY-MM-DD"),
+					last_date: moment().format("YYYY-MM-DD"),
 					month_id: null,
 				},
 				this.month = null,

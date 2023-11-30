@@ -23,10 +23,10 @@
 		position: absolute;
 		left: 0px;
 	}
-
-	/* .v-select .vs__actions {
-		margin-top: -5px;
-	} */
+	.highlight-row {
+		background-color: #ffeeba; 
+		color: #eb4c0f;
+	}
 
 	.v-select .dropdown-menu {
 		width: auto;
@@ -40,6 +40,10 @@
 	#branchDropdown .vs__actions .open-indicator {
 		height: 15px;
 		margin-top: 7px;
+	}
+
+	.utility-header {
+		color: #005a8b;
 	}
 
 	.title_design {
@@ -103,33 +107,43 @@
 </style>
 
 <div id="sales" class="row">
-	<div class="col-xs-12 col-md-12 col-lg-12" style="border:1px solid #ccc;margin-bottom:5px; padding:10px">
-		<div class="row" style="margin-bottom: 10px;">
-			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right">Payment Invoice</label>
-				<div class="col-sm-2">
-					<input type="text" id="invoiceNo" class="form-control" v-model="order.invoice" readonly />
-				</div>
-			</div>
+	<div class="col-xs-12 col-md-12 col-lg-12" style="margin-bottom:5px; padding:10px">
+		<div class="widget-box">
+			<div class="widget-body">
+				<div class="widget-main">
+					<div class="row">
+						<div class="form-group">
+							<label class="col-sm-1 control-label no-padding-right">Payment Inv</label>
+							<div class="col-sm-2">
+								<input type="text" id="invoiceNo" class="form-control" v-model="payment.invoice" readonly />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-1 control-label no-padding-right"> Date </label>
+							<div class="col-sm-2">
+								<input class="form-control" id="salesDate" type="date" v-model="payment.date" v-bind:disabled="userType == 'u' ? true : false" />
+							</div>
+						</div>
+					
+						<div class="form-group">
+							<label class="col-sm-1 control-label no-padding-right"> Month </label>
+							<div class="col-sm-2">
+								<v-select v-bind:options="months" label="month_name" v-model="selectedMonth"></v-select>
+							</div>
+						</div>
 
-			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right"> Date </label>
-				<div class="col-sm-2">
-					<input class="form-control" id="salesDate" type="date" v-model="order.order_date" v-bind:disabled="userType == 'u' ? true : false" />
+						<div class="form-group">
+							<label class="col-sm-1 control-label no-padding"> Payment Type </label>
+							<div class="col-sm-2">
+								<input type="radio" id="store" value="store" v-model="paymentType" v-on:change="onPaymentTypeChange"> <label for="store">Store</label>&nbsp;
+								<!-- <input type="radio" id="renter" value="renter" v-model="paymentType" v-on:change="onPaymentTypeChange"> <label for="renter">Renter</label>  -->
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right"> Month </label>
-				<div class="col-sm-2">
-                    <v-select v-bind:options="months" label="month_name" v-model="month"></v-select>
-				</div>
-			</div>
-		</div>
-		<div class="row">
 		</div>
 	</div>
-
 	<div class="col-xs-12 col-md-9 col-lg-9">
 		<div class="widget-box">
 			<div class="widget-header">
@@ -148,58 +162,79 @@
 				<div class="widget-main">
 					<!-- Renter info part start -->
 					<div class="row" style="margin: 0px;border:1px solid #ccc;padding-bottom:10px;margin-bottom:15px;">
-						<h5 style="text-align: center;background: rgb(0 90 139);padding: 6px;color: #fff;margin-top:0px">Renter Info:</h5>
+						<h5 style="text-align: center;background: rgb(0 90 139);padding: 6px;color: #fff;margin-top:0px">Store Info:</h5>
 						<div class="col-md-5" style="border-right: 1px solid #ccc;">
 
-							<div class="form-group">
-								<label class="col-sm-1 control-label"> Floor </label>
-								<div class="col-sm-2">
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label"> Floor </label>
+								<div class="col-sm-8">
 									<select class="form-control" v-if="floors.length == 0"></select>
-									<v-select v-bind:options="floors" v-model="selectedFloor" label="Floor_Name" v-if="floors.length > 0"></v-select>
+									<v-select v-bind:options="floors" v-model="selectedFloor" label="Floor_Name" v-if="floors.length > 0" @input="onChangeFloor()"></v-select>
 								</div>
 							</div>
 
-							<div class="form-group">
-								<label class="col-sm-1 control-label"> Store Grade </label>
-								<div class="col-sm-2">
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label"> Grade </label>
+								<div class="col-sm-8">
 									<select class="form-control" v-if="grades.length == 0"></select>
-									<v-select v-bind:options="grades" v-model="selectedGrade" label="Grade_Name" v-if="grades.length > 0"></v-select>
+									<v-select v-bind:options="grades" v-model="selectedGrade" label="Grade_Name" v-if="grades.length > 0" @input="onChangeFloor()"></v-select>
 								</div>
 							</div>
 
-							<div class="form-group">
-								<label class="col-sm-1 control-label"> Store </label>
-								<div class="col-sm-2">
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label"> Store </label>
+								<div class="col-sm-8">
 									<select class="form-control" v-if="stores.length == 0"></select>
-									<v-select v-bind:options="stores" v-model="selectedStore" label="display_text" v-if="stores.length > 0"></v-select>
+									<v-select v-bind:options="stores" v-model="selectedStore" label="display_text" v-if="stores.length > 0" v-on:input="storeOnChange"></v-select>
 								</div>
 							</div>
-						
-							<div class="form-group">
+
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label no-padding-right"> Name </label>
+								<div class="col-sm-8">
+									<input type="text" id="customerName" placeholder="Name" class="form-control" v-model="selectedStore.Store_Name" readonly />
+								</div>
+							</div>
+
+                            <div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label no-padding-right"> Mobile No </label>
+								<div class="col-sm-8">
+									<input type="number" id="mobileNo" placeholder="Mobile No" class="form-control" v-model="selectedStore.Store_Mobile" autocomplete="off" readonly />
+								</div>
+							</div>
+
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'store' ? '' : 'none'}">
+								<label class="col-sm-4 control-label no-padding-right"> Meter No </label>
+								<div class="col-sm-8">
+									<input type="number" id="meterNo" placeholder="Meter No" class="form-control" v-model="selectedStore.meter_no" autocomplete="off" readonly />
+								</div>
+							</div>
+
+
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'renter' ? '' : 'none'}">
 								<label class="col-sm-4 control-label no-padding-right"> Renter </label>
 								<div class="col-sm-7">
-									<v-select v-bind:options="renters" label="display_name" v-model="selectedRenter" v-on:input="renterOnChange"></v-select>
+									<v-select v-bind:options="renters" label="display_name" v-model="selectedRenter" v-on:input="storeOnChange"></v-select>
 								</div>
 								<div class="col-sm-1" style="padding: 0;">
 									<a href="<?= base_url('renter') ?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;" target="_blank" title="Add New Renter"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
 								</div>
 							</div>
-
-							<div class="form-group">
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'renter' ? '' : 'none'}">
 								<label class="col-sm-4 control-label no-padding-right"> Name </label>
 								<div class="col-sm-8">
 									<input type="text" id="customerName" placeholder="Name" class="form-control" v-model="selectedRenter.Renter_Name" readonly />
 								</div>
 							</div>
 
-                            <div class="form-group">
+                            <div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'renter' ? '' : 'none'}">
 								<label class="col-sm-4 control-label no-padding-right"> Mobile No </label>
 								<div class="col-sm-8">
 									<input type="number" id="mobileNo" placeholder="Mobile No" class="form-control" v-model="selectedRenter.Renter_Mobile" autocomplete="off" readonly />
 								</div>
 							</div>
 
-							<div class="form-group">
+							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'renter' ? '' : 'none'}">
 								<label class="col-sm-4 control-label no-padding-right"> Address </label>
 								<div class="col-sm-8">
 									<textarea id="address" placeholder="Address" class="form-control" v-model="selectedRenter.Renter_PreAddress" readonly></textarea>
@@ -211,28 +246,25 @@
 								<table class="table table-bordered" style="color:#000;margin-bottom: 5px;">
 									<thead>
 										<tr>
+											<th style="color:#000;">All</th>
 											<th style="color:#000;">Store No</th>
-											<th style="color:#000;">Start Date</th>
-											<th style="color:#000;">Years</th>
+											<th style="color:green;">G.Date</th>
+											<th style="color:red;">L.Date</th>
 											<th style="color:#000;">Amount</th>
 											<th style="color:#000;">Paid</th>
 											<th style="color:#000;">Due</th>
 										</tr>
 									</thead>
 									<tbody>
-										<template v-for="order in customer_orders">
-											<tr v-for="(item,index) in order.orderDetails">
-												<td>{{order.invoice}}</td>
-												<td>{{order.order_date | dateOnly('DD-MM-YYYY')}}</td>
-												<td>
-													<span>{{ item.item_name}}</span>
-												</td>
-												<td style="text-align: right;">{{item.total_price}}</td>
-												<td>
-													<a href="javascript:" @click="existSaleClick(order,index)">
-														<i class="fa fa-check"></i>
-													</a>
-												</td>
+										<template>
+											<tr v-for="(store, index) in store_bills" :class="{'highlight-row': isExpire(store.last_date) }">
+												<td><input type="checkbox" v-model="store.isSelect" id="" @change="onSelectStore"></td>
+												<td>{{store.Store_No}}</td>
+												<td>{{store.process_date | dateOnly('DD MMM YYYY')}}</td>
+												<td>{{store.last_date | dateOnly('DD MMM YYYY')}}</td>
+												<td style="text-align: right;">{{store.net_payable}}</td>
+												<td>{{ store.total_payment }}</td>
+												<td>{{ +store.net_payable - +store.total_payment }}</td>
 											</tr>
 										</template>
 									</tbody>
@@ -246,26 +278,39 @@
 					<!-- Body top part and body down part info start -->
 					<div class="row" style="margin: 0px;border:1px solid #ccc;padding-bottom:10px;margin-bottom:15px;">
 						<h5 style="text-align: center;background: rgb(0 90 139);padding: 6px;color: #fff;margin-top:0px">Utility Info:</h5>
-
 						<!-- order info start -->
-						<div class="col-md-12" style="margin-top:10px;">
+						<div v-if="filter_store_bills.length > 0" v-for="store in filter_store_bills" class="col-md-12" style="margin-top:10px;">
+							<div class="utility-header">
+								<strong>Store Name: </strong> <span style="color: #be2300;">{{ store.Store_Name }}</span> <strong>&nbsp;/&nbsp; Meter No: </strong> <span style="color: #be2300;">{{ store.meter_no }}</span>
+							</div>
+							<hr v-if="filter_store_bills.length > 0" style="margin-top:10px;margin-bottom:10px">
 							<div class="form-group row clearfix ">
-                                <label class="col-sm-2" style="text-align: right;">Electricity Bill : </label>
+                                <label class="col-sm-2">Electricity Bill : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="text" v-model="order_details.quantity" class="form-control" require>
+									<input type="number" v-model="store.electricity_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
 								<label class="col-sm-2" style="text-align: right;">AC Bill : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="text" v-model="order_details.quantity" class="form-control" require>
+									<input type="number" v-model="store.ac_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
 								<label class="col-sm-2" style="text-align: right;">Generator Bill : </label>
-								<div class="col-sm-2 no-padding">
-									<input type="text" v-model="order_details.quantity" class="form-control" require>
+								<div class="col-sm-2 no-padding-left">
+									<input type="number" v-model="store.generator_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
                                 <hr>
-								<label class="col-sm-2" style="text-align: right;"> Others : </label>
+								<label class="col-sm-2" > Others : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="text" v-model="order_details.quantity" class="form-control" require>
+									<input type="number" v-model="store.others_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
+								</div>
+								<label class="col-sm-2" style="text-align: right;"> Late Fee : </label>
+								<div class="col-sm-2 no-padding">
+									<input type="number" v-model="store.late_fee" class="form-control" require @input="onChangeUtiltiy(store)">
+								</div>
+
+								<label class="col-sm-2" style="text-align: right;"> Comment : </label>
+								<div class="col-sm-2 no-padding-left">
+									<!-- <textarea v-model="store.comment" class="form-control"><textarea> -->
+										<textarea class="form-control" id=""  cols="" rows="2" v-model="store.comment"></textarea>
 								</div>
 							</div>
 						</div>
@@ -296,12 +341,12 @@
 						<div class="col-xs-12">
 							<div class="table-responsive">
 								<table style="color:#000;margin-bottom: 0px;border-collapse: collapse;">
-									<tr style="display: none;">
+									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Fabric Price</label>
+												<label class="col-xs-12 control-label no-padding-right">Total Electricity Bill</label>
 												<div class="col-xs-12">
-													<input type="number" id="subTotal" class="form-control" v-model="order.fabric_price" v-on:input="calculateTotal" />
+													<input type="number" id="subTotal" class="form-control" v-model="payment.total_electricity_bill" readonly />
 												</div>
 											</div>
 										</td>
@@ -310,9 +355,41 @@
 									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Charges</label>
+												<label class="col-xs-12 control-label no-padding-right">Total Generator Bill</label>
 												<div class="col-xs-12">
-													<input type="number" class="form-control" v-model="order.charge" v-on:input="calculateTotal" readonly />
+													<input type="number" class="form-control" v-model="payment.total_generator_bill" v-on:input="calculateTotal" readonly />
+												</div>
+											</div>
+										</td>
+									</tr>
+
+									<tr>
+										<td>
+											<div class="form-group">
+												<label class="col-xs-12 control-label no-padding-right">Total AC Bill</label>
+												<div class="col-xs-12">
+													<input type="number" class="form-control" v-model="payment.total_ac_bill" v-on:input="calculateTotal" readonly />
+												</div>
+											</div>
+										</td>
+									</tr>
+
+									<tr>
+										<td>
+											<div class="form-group">
+												<label class="col-xs-12 control-label no-padding-right">Total Others Bill</label>
+												<div class="col-xs-12">
+													<input type="number" class="form-control" v-model="payment.total_others_bill" v-on:input="calculateTotal" readonly />
+												</div>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<div class="form-group">
+												<label class="col-xs-12 control-label no-padding-right">Total Late Fee</label>
+												<div class="col-xs-12">
+													<input type="number" class="form-control" v-model="payment.total_late_fee" v-on:input="calculateTotal" readonly />
 												</div>
 											</div>
 										</td>
@@ -323,7 +400,7 @@
 											<div class="form-group">
 												<label class="col-xs-12 control-label no-padding-right">Total</label>
 												<div class="col-xs-12">
-													<input type="number" id="total" class="form-control" v-model="order.total" readonly />
+													<input type="number" id="total" class="form-control" v-model="payment.total_payment_amount" readonly />
 												</div>
 											</div>
 										</td>
@@ -332,36 +409,24 @@
 									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Advance</label>
+												<label class="col-xs-12 control-label no-padding-right">Due</label>
 												<div class="col-xs-12">
-													<input type="number" id="paid" class="form-control" v-model="order.advance" v-on:input="calculateTotal" />
+													<input type="number" id="due" class="form-control" v-model="payment.total_due" readonly />
 												</div>
 											</div>
 										</td>
 									</tr>
 
-									<tr>
-										<td>
-											<div class="form-group">
-												<label class="col-xs-12 control-label">Balance</label>
-												<div class="col-xs-12">
-													<input type="number" id="due" class="form-control" v-model="order.balance" readonly />
-												</div>
-											</div>
-										</td>
-									</tr>
 
 									<tr>
 										<td>
 											<div class="form-group">
 												<div class="col-sm-12" style="margin-top: 10px;">
-													<input type="button" class="btn btn-primary btn-sm" value="Save Payment" v-on:click.prevent="saveOrder" v-bind:disabled="orderProgress ? true : false" style="color: #fff;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">
+													<input type="button" class="btn btn-primary btn-sm" value="Save Payment" v-on:click.prevent="savePayment" v-bind:disabled="paymentProgress ? true : false" style="color: #fff;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">
 												</div>
 											</div>
 										</td>
 									</tr>
-
-
 								</table>
 							</div>
 						</div>
@@ -383,48 +448,52 @@
 		el: '#sales',
 		data() {
 			return {
-				orderItems: [],
-				itemSections: [],
+				payment: {
+					id: parseInt('<?php echo $paymentId; ?>'),
+					invoice: '<?php echo $invoice; ?>',
+					date: moment().format('YYYY-MM-DD'),
+					total_electricity_bill: 0,
+					total_generator_bill: 0,
+					total_ac_bill: 0,
+					total_others_bill: 0,
+					total_late_fee: 0,
+					total_payment_amount: 0,
+					total_due: 0
+				},
+				paymentType: 'store',
                 months: [],
-				month: null,
+				selectedMonth: null,
                 stores: [],
-                selectedStore: null,
+                selectedStore: {
+					Store_SlNo: '',
+					Store_Name: '',
+					display_text: 'Select Store',
+					Store_Mobile: '',
+					meter_no: '',
+				},
 				grades: [],
-				selectedGrade: null,
+				selectedGrade: {
+                    Grade_SlNo: '',
+					Grade_Name: 'Select Grade',
+				},
 				floors: [],
-				selectedFloor: null,
+				selectedFloor: {
+					Floor_SlNo: '',
+					Floor_Name: 'Select Floor',
+				},
 				owners: [],
 				selectedOwner: null,
 				renters: [],
 				selectedRenter: {
+					Renter_SlNo: '',
                     Renter_Name: '',
                     Renter_Mobile: '',
-                    Renter_PreAddress: ''
+                    Renter_PreAddress: '',
+					display_name: 'Select Renter'
                 },
                 employees: [],
                 selectedEmployee: null,
-
-				order: {
-					id: parseInt('<?php echo $id; ?>'),
-					invoice: '<?php echo $invoice; ?>',
-					order_date: moment().format('YYYY-MM-DD'),
-					delivery_date: moment().day(7).format('YYYY-MM-DD'),
-					order_status: 'pending',
-					customer_id: '',
-					measurement_master: '',
-					cutting_master: '',
-					material_man: '',
-					serial_man: '',
-					sewing_master: '',
-					finish_man: '',
-
-					fabric_price: 0.00,
-					charge: 0.00,
-					total: 0.00,
-					advance: 0.00,
-					balance: 0.00,
-				},
-				orderProgress: false,
+				paymentProgress: false,
 				employees: [],
 				customers: [],
 				selectedCustomer: {
@@ -436,56 +505,10 @@
 					Customer_Address: '',
 					Customer_Type: ''
 				},
-				order_details: {
-					order_details_id: '',
-					body_part: '',
-					order_item_id: '',
-					top_F_L: '',
-					top_F_R: '',
-					top_B_L: '',
-					top_B_R: '',
-					top_H_L: '',
-					top_H_R: '',
-					top_luze_1: '',
-					top_luze_2: '',
-					top_luze_3: '',
-					top_height: '',
-					top_chest: '',
-					top_belly: '',
-					top_hip: '',
-					top_shoulder: '',
-					top_shoulder_down: '',
-					top_D: '',
-					top_hand: '',
-					top_ARM: '',
-					top_M: '',
-					top_N: '',
-					top_throat: '',
-					top_cuff: '',
-					top_mohuri: '',
-					top_gher: '',
-					extra_item_top: '',
-					b_f: '',
-					b_b: '',
-					b_waist: '',
-					b_hip: '',
-					b_height: '',
-					b_thai: '',
-					b_mohuri: '',
-					b_hai: '',
-					b_fly: '',
-					b_knee: '',
-					b_FD: '',
-					extra_item_bottom: '',
-					quantity: '',
-					unit_price: '',
-					total_price: '',
-				},
-				order_info: [],
 				cart: [],
-
 				userType: '<?php echo $this->session->userdata("accountType"); ?>',
-				customer_orders: [],
+				store_bills: [],
+				filter_store_bills: [],
 			}
 		},
 		filters: {
@@ -497,9 +520,6 @@
 
 		},
 		computed: {
-			// pItem(sale) {
-			// 	return 'shirt';
-			// }
 		},
 		async created() {
 			await this.getEmployees();
@@ -511,8 +531,8 @@
 			this.getStores();
 
 			
-			if (this.order.id != 0) {
-				await this.getOrders();
+			if (this.payment.id != 0) {
+				await this.getPayments();
 			}
 		},
 		methods: {
@@ -549,15 +569,99 @@
 			},
 
             async getStores() {
-				await axios.post('/get_stores', {
-					
-				}).then(res => {
+				let filter = {
+					GradeId: this.selectedGrade?.Grade_SlNo,
+					FloorId: this.selectedFloor?.Floor_SlNo,
+				}
+
+				await axios.post('/get_stores', filter).then(res => {
 					let stores = res.data;
                     this.stores = stores.map(store => {
 					    store.display_text = store.Store_SlNo == '' ? store.Store_Name : `${store.Store_Name} - ${store.Store_No}`;
 					    return store;
                     });
 				})
+			},
+			onChangeFloor() {
+				this.selectedStore = {
+					Store_SlNo: '',
+					Store_Name: '',
+					display_text: 'Select Store',
+					Store_Mobile: '',
+					meter_no: '',
+				}
+				this.getStores();
+			},
+			onSelectStore() {
+				let filterStoreBills = this.store_bills.filter(item => item.isSelect == true);
+				
+				filterStoreBills.map(item => {
+					item.electricity_bill_payment = (item.electricity_bill_payment==0?item.electricity_bill:item.electricity_bill_payment)
+					item.generator_bill_payment = (item.generator_bill_payment==0?item.generator_bill:item.generator_bill_payment)
+					item.ac_bill_payment = (item.ac_bill_payment==0?item.ac_bill:item.ac_bill_payment)
+					item.others_bill_payment = (item.others_bill_payment==0?item.others_bill:item.others_bill_payment)
+					item.payment = +item.electricity_bill_payment + +item.generator_bill_payment + +item.ac_bill_payment + +item.others_bill_payment;
+					return item;
+				})
+				this.filter_store_bills = filterStoreBills;
+				// start calculate total from here
+				this.calculateTotal()
+				console.log(this.filter_store_bills)
+
+			},
+			onChangeUtiltiy(store) {
+				if(+store.electricity_bill < +store.electricity_bill_payment) {
+					store.electricity_bill_payment = store.electricity_bill;
+				}
+				if(+store.generator_bill < +store.generator_bill_payment) {
+					store.generator_bill_payment = store.generator_bill;
+				}
+				if(+store.ac_bill < +store.ac_bill_payment) {
+					store.ac_bill_payment = store.ac_bill;
+				}
+				if(+store.others_bill < +store.others_bill_payment) {
+					store.others_bill_payment = store.others_bill;
+				}
+
+				store.payment = +store.electricity_bill_payment + +store.generator_bill_payment + +store.ac_bill_payment + +store.others_bill_payment + +store.late_fee;
+
+				this.calculateTotal();
+			},
+			onPaymentTypeChange(){
+				if(this.paymentType == 'store') {
+					this.selectedRenter = {
+						Renter_SlNo: '',
+						Renter_Name: '',
+						Renter_Mobile: '',
+						Renter_PreAddress: '',
+						display_name: 'Select Renter'
+					}
+				} else if(this.paymentType == 'renter') {
+					this.selectedStore = {
+						Store_SlNo: '',
+						Store_Name: '',
+						display_text: 'Select Store',
+						Store_Mobile: '',
+						meter_no: '',
+					}
+					this.selectedGrade = {
+						Grade_SlNo: '',
+						Grade_Name: 'Select Grade',
+					},
+					this.selectedFloor = {
+						Floor_SlNo: '',
+						Floor_Name: 'Select Floor',
+					}
+				}
+
+
+				// this.clearProduct();
+				// this.getProducts();
+			},
+			isExpire(date) {
+				const currentDate = new Date();
+				const lastDate = new Date(date);
+				return lastDate < currentDate;
 			},
 
 			async getOrderItem() {
@@ -594,58 +698,7 @@
 
 				})
 			},
-			addToCart() {
-
-				if (this.order_details.body_part == '') {
-					alert('Select a Body Part.')
-					return;
-				}
-				if (this.order_details.order_item_id == '') {
-					alert('Select an order item.')
-					return;
-				}
-				if (this.order_details.quantity == '' || this.order_details.quantity == '0') {
-					alert('Minimum quantity 1 required.')
-					return;
-				}
-				if (Object.keys(this.order_info).length == 0) {
-					alert('Order Info Required')
-					return;
-				}
-
-				this.orderItems.forEach(ele => {
-					if (ele.order_item_id == this.order_details.order_item_id) {
-						this.order_details.item_name = ele.item_name;
-						this.order_details.unit_price = ele.charge;
-					}
-				})
-
-				this.order_details.total_price = parseFloat(this.order_details.unit_price) * parseInt(this.order_details.quantity);
-
-				if (this.order_details.hasOwnProperty("orderInfo")) {
-					delete this.order_details.orderInfo;
-				}
-				if (this.order_details.hasOwnProperty("item_name_en")) {
-					delete this.order_details.item_name_en;
-				}
-				this.order_info.forEach(ele => {
-					delete ele.sub;
-				})
-
-				let item = {
-					orderDetails: this.order_details,
-					orderInfo: this.order_info,
-				}
-
-				this.cart.push(item);
-
-				this.calculateTotal();
-				this.orderItems = [];
-				this.itemSections = [];
-				this.clearOrderDetails();
-				this.clearOrderInfo();
-
-			},
+		
 			deleteCartItem(index) {
 				this.cart.splice(index, 1);
 				this.calculateTotal();
@@ -658,7 +711,6 @@
 
 
 				setTimeout(() => {
-					console.log(data.orderInfo, this.order_info);
 					data.orderInfo.forEach(ele1 => {
 						this.order_info.forEach(ele2 => {
 							if (ele1.section_name_en == ele2.section_name_en && ele1.section_name_en != 'extra') {
@@ -720,72 +772,45 @@
 					})
 				}, 500);
 
-				console.log(this.order_details.orderInfo);
-
 				delete this.order_details.orderInfo;
 			},
-			saveOrder() {
-				if (this.order.measurement_master == '') {
-					alert('Select measurement master!')
+			savePayment() {
+			
+				if (this.filter_store_bills.length <= 0 || this.filter_store_bills == null) {
+					alert('Add store to pay');
 					return;
 				}
-				// if (this.order.cutting_master == '') {
-				// 	alert('Select cutting master!')
-				// 	return;
-				// }
-				// if (this.order.material_man == '') {
-				// 	alert('Select material man!')
-				// 	return;
-				// }
-				if (this.order.serial_man == '') {
-					alert('Select serial man man!')
-					return;
-				}
-				// if (this.order.sewing_master == '') {
-				// 	alert('Select sewing master!')
-				// 	return;
-				// }
-				// if (this.order.finish_man == '') {
-				// 	alert('Select sewing master!')
-				// 	return;
-				// }
-				if (this.selectedCustomer.Customer_Mobile == '' || this.selectedCustomer.Customer_Name == '' || this.selectedCustomer.Customer_Address == '') {
-					alert('Customer Mobile/Name/Address required!')
-					return;
-				}
+
+				this.payment.month_id = this.selectedMonth.month_id
 
 				let filter = {
-					order: this.order,
-					cart: this.cart,
-					customer: this.selectedCustomer,
+					payment: this.payment,
+					storeBills: this.filter_store_bills,
 				}
 
-				this.order.customer_id = this.selectedCustomer.Customer_SlNo
+				this.paymentProgress = true;
 
-
-				let url = "/add_order";
-				if (this.order.id != 0) {
-					url = "/update_order";
+				let url = "/add_utility_payment";
+				if (this.payment.id != 0) {
+					url = "/update_utility_payment";
 				}
-
-
-				console.log(filter, url);
-				// return;
 
 				axios.post(url, filter).then(async res => {
 					let r = res.data;
 					if (r.success) {
-						let conf = confirm('Order success, Do you want to view invoice?');
+						let conf = confirm( r.message + ', Do you want to view invoice?');
 						if (conf) {
-							window.open('/order_invoice_print/' + r.id, '_blank');
+							r.utilityDetailsArr.forEach(element => {
+								window.open('/order_invoice_print/' + element, '_blank');
+							});
 							await new Promise(r => setTimeout(r, 1000));
-							window.location = '/order_entry';
+							// window.location = '/utility/payment';
 						} else {
-							window.location = '/order_entry';
+							// window.location = '/utility/payment';
 						}
 					} else {
 						alert(r.message);
-						this.saleOnProgress = false;
+						this.paymentProgress = false;
 					}
 				})
 			},
@@ -803,30 +828,58 @@
 				}
 			},
 
-			async renterOnChange() {
-				if (this.selectedCustomer.Customer_SlNo == '') {
+			async storeOnChange() {
+				if (this.selectedStore.Store_SlNo == '') {
 					return;
 				}
-
-				axios.post('/get_orders', {
-					customerId: this.selectedCustomer.Customer_SlNo,
-					limit: 10
+				if (this.selectedMonth == null || this.selectedMonth == "") {
+					alert("Select Month");
+					this.selectedStore = {
+						Store_SlNo: '',
+						Store_Name: '',
+						display_text: 'Select Store',
+						Store_Mobile: '',
+						meter_no: '',
+					}
+					return;
+				}
+				
+				axios.post('/get_store_bills', {
+					storeId: this.selectedStore.Store_SlNo,
+					month: this.selectedMonth.month_id
 				}).then(res => {
-					this.customer_orders = res.data;
+					this.store_bills = res.data;
 				});
 
 			},
 			calculateTotal() {
+				let total_electricity_bill = 0;
+				let total_generator_bill = 0;
+				let total_ac_bill = 0;
+				let total_others_bill = 0;
+				let total_late_fee = 0;
 
-				let sum = 0;
-				this.cart.forEach(element => {
-					sum += parseFloat(element.orderDetails.total_price);
+				let total_net_payable = 0;
+
+				this.filter_store_bills.forEach(element => {
+					total_electricity_bill += parseFloat(element.electricity_bill_payment);
+					total_generator_bill += parseFloat(element.generator_bill_payment);
+					total_ac_bill += parseFloat(element.ac_bill_payment);
+					total_others_bill += parseFloat(element.others_bill_payment);
+					total_late_fee += parseFloat(element.late_fee);
+					total_net_payable +=  parseFloat(element.net_payable);
 				});
 
-				this.order.charge = sum;
-				this.order.total = parseFloat(sum) + parseFloat(this.order.fabric_price == '' ? 0 : this.order.fabric_price);
+				let total_payment_amount = parseFloat( +total_electricity_bill + +total_generator_bill + +total_ac_bill + +total_others_bill + +total_late_fee ).toFixed(2);
 
-				this.order.balance = (this.order.total - parseFloat(this.order.advance == '' ? 0 : this.order.advance)).toFixed(2);
+				this.payment.total_electricity_bill = parseFloat(+total_electricity_bill).toFixed(2);
+				this.payment.total_generator_bill = parseFloat(+total_generator_bill).toFixed(2);
+				this.payment.total_ac_bill = parseFloat(+total_ac_bill).toFixed(2);
+				this.payment.total_others_bill = parseFloat(+total_others_bill).toFixed(2);
+				this.payment.total_late_fee = parseFloat(+total_late_fee).toFixed(2);
+				this.payment.total_payment_amount = total_payment_amount;
+				this.payment.total_due = parseFloat(+total_net_payable + +total_late_fee - +total_payment_amount).toFixed(2);
+				console.log(this.payment)
 			},
 
 			async customerExistCheck(mobile) {
@@ -842,125 +895,44 @@
 
 				return hasCustomer;
 			},
-			async getOrders() {
-				await axios.post('/get_orders', {
-					id: this.order.id
-				}).then(res => {
+			async getPayments() {
+				await axios.post('/get_utility_payment', { id: this.payment.id }).then(res => {
+					let r = res.data;
+					let payments = r.payments[0];
+					this.payment.invoice = payments.invoice;
+					this.payment.date = payments.payment_date;
+					this.payment.total_payment_amount = payments.total_payment_amount;
 
-					// this.order_details.body_part = res.data[0].orderDetails[0].body_part;
-					// this.getOrderItem();
-
-					var order = res.data[0];
-					this.order = order;
-					// delete this.order.orderDetails
-
-					this.selectedCustomer = {
-						Customer_SlNo: order.customer_id,
-						Customer_Code: order.Customer_Code,
-						Customer_Name: order.Customer_Name,
-						display_name: order.Customer_Code + ' - ' + order.Customer_Name,
-						Customer_Mobile: order.Customer_Mobile,
-						Customer_Address: order.Customer_Address,
-						Customer_Type: order.Customer_Type
-					};
-
-					for (let i = 0; i < res.data[0].orderDetails.length; i++) {
-						let item = {
-							orderDetails: res.data[0].orderDetails[i],
-							orderInfo: res.data[0].orderDetails[i].orderInfo,
-						}
-						this.cart.push(item);
-
-					}
-					for (let i = 0; i < res.data[0].orderDetails.length; i++) {
-						delete this.cart[0].orderDetails.orderInfo
+					this.selectedMonth = {
+						month_id: payments.month_id,
+						month_name: payments.month_name
 					}
 
+				// let filterStoreBills = this.store_bills.filter(item => item.isSelect == true);
+				
+				// filterStoreBills.map(item => {
+				// 	item.electricity_bill_payment = (item.electricity_bill_payment==0?item.electricity_bill:item.electricity_bill_payment)
+				// 	item.generator_bill_payment = (item.generator_bill_payment==0?item.generator_bill:item.generator_bill_payment)
+				// 	item.ac_bill_payment = (item.ac_bill_payment==0?item.ac_bill:item.ac_bill_payment)
+				// 	item.others_bill_payment = (item.others_bill_payment==0?item.others_bill:item.others_bill_payment)
+				// 	item.payment = +item.electricity_bill_payment + +item.generator_bill_payment + +item.ac_bill_payment + +item.others_bill_payment;
+				// 	return item;
+				// })
+				// this.filter_store_bills = filterStoreBills;
+
+
+					r.paymentDetails.forEach(store => {
+						this.selectedStore.Store_SlNo = store.Store_SlNo
+						this.storeOnChange();
+					});
 				})
 			},
-			chargeCalculate() {
-				let total_tk = 0;
-				this.typeChargeAmount.forEach(item => {
-					if (item.type == 'shirt') {
-						total_tk += this.sales.shirt * item.charge_tk;
-					}
-					if (item.type == 'panjabi') {
-						total_tk += this.sales.panjabi * item.charge_tk;
-					}
-					if (item.type == 'coat') {
-						total_tk += this.sales.coat * item.charge_tk;
-					}
-					if (item.type == 'watch_coat') {
-						total_tk += this.sales.watch_coat * item.charge_tk;
-					}
-					if (item.type == 'safari') {
-						total_tk += this.sales.safari * item.charge_tk;
-					}
-					if (item.type == 'appron') {
-						total_tk += this.sales.appron * item.charge_tk;
-					}
-					if (item.type == 'prince_coat') {
-						total_tk += this.sales.prince_coat * item.charge_tk;
-					}
-					if (item.type == 'mujib_coat') {
-						total_tk += this.sales.mujib_coat * item.charge_tk;
-					}
-					if (item.type == 'sherwani') {
-						total_tk += this.sales.sherwani * item.charge_tk;
-					}
-					if (item.type == 'pant') {
-						total_tk += this.sales.pant * item.charge_tk;
-					}
-					if (item.type == 'trousers') {
-						total_tk += this.sales.trousers * item.charge_tk;
-					}
-				})
-				this.sales.charge = total_tk;
-				this.calculateTotal();
-
-			},
-			CollarValue(val) {
-				this.sales.Shirt_CollarValue = val;
-			},
-			PlateValue(val) {
-				this.sales.Shirt_PlateValue = val;
-			},
+			
+			
+			
 			clearOrderDetails() {
 				this.order_details = {
-					order_details_id: '',
-					body_part: '',
-					order_item_id: '',
-					top_F_L: '',
-					top_F_R: '',
-					top_B_L: '',
-					top_B_R: '',
-					top_H_L: '',
-					top_H_R: '',
-					top_height: '',
-					top_chest: '',
-					top_belly: '',
-					top_hip: '',
-					top_shoulder: '',
-					top_hand: '',
-					top_M: '',
-					top_N: '',
-					top_throat: '',
-					top_cuff: '',
-					top_mohuri: '',
-					top_gher: '',
-					b_f: '',
-					b_b: '',
-					b_waist: '',
-					b_hip: '',
-					b_height: '',
-					b_thai: '',
-					b_mohuri: '',
-					b_hai: '',
-					b_fly: '',
-					b_knee: '',
-					quantity: '',
-					unit_price: '',
-					total_price: '',
+				
 				}
 			},
 

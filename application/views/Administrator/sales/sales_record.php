@@ -126,7 +126,7 @@
 		<div class="col-md-12">
 			<div class="table-responsive" id="reportContent">
 				<table 
-					class="record-table" 
+					class="table table-bordered record-table" 
 					v-if="(searchTypesForRecord.includes(searchType)) && recordType == 'with_details'" 
 					style="display:none" 
 					v-bind:style="{display: (searchTypesForRecord.includes(searchType)) && recordType == 'with_details' ? '' : 'none'}"

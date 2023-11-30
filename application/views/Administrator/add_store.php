@@ -117,6 +117,13 @@
 				</div>
 
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Meter No:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="store.meter_no" placeholder="">
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Level:</label>
 					<div class="col-md-7">
 						<select class="form-control" v-if="floors.length == 0"></select>
@@ -253,13 +260,14 @@
 			</div>
 			<div class="col-md-12">
 				<div class="table-responsive">
-					<datatable :columns="columns" :data="stores" :filter-by="filter" style="margin-bottom: 5px;">
+					<datatable :columns="columns" :data="stores" :filter-by="filter" style="margin-bottom:5px;">
 						<template scope="{ row }">
 							<tr>
 								<td>{{ row.Store_Code }}</td>
 								<td>{{ row.Store_Name }}</td>
 								<td>{{ row.Store_Mobile }}</td>
 								<td>{{ row.Store_OfficePhone }}</td>
+								<td>{{ row.meter_no }}</td>
 								<td>{{ row.Store_TIN }}</td>
 								<td>{{ row.ProductType_Name }}</td>
 								<td>{{ row.Floor_Name }}</td>
@@ -305,6 +313,7 @@
 					Start_Unit: '',
 					Store_Description: '',
 					Store_Mobile: '',
+					meter_no: '',
 					Store_Email: '',
 					start_date: moment().format('YYYY-MM-DD'),
 					Store_OfficePhone: '',
@@ -332,6 +341,7 @@
                     { label: 'Store Name', field: 'Store_Name', align: 'center' },
                     { label: 'Contact Number', field: 'Store_Mobile', align: 'center' },
                     { label: 'Office Phone', field: 'Store_OfficePhone', align: 'center' },
+                    { label: 'Meter No', field: 'meter_no', align: 'center' },
                     { label: 'TIN', field: 'Store_TIN', align: 'center' },
                     { label: 'Type', field: 'ProductType_Name', align: 'center' },
                     { label: 'Floor', field: 'Floor_Name', align: 'center' },
