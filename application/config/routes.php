@@ -138,12 +138,12 @@ $route['delete_store'] = 'Administrator/Store/deleteStore';
 $route['get_stores'] = 'Administrator/Store/getStores';
 $route['get_store_due'] = 'Administrator/Store/getStoreDue';
 $route['get_store_ledger'] = 'Administrator/Store/getStoreLedger';
-$route['get_store_payments'] = 'Administrator/Store/getStorePayments';
 $route['add_store_payment'] = 'Administrator/Store/addStorePayment';
 $route['update_store_payment'] = 'Administrator/Store/updateStorePayment';
 $route['delete_store_payment'] = 'Administrator/Store/deleteStorePayment';
 $route['storePaymentPage'] = 'Administrator/Store/storePaymentPage';
 $route['store_payment_history'] = 'Administrator/Store/storePaymentHistory';
+
 
 $route['owner'] = 'Administrator/Owner';
 $route['add_owner'] = 'Administrator/Owner/addOwner';
@@ -183,15 +183,15 @@ $route['get_payment_sheet'] = 'Administrator/Bills/getBillSheet';
 $route['payment_sheet/(:any)'] = 'Administrator/Bills/billSheet/$1';
 $route['payment_sheet_record'] = 'Administrator/Bills/billSheetRecord';
 $route['store_bill_report'] = 'Administrator/Store/storeBillReport';
-$route['get_store_payments'] = 'Administrator/Store/getStoreBills';
+// $route['get_store_payments'] = 'Administrator/Store/getStoreBills';
 
 $route['get_utility_payment'] = 'Administrator/Utility/getUtilityPayment';
 $route['get_payment_record'] = 'Administrator/Utility/getUtilityPaymentsRecord';
+$route['get_store_payments'] = 'Administrator/Utility/getStorePayments';
 
 $route['utility/payment'] = 'Administrator/Utility/index';
 $route['utility/payment/(:any)'] = 'Administrator/Utility/utilityEdit/$1';
 $route['store_payment_report'] = 'Administrator/Utility/storePaymentReport';
-$route['get_store_payments'] = 'Administrator/Store/getStoreBills';
 
 
 
@@ -295,7 +295,7 @@ $route['sale_return_invoice/(:any)'] = 'Administrator/Sales/saleReturnInvoice/$1
 $route['sale_return_details'] = 'Administrator/Sales/saleReturnDetails';
 $route['check_sale_return/(:any)'] = 'Administrator/Sales/checkSaleReturn/$1';
 
-$route['sale_invoice_print/(:any)'] = 'Administrator/Sales/saleInvoicePrint/$1';
+$route['utility_invoice_print/(:any)'] = 'Administrator/Utility/utilityInvoicePrint/$1';
 $route['craditlimit'] = 'Administrator/Sales/craditlimit/';
 $route['salesrecord'] = 'Administrator/Sales/sales_record';   
 $route['search_sales_record'] = 'Administrator/Reports/search_sales_record';

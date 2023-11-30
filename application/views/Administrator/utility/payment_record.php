@@ -107,7 +107,7 @@
                                 <th>Total Amount</th>
                                 <th>Payment Date</th>
                                 <th>Payment By</th>
-                                <th style="text-align: center;">View</th>
+                                <!-- <th style="text-align: center;">View</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -126,11 +126,11 @@
                                 <td style="text-align:center;">{{ payment.total_payment_amount }}</td>
                                 <td style="text-align:center;">{{ payment.payment_date }}</td>
                                 <td style="text-align:left;">{{ payment.User_Name }}</td>
-                                <td style="text-align: center;">
+                                <!-- <td style="text-align: center;">
                                     <a href="" @click.prevent="viewBillPayment(payment.id)" class="" title="View">
                                         <i class="fa fa-file"></i>
                                     </a>
-                                </td>
+                                </td> -->
                             </tr>
                         </tbody>
                     </table>

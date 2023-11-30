@@ -801,7 +801,7 @@
 						let conf = confirm( r.message + ', Do you want to view invoice?');
 						if (conf) {
 							r.utilityDetailsArr.forEach(element => {
-								window.open('/order_invoice_print/' + element, '_blank');
+								window.open('/utility_invoice_print/' + element, '_blank');
 							});
 							await new Promise(r => setTimeout(r, 1000));
 							// window.location = '/utility/payment';

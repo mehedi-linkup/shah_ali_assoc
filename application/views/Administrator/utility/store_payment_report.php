@@ -88,14 +88,11 @@
 								<th>Renter Name</th>
 								<th>Owner Name</th>
 								<th>Month</th>
-								<th>Previous Unit</th>
-								<th>Current Unit</th>
-								<th>Total Unit</th>
-								<th>Electricity bill</th>
-								<th>Generator_bill</th>
-								<th>Ac bill</th>
-								<th>Others bill</th>
-								<th>Net Payable</th>
+								<th>Electricity</th>
+								<th>Generator</th>
+								<th>Ac</th>
+								<th>Others</th>
+								<th>Total</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -106,25 +103,21 @@
 								<td>{{ bill.Renter_Name }}</td>
 								<td>{{ bill.Owner_Name }}</td>
 								<td>{{ bill.month_name }}</td>
-								<td>{{ bill.previous_unit }}</td>
-								<td>{{ bill.current_unit }}</td>
-								<td style="text-align:right;">{{ bill.electricity_unit }}</td>
 								<td style="text-align:right;">{{ bill.electricity_bill }}</td>
 								<td style="text-align:right;">{{ bill.generator_bill }}</td>
 								<td style="text-align:right;">{{ bill.ac_bill }}</td>
 								<td style="text-align:right;">{{ bill.others_bill }}</td>
-								<td style="text-align:right;">{{ bill.net_payable }}</td>
+								<td style="text-align:right;">{{ bill.payment }}</td>
 							</tr>
 						</tbody>
 						<tfoot>
 							<tr style="font-weight:bold;">
-								<td colspan="8" style="text-align:right;">Total</td>
-								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.electricity_unit)}, 0).toFixed(2) }}</td>
+								<td colspan="6" style="text-align:right;">Total</td>
 								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.electricity_bill)}, 0).toFixed(2) }}</td>
 								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.generator_bill)}, 0).toFixed(2) }}</td>
 								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.ac_bill)}, 0).toFixed(2) }}</td>
 								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.others_bill)}, 0).toFixed(2) }}</td>
-								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.net_payable )}, 0).toFixed(2) }}</td>
+								<td style="text-align:right;">{{ bills.reduce((prev, curr) => { return prev + parseFloat(+curr.payment )}, 0).toFixed(2) }}</td>
 							</tr>
 						</tfoot>
 					</table>
@@ -202,9 +195,9 @@
 				}
 			},
 			showReport(){
-				this.getStoreBills();
+				this.getStorePayments();
 			},
-			getStoreBills() {
+			getStorePayments() {
 				let data = {}
 				if(this.selectedStore == null){
 					data.storeId = '';
@@ -217,7 +210,7 @@
 				} else {
 					data.month = this.selectedMonth.month_id;
 				}
-				axios.post('/get_store_bills', data)
+				axios.post('/get_store_payments', data)
 				.then(res => {
 					this.bills = res.data;
 				})

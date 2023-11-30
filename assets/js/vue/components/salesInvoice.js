@@ -11,7 +11,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div _h098asdh>
-                            Sales Invoice
+                            Payment Invoice
                         </div>
                     </div>
                 </div>
@@ -62,7 +62,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                 <div class="row">
                     <div class="col-xs-6">
                         <br>
-                        <table class="pull-left">
+                        <!--<table class="pull-left">
                             <tr>
                                 <td><strong>Previous Due:</strong></td>
                                 
@@ -81,7 +81,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                                 
                                 <td style="text-align:right">{{ (parseFloat(sales.SaleMaster_Previous_Due) + parseFloat(sales.SaleMaster_DueAmount == null ? 0.00 : sales.SaleMaster_DueAmount)).toFixed(2) }}</td>
                             </tr>
-                        </table>
+                        </table>-->
                     </div>
                     <div class="col-xs-6">
                         <table _t92sadbc2>
@@ -167,7 +167,7 @@ const salesInvoice = Vue.component('sales-invoice', {
     },
     methods:{
         getSales(){
-            axios.post('/get_sales', {salesId: this.sales_id}).then(res=>{
+            axios.post('/get_store', {storeId: this.sales_id}).then(res=>{
                 this.sales = res.data.sales[0];
                 this.cart = res.data.saleDetails;
             })

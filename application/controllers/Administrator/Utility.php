@@ -518,8 +518,8 @@ class Utility extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $data = json_decode($this->input->raw_input_stream);
-            echo json_encode($data);
-            return;
+            // echo json_encode($data);
+            // return;
             $invoice = $data->payment->invoice;
             $invoiceCount = $this->db->query("select * from tbl_utility_payment where invoice = ?", $invoice)->num_rows();
             if($invoiceCount != 0){
@@ -1834,6 +1834,50 @@ class Utility extends CI_Controller
         }
         $data['title'] = "Store Payment Report";
         $data['content'] = $this->load->view('Administrator/utility/store_payment_report', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function getStorePayments(){
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+        if(isset($data->storeId) && $data->storeId != ''){
+            $clauses .= " and s.Store_SlNo = '$data->storeId'";
+        }
+
+        if(isset($data->month) && $data->month != ''){
+            $clauses .= " and bs.month_id = '$data->month'";
+        }
+
+        $payments = $this->db->query("
+            select 
+                bsd.*,
+                bs.payment_date,
+                s.Store_No,
+                s.Store_Name,
+                s.meter_no,
+                o.Owner_Name,
+                re.Renter_Name,
+                m.month_name
+            from tbl_utility_payment_details bsd
+            join tbl_utility_payment bs on bs.id = bsd.utility_payment_id
+            join tbl_month m on m.month_id = bs.month_id
+            join tbl_store s on s.Store_SlNo = bsd.store_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            where bsd.branch_id = 1
+            and bsd.status = 'a'
+            $clauses
+            order by bsd.id desc
+        ", $this->session->userdata('BRANCHid'))->result();
+
+        echo json_encode($payments);
+    }
+
+    public function utilityInvoicePrint($saleId)  {
+        $data['title'] = "Utility Invoice";
+        $data['salesId'] = $saleId;
+        $data['content'] = $this->load->view('Administrator/sales/sellAndreport', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
