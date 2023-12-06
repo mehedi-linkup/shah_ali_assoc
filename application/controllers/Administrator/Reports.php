@@ -20,6 +20,7 @@ class Reports extends CI_Controller {
         $data['content'] = $this->load->view('Administrator/sales/product_sales', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
+
     public function supplierList(){
         $access = $this->mt->userAccess();
         if(!$access){
@@ -27,6 +28,27 @@ class Reports extends CI_Controller {
         }
         $data['title'] = "Supplier List";
         $data['content'] = $this->load->view('Administrator/reports/supplierList', $data, true);
+        $this->load->view("Administrator/index", $data);
+    }
+
+    
+    public function renterList() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Renter List";
+        $data['content'] = $this->load->view('Administrator/reports/renterList', $data, true);
+        $this->load->view("Administrator/index", $data);
+    }
+
+    public function ownerList(){
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Owner List";
+        $data['content'] = $this->load->view('Administrator/reports/ownerList', $data, true);
         $this->load->view("Administrator/index", $data);
     }
 

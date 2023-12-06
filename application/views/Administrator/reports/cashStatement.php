@@ -108,98 +108,35 @@
 				<table class="table table-bordered table-condensed">
 					<thead>
 						<tr style="background: #dee4dc;">
-							<th colspan="4">Sales</th>
+							<th colspan="4">Payment</th>
 						</tr>
 						<tr>
 							<th>Invoice</th>
 							<th>Date</th>
-							<th>Customer</th>
+							<th>----</th>
 							<th>Received</th>
 						</tr>
 					</thead>
-					<tbody style="display:none;" v-bind:style="{display: sales.length > 0 ? '' : 'none'}">
-						<tr v-for="sale in sales">
-							<td>{{ sale.SaleMaster_InvoiceNo }}</td>
-							<td>{{ sale.SaleMaster_SaleDate }}</td>
-							<td>{{ sale.Customer_Name }}</td>
-							<td style="text-align:right;">{{ sale.SaleMaster_PaidAmount | decimal }}</td>
+					<tbody style="display:none;" v-bind:style="{display: payments.length > 0 ? '' : 'none'}">
+						<tr v-for="payment in payments">
+							<td>{{ payment.invoice }}</td>
+							<td>{{ payment.payment_date }}</td>
+							<td> ---- </td>
+							<td style="text-align:right;">{{ payment.total_payment | decimal }}</td>
 						</tr>
 					</tbody>
 					<tfoot>
 						<tr style="font-weight:bold;">
 							<td colspan="3" style="text-align:right;">Total</td>
 							<td style="text-align:right;">
-								<span v-if="sales.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: sales.length > 0 ? '' : 'none'}">{{ totalSales | decimal }}</span>
+								<span v-if="payments.length == 0">0.00</span>
+								<span style="display:none;" v-bind:style="{display: payments.length > 0 ? '' : 'none'}">{{ totalPayments | decimal }}</span>
 							</td>
 						</tr>
 					</tfoot>
 				</table>
 
-				<!-- Received from Customers -->
-				<table class="table table-bordered table-condensed">
-					<thead>
-						<tr style="background: #dee4dc;">
-							<th colspan="4">Received from Customers</th>
-						</tr>
-						<tr>
-							<th>Invoice</th>
-							<th>Date</th>
-							<th>Customer</th>
-							<th>Received</th>
-						</tr>
-					</thead>
-					<tbody style="display:none;" v-bind:style="{display: receivedFromCustomers.length > 0 ? '' : 'none'}">
-						<tr v-for="payment in receivedFromCustomers">
-							<td>{{ payment.CPayment_invoice }}</td>
-							<td>{{ payment.CPayment_date }}</td>
-							<td>{{ payment.Customer_Name }}</td>
-							<td style="text-align:right;">{{ payment.CPayment_amount | decimal }}</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr style="font-weight:bold;">
-							<td colspan="3" style="text-align:right;">Total</td>
-							<td style="text-align:right;">
-								<span v-if="receivedFromCustomers.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: receivedFromCustomers.length > 0 ? '' : 'none'}">{{ totalReceivedFromCustomers | decimal }}</span>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
-
-				<!-- Received from Suppliers -->
-				<table class="table table-bordered table-condensed">
-					<thead>
-						<tr style="background: #dee4dc;">
-							<th colspan="4">Received from Suppliers</th>
-						</tr>
-						<tr>
-							<th>Invoice</th>
-							<th>Date</th>
-							<th>Supplier</th>
-							<th>Received</th>
-						</tr>
-					</thead>
-					<tbody style="display:none;" v-bind:style="{display: receivedFromSuppliers.length > 0 ? '' : 'none'}">
-						<tr v-for="payment in receivedFromSuppliers">
-							<td>{{ payment.SPayment_invoice }}</td>
-							<td>{{ payment.SPayment_date }}</td>
-							<td>{{ payment.Supplier_Name }}</td>
-							<td style="text-align:right;">{{ payment.SPayment_amount | decimal }}</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr style="font-weight:bold;">
-							<td colspan="3" style="text-align:right">Total</td>
-							<td style="text-align:right;">
-								<span v-if="receivedFromSuppliers.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: receivedFromSuppliers.length > 0 ? '' : 'none'}">{{ totalReceivedFromSuppliers | decimal }}</span>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
-
+			
 				<!-- Cash Received -->
 				<table class="table table-bordered table-condensed">
 					<thead>
@@ -404,103 +341,7 @@
 				</table>
 			</div>
 			<div class="col-md-6">
-				<!-- Purchase -->
-				<table class="table table-bordered table-condensed">
-					<thead>
-						<tr style="background: #dee4dc;">
-							<th colspan="4">Purchases</th>
-						</tr>
-						<tr>
-							<th>Invoice</th>
-							<th>Date</th>
-							<th>Supplier</th>
-							<th>Paid</th>
-						</tr>
-					</thead>
-					<tbody style="display:none;" v-bind:style="{display: purchases.length > 0 ? '' : 'none'}">
-						<tr v-for="purchase in purchases">
-							<td>{{ purchase.PurchaseMaster_InvoiceNo }}</td>
-							<td>{{ purchase.PurchaseMaster_OrderDate }}</td>
-							<td>{{ purchase.Supplier_Name }}</td>
-							<td style="text-align:right;">{{ purchase.PurchaseMaster_PaidAmount | decimal }}</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr style="font-weight:bold;">
-							<td colspan="3" style="text-align:right;">Total</td>
-							<td style="text-align:right;">
-								<span v-if="purchases.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: purchases.length > 0 ? '' : 'none'}">{{ totalPurchase | decimal }}</span>
-							</td>
-						</tr>
-					</tfoot>
-
-				</table>
-
-				<!-- Paid to Suppliers -->
-				<table class="table table-bordered table-condensed">
-					<thead>
-						<tr style="background: #dee4dc;">
-							<th colspan="4">Paid to Suppliers</th>
-						</tr>
-						<tr>
-							<th>Invoice</th>
-							<th>Date</th>
-							<th>Supplier</th>
-							<th>Paid</th>
-						</tr>
-					</thead>
-					<tbody style="display:none;" v-bind:style="{display: paidToSuppliers.length > 0 ? '' : 'none'}">
-						<tr v-for="payment in paidToSuppliers">
-							<td>{{ payment.SPayment_invoice }}</td>
-							<td>{{ payment.SPayment_date }}</td>
-							<td>{{ payment.Supplier_Name }}</td>
-							<td style="text-align:right;">{{ payment.SPayment_amount | decimal }}</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr style="font-weight:bold;">
-							<td colspan="3" style="text-align:right;">Total</td>
-							<td style="text-align:right;">
-								<span v-if="paidToSuppliers.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: paidToSuppliers.length > 0 ? '' : 'none'}">{{ totalPaidToSuppliers | decimal }}</span>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
-
-				<!-- Paid to Customers -->
-				<table class="table table-bordered table-condensed">
-					<thead>
-						<tr style="background: #dee4dc;">
-							<th colspan="4">Paid to Customers</th>
-						</tr>
-						<tr>
-							<th>Invoice</th>
-							<th>Date</th>
-							<th>Customer</th>
-							<th>Paid</th>
-						</tr>
-					</thead>
-					<tbody style="display:none;" v-bind:style="{display: paidToCustomers.length > 0 ? '' : 'none'}">
-						<tr v-for="payment in paidToCustomers">
-							<td>{{ payment.CPayment_invoice }}</td>
-							<td>{{ payment.CPayment_date }}</td>
-							<td>{{ payment.Customer_Name }}</td>
-							<td style="text-align:right;">{{ payment.CPayment_amount | decimal }}</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr style="font-weight:bold;">
-							<td colspan="3" style="text-align:right;">Total</td>
-							<td style="text-align:right;">
-								<span v-if="paidToCustomers.length == 0">0.00</span>
-								<span style="display:none;" v-bind:style="{display: paidToCustomers.length > 0 ? '' : 'none'}">{{ totalPaidToCustomers | decimal }}</span>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
-
+				
 				<!-- Cash Paid -->
 				<table class="table table-bordered table-condensed">
 					<thead>
@@ -724,12 +565,7 @@
 					dateFrom: moment().format('YYYY-MM-DD'),
 					dateTo: moment().format('YYYY-MM-DD')
 				},
-				sales: [],
-				purchases: [],
-				receivedFromCustomers: [],
-				paidToCustomers: [],
-				receivedFromSuppliers: [],
-				paidToSuppliers: [],
+				payments: [],
 				cashReceived: [],
 				cashPaid: [],
 				bankDeposits: [],
@@ -750,34 +586,9 @@
 			}
 		},
 		computed: {
-			totalSales() {
-				return this.sales.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SaleMaster_PaidAmount)
-				}, 0).toFixed(2);
-			},
-			totalPurchase() {
-				return this.purchases.reduce((prev, curr) => {
-					return prev + parseFloat(curr.PurchaseMaster_PaidAmount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromCustomers() {
-				return this.receivedFromCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.CPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToCustomers() {
-				return this.paidToCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.CPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromSuppliers() {
-				return this.receivedFromSuppliers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToSuppliers() {
-				return this.paidToSuppliers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SPayment_amount)
+			totalPayments() {
+				return this.payments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.total_payment)
 				}, 0).toFixed(2);
 			},
 			totalCashReceived() {
@@ -844,9 +655,7 @@
 				}, 0).toFixed(2);
 			},
 			totalCashIn(){
-				return parseFloat(this.totalSales) + 
-					parseFloat(this.totalReceivedFromCustomers) + 
-					parseFloat(this.totalReceivedFromSuppliers) + 
+				return parseFloat(this.totalPayments) + 
 					parseFloat(this.totalCashReceived) + 
 					parseFloat(this.totalLoanReceived) + 
 					parseFloat(this.totalInvestReceived) + 
@@ -855,10 +664,7 @@
 					parseFloat(this.totalBankWithdraw);
 			},
 			totalCashOut(){
-				return parseFloat(this.totalPurchase) +
-					parseFloat(this.totalPaidToCustomers) +
-					parseFloat(this.totalPaidToSuppliers) +
-					parseFloat(this.totalCashPaid) +
+				return parseFloat(this.totalCashPaid) +
 					parseFloat(this.totalLoanPayment) +
 					parseFloat(this.totalInvestPayment) +
 					parseFloat(this.totalBankDeposit) +
@@ -874,12 +680,7 @@
 		},
 		methods: {
 			getStatements() {
-				this.getSales();
-				this.getPurchases();
-				this.getReceivedFromCustomers();
-				this.getPaidToCustomers();
-				this.getPaidToSuppliers();
-				this.getReceivedFromSuppliers();
+				this.getPayments();
 				this.getCashReceived();
 				this.getCashPaid();
 				this.getBankDeposits();
@@ -893,65 +694,10 @@
 				this.getAssetsSales();
 			},
 
-			getSales() {
-				axios.post('/get_sales', this.filter)
+			getPayments() {
+				axios.post('/get_utility_payment', this.filter)
 					.then(res => {
-						this.sales = res.data.sales;
-					})
-			},
-
-			getPurchases() {
-				axios.post('/get_purchases', this.filter)
-					.then(res => {
-						this.purchases = res.data.purchases;
-					})
-			},
-
-			getReceivedFromCustomers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'received'
-				}
-				axios.post('/get_customer_payments', filter)
-					.then(res => {
-						this.receivedFromCustomers = res.data.filter(p => p.CPayment_Paymentby != 'bank');
-					})
-			},
-
-			getPaidToCustomers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'paid'
-				}
-				axios.post('/get_customer_payments', filter)
-					.then(res => {
-						this.paidToCustomers = res.data.filter(p => p.CPayment_Paymentby != 'bank');
-					})
-			},
-
-			getPaidToSuppliers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'paid'
-				}
-				axios.post('/get_supplier_payments', filter)
-					.then(res => {
-						this.paidToSuppliers = res.data.filter(p => p.SPayment_Paymentby != 'bank');
-					})
-			},
-
-			getReceivedFromSuppliers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'received'
-				}
-				axios.post('/get_supplier_payments', filter)
-					.then(res => {
-						this.receivedFromSuppliers = res.data.filter(p => p.SPayment_Paymentby != 'bank');
+						this.payments = res.data.payments;
 					})
 			},
 

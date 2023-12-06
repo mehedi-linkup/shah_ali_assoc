@@ -43,10 +43,10 @@ class Store extends CI_Controller
        
         $clauses = "";
         if(isset($data->FloorId) && $data->FloorId != null){
-            $clauses .= " and Store_Floor  = '$data->FloorId'";
+            $clauses .= " and floor_id  = '$data->FloorId'";
         }
         if(isset($data->GradeId) && $data->GradeId != null){
-            $clauses .= " and Store_Grade  = '$data->GradeId'";
+            $clauses .= " and grade_id  = '$data->GradeId'";
         }
         $storeTypeClause = "";
         if(isset($data->storeType) && $data->storeType != null){
@@ -64,8 +64,8 @@ class Store extends CI_Controller
                 concat_ws(' - ', s.Store_Code, s.Store_Name, s.Store_Mobile) as display_name
             from tbl_store s
             left join tbl_producttype t on t.ProductType_SlNo = s.Store_Type
-            left join tbl_floor f on f.Floor_SlNo = s.Store_Floor
-            left join tbl_grade g on g.Grade_SlNo = s.Store_Grade
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+            left join tbl_grade g on g.Grade_SlNo = s.grade_id
             left join tbl_owner o on o.Owner_SlNo = s.owner_id
             left join tbl_renter r on r.Renter_SlNo = s.renter_id
             where s.status = 'a'
@@ -577,16 +577,16 @@ class Store extends CI_Controller
         $this->load->view('Administrator/index', $data);
     }
 
-    function customer_payment_report()
+    function store_payment_report()
     {
         $access = $this->mt->userAccess();
         if(!$access){
             redirect(base_url());
         }
-        $data['title'] = "Customer Payment Reports";
+        $data['title'] = "Store Payment Reports";
         $branch_id = $this->session->userdata('BRANCHid');
 
-        $data['content'] = $this->load->view('Administrator/payment_reports/customer_payment_report', $data, TRUE);
+        $data['content'] = $this->load->view('Administrator/payment_reports/store_payment_report', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
@@ -846,21 +846,14 @@ class Store extends CI_Controller
                 bs.last_date,
                 s.Store_No,
                 s.Store_Name,
+                concat_ws('-', s.Store_No, s.Store_Name) as display_text,
                 s.meter_no,
                 o.Owner_Name,
                 re.Renter_Name,
-                m.month_name,
-                ifnull(sum(upd.electricity_bill), 0) as electricity_bill_payment,
-                ifnull(sum(upd.generator_bill), 0) as generator_bill_payment,
-                ifnull(sum(upd.ac_bill), 0) as ac_bill_payment,
-                ifnull(sum(upd.others_bill), 0) as others_bill_payment,
-                ifnull(sum(upd.late_fee), 0) as late_fee,
-                ifnull(sum(upd.payment), 0) as total_payment,
-                upd.comment as payment_comment
+                m.month_name
+
             from tbl_bill_sheet_details bsd
             join tbl_bill_sheet bs on bs.id = bsd.bill_id
-            left join tbl_utility_payment up on up.month_id = bs.month_id
-            left join tbl_utility_payment_details upd on upd.utility_payment_id = up.id
             join tbl_month m on m.month_id = bs.month_id
             join tbl_store s on s.Store_SlNo = bsd.store_id
             left join tbl_owner o on o.Owner_SlNo = s.owner_id
@@ -873,6 +866,97 @@ class Store extends CI_Controller
         ", $this->session->userdata('BRANCHid'))->result();
 
         echo json_encode($bills);
+    }
+
+    function store_due()
+    {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = 'Store Due';
+        $data['content'] = $this->load->view('Administrator/due_report/store_due', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    
+    public function getStoreDue() {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+        if(isset($data->storeId) && $data->storeId != null){
+            $clauses = " and s.Store_SlNo = '$data->storeId'";
+        }
+        $storeDues = $this->mt->storeDue($clauses);
+
+        echo json_encode($storeDues);
+    }
+
+    public function getStoreLedger(){
+        $data = json_decode($this->input->raw_input_stream);
+        $previousDueQuery = $this->db->query("select ifnull(previous_due, 0.00) as previous_due from tbl_store where Store_SlNo = '$data->storeId'")->row();
+        $payments = $this->db->query("
+            select
+                'a' as sequence,
+                bsd.id as id,
+                bs.process_date as date,
+                s.Store_Name as store_name,
+                concat('Generate Bill -', s.Store_Name,' - ', m.month_name) as description,
+                bsd.net_payable as bill,
+                0.00 as paid,
+                0.00 as due
+            from tbl_bill_sheet_details bsd
+            join tbl_bill_sheet bs on bs.id = bsd.bill_id
+            join tbl_month m on m.month_id = bs.month_id
+            join tbl_store s on s.Store_SlNo = bsd.store_id
+            where s.Store_SlNo = '$data->storeId'
+            and s.status = 'a'
+            and bsd.status = 'a'
+            
+            UNION
+
+            select
+                'b' as sequence,
+                upd.id as id,
+                up.payment_date as date,
+                s.Store_Name as store_name,
+                concat('Payment Bill -', s.Store_Name,' - ', m.month_name) as description,
+                0.00 as bill,
+                upd.payment as paid,
+                upd.due as due
+            from tbl_utility_payment_details upd
+            join tbl_utility_payment up on up.id = upd.utility_payment_id
+            join tbl_month m on m.month_id = up.month_id
+            join tbl_store s on s.Store_SlNo = upd.store_id
+            where s.Store_SlNo = '$data->storeId'
+            and s.status = 'a'
+            and upd.status = 'a'
+
+            order by date, sequence, id
+        ")->result();
+
+        $previousBalance = $previousDueQuery->previous_due;
+
+        foreach($payments as $key=>$payment){
+            $lastBalance = $key == 0 ? $previousDueQuery->previous_due : $payments[$key - 1]->balance;
+            $payment->balance = ($lastBalance + $payment->bill - $payment->paid);
+        }
+
+        if((isset($data->dateFrom) && $data->dateFrom != null) && (isset($data->dateTo) && $data->dateTo != null)){
+            $previousPayments = array_filter($payments, function($payment) use ($data){
+                return $payment->date < $data->dateFrom;
+            });
+
+            $previousBalance = count($previousPayments) > 0 ? $previousPayments[count($previousPayments) - 1]->balance : $previousBalance;
+
+            $payments = array_filter($payments, function($payment) use ($data){
+                return $payment->date >= $data->dateFrom && $payment->date <= $data->dateTo;
+            });
+        }
+
+        $res['previousBalance'] = $previousBalance;
+        $res['payments'] = $payments;
+        echo json_encode($res);
     }
 
 }

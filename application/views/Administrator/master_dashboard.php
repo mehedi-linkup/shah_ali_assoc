@@ -79,10 +79,31 @@
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
 						<?php 
-						$userID =  $this->session->userdata('userId');
+							$userID =  $this->session->userdata('userId');
 							$CheckSuperAdmin = $this->db->where('UserType','m')->where('User_SlNo',$userID)->get('tbl_user')->row();
-							if(isset($CheckSuperAdmin)):
+							
 						?>
+						<li class="light-blue dropdown-modal">
+							<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color:unset">
+										<span style="font-size: 20px;"><i class="fa fa-globe" aria-hidden="true" style="font-size:20px;"></i></span>
+							</a>
+
+							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+									
+								<?php 
+								$sql = $this->db->query("SELECT * FROM tbl_brunch where status = 'a' order by Brunch_name asc ");
+								$row = $sql->result();
+								foreach($row as $row){ ?>
+										<li>
+											<a class="btn-add fancybox fancybox.ajax" href="<?php echo base_url();?>brachAccess/<?php echo $row->brunch_id; ?>">
+												<i class="ace-icon fa fa-bank"></i>
+												<?php echo $row->Brunch_name; ?>
+											</a>
+										</li>
+								<?php } ?>
+							</ul>
+						</li>
+						<?php if(isset($CheckSuperAdmin)): ?>
 						<li class="light-blue dropdown-modal">
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
 										<span>Branch Acess</span>

@@ -497,6 +497,7 @@ class Page extends CI_Controller {
             $newBranch = array(
                 'Brunch_name' => $branch->name,
                 'Brunch_title' => $branch->title,
+                'Brunch_bangla_title' => $branch->bangla_title,
                 'Brunch_address' => $branch->address,
                 'Brunch_sales' => '2',
                 'add_by' => $this->session->userdata("FullName"),
@@ -528,6 +529,7 @@ class Page extends CI_Controller {
             $newBranch = array(
                 'Brunch_name' => $branch->name,
                 'Brunch_title' => $branch->title,
+                'Brunch_bangla_title' => $branch->bangla_title,
                 'Brunch_address' => $branch->address,
                 'update_by' => $this->session->userdata("FullName")
             );

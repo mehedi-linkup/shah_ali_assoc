@@ -185,7 +185,7 @@
 								<label class="col-sm-4 control-label"> Store </label>
 								<div class="col-sm-8">
 									<select class="form-control" v-if="stores.length == 0"></select>
-									<v-select v-bind:options="stores" v-model="selectedStore" label="display_text" v-if="stores.length > 0" v-on:input="storeOnChange"></v-select>
+									<v-select v-bind:options="stores" v-model="selectedStore" label="display_text" v-if="stores.length > 0" v-on:input="OnChangeStore"></v-select>
 								</div>
 							</div>
 
@@ -214,7 +214,7 @@
 							<div class="form-group" style="display:none;" v-bind:style="{display: paymentType == 'renter' ? '' : 'none'}">
 								<label class="col-sm-4 control-label no-padding-right"> Renter </label>
 								<div class="col-sm-7">
-									<v-select v-bind:options="renters" label="display_name" v-model="selectedRenter" v-on:input="storeOnChange"></v-select>
+									<v-select v-bind:options="renters" label="display_name" v-model="selectedRenter" v-on:input="OnChangeStore"></v-select>
 								</div>
 								<div class="col-sm-1" style="padding: 0;">
 									<a href="<?= base_url('renter') ?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;" target="_blank" title="Add New Renter"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
@@ -247,7 +247,7 @@
 									<thead>
 										<tr>
 											<th style="color:#000;">All</th>
-											<th style="color:#000;">Store No</th>
+											<th style="color:#000;">Store</th>
 											<th style="color:green;">G.Date</th>
 											<th style="color:red;">L.Date</th>
 											<th style="color:#000;">Amount</th>
@@ -259,12 +259,12 @@
 										<template>
 											<tr v-for="(store, index) in store_bills" :class="{'highlight-row': isExpire(store.last_date) }">
 												<td><input type="checkbox" v-model="store.isSelect" id="" @change="onSelectStore"></td>
-												<td>{{store.Store_No}}</td>
+												<td>{{store.Store_Name}}</td>
 												<td>{{store.process_date | dateOnly('DD MMM YYYY')}}</td>
 												<td>{{store.last_date | dateOnly('DD MMM YYYY')}}</td>
 												<td style="text-align: right;">{{store.net_payable}}</td>
-												<td>{{ store.total_payment }}</td>
-												<td>{{ +store.net_payable - +store.total_payment }}</td>
+												<td>{{ store.subtotal_payment }}</td>
+												<td>{{ store.previous_due }}</td>
 											</tr>
 										</template>
 									</tbody>
@@ -279,32 +279,32 @@
 					<div class="row" style="margin: 0px;border:1px solid #ccc;padding-bottom:10px;margin-bottom:15px;">
 						<h5 style="text-align: center;background: rgb(0 90 139);padding: 6px;color: #fff;margin-top:0px">Utility Info:</h5>
 						<!-- order info start -->
-						<div v-if="filter_store_bills.length > 0" v-for="store in filter_store_bills" class="col-md-12" style="margin-top:10px;">
+						<div v-if="payment_store_bills.length > 0" v-for="store in payment_store_bills" class="col-md-12" style="margin-top:10px;">
 							<div class="utility-header">
 								<strong>Store Name: </strong> <span style="color: #be2300;">{{ store.Store_Name }}</span> <strong>&nbsp;/&nbsp; Meter No: </strong> <span style="color: #be2300;">{{ store.meter_no }}</span>
 							</div>
-							<hr v-if="filter_store_bills.length > 0" style="margin-top:10px;margin-bottom:10px">
+							<hr v-if="payment_store_bills.length > 0" style="margin-top:10px;margin-bottom:10px">
 							<div class="form-group row clearfix ">
                                 <label class="col-sm-2">Electricity Bill : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="number" v-model="store.electricity_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
+									<input type="number" v-model="store.electricity_due" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
 								<label class="col-sm-2" style="text-align: right;">AC Bill : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="number" v-model="store.ac_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
+									<input type="number" v-model="store.ac_due" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
 								<label class="col-sm-2" style="text-align: right;">Generator Bill : </label>
 								<div class="col-sm-2 no-padding-left">
-									<input type="number" v-model="store.generator_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
+									<input type="number" v-model="store.generator_due" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
                                 <hr>
 								<label class="col-sm-2" > Others : </label>
 								<div class="col-sm-2 no-padding">
-									<input type="number" v-model="store.others_bill_payment" class="form-control" require @input="onChangeUtiltiy(store)">
+									<input type="number" v-model="store.others_due" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
-								<label class="col-sm-2" style="text-align: right;"> Late Fee : </label>
-								<div class="col-sm-2 no-padding">
-									<input type="number" v-model="store.late_fee" class="form-control" require @input="onChangeUtiltiy(store)">
+								<label v-if="isExpire(store.last_date)" class="col-sm-2" style="text-align: right;"> Late Fee : </label>
+								<div v-if="isExpire(store.last_date)" class="col-sm-2 no-padding">
+									<input type="number" v-model="store.late_fee_payment" class="form-control" require @input="onChangeUtiltiy(store)">
 								</div>
 
 								<label class="col-sm-2" style="text-align: right;"> Comment : </label>
@@ -357,7 +357,7 @@
 											<div class="form-group">
 												<label class="col-xs-12 control-label no-padding-right">Total Generator Bill</label>
 												<div class="col-xs-12">
-													<input type="number" class="form-control" v-model="payment.total_generator_bill" v-on:input="calculateTotal" readonly />
+													<input type="number" class="form-control" v-model="payment.total_generator_bill" readonly />
 												</div>
 											</div>
 										</td>
@@ -400,7 +400,7 @@
 											<div class="form-group">
 												<label class="col-xs-12 control-label no-padding-right">Total</label>
 												<div class="col-xs-12">
-													<input type="number" id="total" class="form-control" v-model="payment.total_payment_amount" readonly />
+													<input type="number" id="total" class="form-control" v-model="+payment.total_payment + +payment.total_late_fee" readonly />
 												</div>
 											</div>
 										</td>
@@ -457,7 +457,7 @@
 					total_ac_bill: 0,
 					total_others_bill: 0,
 					total_late_fee: 0,
-					total_payment_amount: 0,
+					total_payment: 0,
 					total_due: 0
 				},
 				paymentType: 'store',
@@ -508,7 +508,8 @@
 				cart: [],
 				userType: '<?php echo $this->session->userdata("accountType"); ?>',
 				store_bills: [],
-				filter_store_bills: [],
+				store_payments: [],
+				payment_store_bills: [],
 			}
 		},
 		filters: {
@@ -592,38 +593,69 @@
 				}
 				this.getStores();
 			},
-			onSelectStore() {
-				let filterStoreBills = this.store_bills.filter(item => item.isSelect == true);
+			async OnChangeStore() {
+				if (this.selectedStore.Store_SlNo == '') {
+					return;
+				}
+				if (this.selectedMonth == null || this.selectedMonth == "") {
+					alert("Select Month");
+					this.selectedStore = {
+						Store_SlNo: '',
+						Store_Name: '',
+						display_text: 'Select Store',
+						Store_Mobile: '',
+						meter_no: '',
+					}
+					return;
+				}
 				
-				filterStoreBills.map(item => {
-					item.electricity_bill_payment = (item.electricity_bill_payment==0?item.electricity_bill:item.electricity_bill_payment)
-					item.generator_bill_payment = (item.generator_bill_payment==0?item.generator_bill:item.generator_bill_payment)
-					item.ac_bill_payment = (item.ac_bill_payment==0?item.ac_bill:item.ac_bill_payment)
-					item.others_bill_payment = (item.others_bill_payment==0?item.others_bill:item.others_bill_payment)
-					item.payment = +item.electricity_bill_payment + +item.generator_bill_payment + +item.ac_bill_payment + +item.others_bill_payment;
-					return item;
-				})
-				this.filter_store_bills = filterStoreBills;
-				// start calculate total from here
-				this.calculateTotal()
-				console.log(this.filter_store_bills)
+				axios.post('/get_store_due_for_payment', {
+					storeId: this.selectedStore.Store_SlNo,
+					month: this.selectedMonth.month_id
+				}).then(res => {
+					this.store_bills = res.data;
+				});
+				this.payment_store_bills = [];
+			},
+			onSelectStore() {
+				let filteredStoreBills = this.store_bills.filter(item => item.isSelect == true);
 
+				filteredStoreBills.map(item => {
+					item.payment = parseFloat(+item.electricity_due + +item.generator_due + +item.ac_due + +item.others_due).toFixed(2);
+					item.due = parseFloat(+item.net_payable - +item.subtotal_payment - +item.payment).toFixed(2);
+				});
+
+				this.payment_store_bills = filteredStoreBills;
+
+				// paymentStoreBills.map(item => {
+				// 	item.electricity_bill_payment = (item.electricity_bill_payment==0?item.electricity_bill:item.electricity_bill_payment)
+				// 	item.generator_bill_payment = (item.generator_bill_payment==0?item.generator_bill:item.generator_bill_payment)
+				// 	item.ac_bill_payment = (item.ac_bill_payment==0?item.ac_bill:item.ac_bill_payment)
+				// 	item.others_bill_payment = (item.others_bill_payment==0?item.others_bill:item.others_bill_payment)
+				// 	item.payment = +item.electricity_bill_payment + +item.generator_bill_payment + +item.ac_bill_payment + +item.others_bill_payment;
+				// 	return item;
+				// })
+				// this.payment_store_bills = paymentStoreBills;
+
+				this.calculateTotal()
 			},
 			onChangeUtiltiy(store) {
-				if(+store.electricity_bill < +store.electricity_bill_payment) {
-					store.electricity_bill_payment = store.electricity_bill;
+				if((+store.electricity_bill - +store.electricity_payment) < +store.electricity_due) {
+					store.electricity_due = (+store.electricity_bill - +store.electricity_payment);
 				}
-				if(+store.generator_bill < +store.generator_bill_payment) {
-					store.generator_bill_payment = store.generator_bill;
+				if((+store.generator_bill - +store.generator_payment) < +store.generator_due) {
+					store.generator_due = (+store.generator_bill - +store.generator_payment);
 				}
-				if(+store.ac_bill < +store.ac_bill_payment) {
-					store.ac_bill_payment = store.ac_bill;
+				if((+store.ac_bill - +store.ac_payment) < +store.ac_due) {
+					store.ac_due = (+store.ac_bill - +store.ac_payment);
 				}
-				if(+store.others_bill < +store.others_bill_payment) {
-					store.others_bill_payment = store.others_bill;
+				if((+store.others_bill - +store.others_payment) < +store.others_due) {
+					store.others_due = (+store.others_bill - +store.others_payment);
 				}
 
-				store.payment = +store.electricity_bill_payment + +store.generator_bill_payment + +store.ac_bill_payment + +store.others_bill_payment + +store.late_fee;
+				store.payment = parseFloat(+store.electricity_due + +store.generator_due + +store.ac_due + +store.others_due).toFixed(2);
+				store.due =  parseFloat(+store.net_payable - +store.subtotal_payment - +store.payment).toFixed(2);
+				
 
 				this.calculateTotal();
 			},
@@ -663,121 +695,15 @@
 				const lastDate = new Date(date);
 				return lastDate < currentDate;
 			},
-
-			async getOrderItem() {
-				// this.order_details.order_item_id = '';
-				this.itemSections = [];
-				let filter = {
-					body_part: this.order_details.body_part
-				}
-				await axios.post('/get-order-item', filter).then(res => {
-
-					this.orderItems = res.data;
-				})
-			},
-			async getItemSection() {
-				this.order_info = [];
-				let filter = {
-					order_type: this.order_details.order_item_id
-				}
-				await axios.post('/get-item-section', filter).then(res => {
-
-					res.data.forEach(ele => {
-						let item = {
-							section_id: ele.section_id,
-							section_name: ele.section_name,
-							section_name_en: ele.section_name_en,
-							input_status: ele.input_status,
-							section_sub_id: '',
-							value: '',
-							sub: ele.sub,
-							extra_title: '',
-						}
-						this.order_info.push(item);
-					})
-
-				})
-			},
-		
-			deleteCartItem(index) {
-				this.cart.splice(index, 1);
-				this.calculateTotal();
-			},
-
-			async editCartItem(data, index) {
-				this.order_details = data.orderDetails;
-				await this.getOrderItem();
-				await this.getItemSection();
-
-
-				setTimeout(() => {
-					data.orderInfo.forEach(ele1 => {
-						this.order_info.forEach(ele2 => {
-							if (ele1.section_name_en == ele2.section_name_en && ele1.section_name_en != 'extra') {
-								ele2.section_sub_id = ele1.section_sub_id;
-								if (ele2.input_status == 'yes') {
-									ele2.value = ele1.value;
-								}
-							} else if (ele1.section_name_en == ele2.section_name_en && ele1.section_name_en == 'extra') {
-								ele2.extra_title = ele1.extra_title;
-								ele2.value = ele1.value;
-							}
-						})
-					})
-				}, 500);
-				this.cart.splice(index, 1);
-
-			},
-
-			async existSaleClick(item, index) {
-				// this.order_details = item.orderDetails;
-				// this.orderItems = []
-				// this.itemSections = []
-				// this.order_info = {};
-				// this.order_details = {};
-				// console.log(item, index);
-
-				this.order.customer_id = item.customer_id;
-				this.order.measurement_master = item.measurement_master;
-				this.order.cutting_master = item.cutting_master;
-				this.order.material_man = item.material_man;
-				this.order.serial_man = item.serial_man;
-				this.order.sewing_master = item.sewing_master;
-				this.order.finish_man = item.finish_man;
-
-				this.order_details = item.orderDetails[index];
-
-				await this.getOrderItem();
-				await this.getItemSection();
-
-				// console.log(item);
-				// console.log(this.order_info);
-				// return
-
-				let o_Info = item.orderDetails[index].orderInfo;
-
-				setTimeout(() => {
-					o_Info.forEach(ele1 => {
-						this.order_info.forEach(ele2 => {
-							if (ele1.section_name_en == ele2.section_name_en && ele1.section_name_en != 'extra') {
-								ele2.section_sub_id = ele1.section_sub_id;
-								if (ele2.input_status == 'yes') {
-									ele2.value = ele1.value;
-								}
-							} else if (ele1.section_name_en == ele2.section_name_en && ele1.section_name_en == 'extra') {
-								ele2.extra_title = ele1.extra_title;
-								ele2.value = ele1.value;
-							}
-						})
-					})
-				}, 500);
-
-				delete this.order_details.orderInfo;
-			},
 			savePayment() {
-			
-				if (this.filter_store_bills.length <= 0 || this.filter_store_bills == null) {
+
+				if (this.payment_store_bills.length <= 0 || this.payment_store_bills == null) {
 					alert('Add store to pay');
+					return;
+				}
+
+				if(this.payment.total_payment == 0 || this.payment.total_payment == null || this.payment.total_payment == "" ) {
+					alert('No change to save');
 					return;
 				}
 
@@ -785,7 +711,7 @@
 
 				let filter = {
 					payment: this.payment,
-					storeBills: this.filter_store_bills,
+					storeBills: this.payment_store_bills,
 				}
 
 				this.paymentProgress = true;
@@ -800,13 +726,11 @@
 					if (r.success) {
 						let conf = confirm( r.message + ', Do you want to view invoice?');
 						if (conf) {
-							r.utilityDetailsArr.forEach(element => {
-								window.open('/utility_invoice_print/' + element, '_blank');
-							});
+							window.open('/utility_invoice_print/' + r.utilityId, '_blank');
 							await new Promise(r => setTimeout(r, 1000));
-							// window.location = '/utility/payment';
+							window.location = '/utility/payment';
 						} else {
-							// window.location = '/utility/payment';
+							window.location = '/utility/payment';
 						}
 					} else {
 						alert(r.message);
@@ -814,103 +738,59 @@
 					}
 				})
 			},
-
-			checkCustomer() {
-				if (!this.customer_find && this.selectedCustomer.Customer_Mobile.length == 11) {
-					axios.post('/check_customer', {
-						mobile: this.selectedCustomer.Customer_Mobile
-					}).then(res => {
-						if (res.data != null) {
-							this.selectedCustomer = res.data;
-							this.customer_find = true;
-						}
-					})
-				}
-			},
-
-			async storeOnChange() {
-				if (this.selectedStore.Store_SlNo == '') {
-					return;
-				}
-				if (this.selectedMonth == null || this.selectedMonth == "") {
-					alert("Select Month");
-					this.selectedStore = {
-						Store_SlNo: '',
-						Store_Name: '',
-						display_text: 'Select Store',
-						Store_Mobile: '',
-						meter_no: '',
-					}
-					return;
-				}
-				
-				axios.post('/get_store_bills', {
-					storeId: this.selectedStore.Store_SlNo,
-					month: this.selectedMonth.month_id
-				}).then(res => {
-					this.store_bills = res.data;
-				});
-
-			},
+			
 			calculateTotal() {
 				let total_electricity_bill = 0;
 				let total_generator_bill = 0;
 				let total_ac_bill = 0;
 				let total_others_bill = 0;
 				let total_late_fee = 0;
-
+				let total_payment = 0;
+				let total_due = 0;
 				let total_net_payable = 0;
 
-				this.filter_store_bills.forEach(element => {
-					total_electricity_bill += parseFloat(element.electricity_bill_payment);
-					total_generator_bill += parseFloat(element.generator_bill_payment);
-					total_ac_bill += parseFloat(element.ac_bill_payment);
-					total_others_bill += parseFloat(element.others_bill_payment);
-					total_late_fee += parseFloat(element.late_fee);
-					total_net_payable +=  parseFloat(element.net_payable);
+				this.payment_store_bills.forEach(element => {
+					total_electricity_bill += parseFloat(element.electricity_due);
+					total_generator_bill += parseFloat(element.generator_due);
+					total_ac_bill += parseFloat(element.ac_due);
+					total_others_bill += parseFloat(element.others_due);
+					total_late_fee += parseFloat(element.late_fee_payment);
+					total_payment +=  parseFloat(element.payment);
+					total_due += parseFloat(element.due);
+					total_net_payable += parseFloat(element.net_payable);
 				});
-
-				let total_payment_amount = parseFloat( +total_electricity_bill + +total_generator_bill + +total_ac_bill + +total_others_bill + +total_late_fee ).toFixed(2);
 
 				this.payment.total_electricity_bill = parseFloat(+total_electricity_bill).toFixed(2);
 				this.payment.total_generator_bill = parseFloat(+total_generator_bill).toFixed(2);
 				this.payment.total_ac_bill = parseFloat(+total_ac_bill).toFixed(2);
 				this.payment.total_others_bill = parseFloat(+total_others_bill).toFixed(2);
 				this.payment.total_late_fee = parseFloat(+total_late_fee).toFixed(2);
-				this.payment.total_payment_amount = total_payment_amount;
-				this.payment.total_due = parseFloat(+total_net_payable + +total_late_fee - +total_payment_amount).toFixed(2);
-				console.log(this.payment)
-			},
-
-			async customerExistCheck(mobile) {
-				let hasCustomer = false;
-
-				await axios.post('/check_customer', {
-					mobile: mobile,
-					check_mobile: true
-				}).then(res => {
-					if (res.data > 0)
-						hasCustomer = true;
-				})
-
-				return hasCustomer;
+				this.payment.total_payment = parseFloat(total_payment).toFixed(2);
+				this.payment.total_due = parseFloat(+total_due).toFixed(2);
 			},
 			async getPayments() {
-				await axios.post('/get_utility_payment', { id: this.payment.id }).then(res => {
+				await axios.post('/get_utility_payment', { id: this.payment.id })
+				.then(res => {
 					let r = res.data;
 					let payments = r.payments[0];
 					this.payment.invoice = payments.invoice;
 					this.payment.date = payments.payment_date;
-					this.payment.total_payment_amount = payments.total_payment_amount;
+					this.payment.total_electricity_bill = payments.total_electricity_bill;
+					this.payment.total_generator_bill = payments.total_generator_bill;
+					this.payment.total_ac_bill = payments.total_ac_bill;
+					this.payment.total_others_bill = payments.total_others_bill;
+					this.payment.total_late_fee = payments.total_late_fee;
+					this.payment.total_due = payments.total_due;
+					this.payment.total_payment = payments.total_payment;
 
 					this.selectedMonth = {
 						month_id: payments.month_id,
 						month_name: payments.month_name
 					}
 
-				// let filterStoreBills = this.store_bills.filter(item => item.isSelect == true);
+				// let paymentStoreBills = this.store_bills.filter(item => item.isSelect == true);
 				
-				// filterStoreBills.map(item => {
+				// paymentStoreBills.map(item => {
 				// 	item.electricity_bill_payment = (item.electricity_bill_payment==0?item.electricity_bill:item.electricity_bill_payment)
 				// 	item.generator_bill_payment = (item.generator_bill_payment==0?item.generator_bill:item.generator_bill_payment)
 				// 	item.ac_bill_payment = (item.ac_bill_payment==0?item.ac_bill:item.ac_bill_payment)
@@ -918,26 +798,36 @@
 				// 	item.payment = +item.electricity_bill_payment + +item.generator_bill_payment + +item.ac_bill_payment + +item.others_bill_payment;
 				// 	return item;
 				// })
-				// this.filter_store_bills = filterStoreBills;
+				// this.payment_store_bills = paymentStoreBills;
 
 
-					r.paymentDetails.forEach(store => {
+					r.paymentDetails.forEach(async store => {
 						this.selectedStore.Store_SlNo = store.Store_SlNo
-						this.storeOnChange();
+						this.selectedStore.display_text = store.Store_SlNo == '' ? store.Store_Name : `${store.Store_Name} - ${store.Store_No}`;
+
+						await axios.post('/get_store_due_for_payment', {
+							storeId: this.selectedStore.Store_SlNo,
+							month: this.selectedMonth.month_id
+						}).then(res => {
+							this.store_bills = res.data;
+							this.store_bills.map(item => item.isSelect = true);
+
+							this.store_bills[0].electricity_due = store.electricity_bill
+							this.store_bills[0].generator_due = store.generator_bill
+							this.store_bills[0].ac_due = store.ac_bill
+							this.store_bills[0].others_due = store.others_bill
+							this.store_bills[0].payment = parseFloat(+store.electricity_bill + +store.generator_bill + +store.ac_bill + +store.others_bill).toFixed(2)
+							this.store_bills[0].due =  parseFloat(this.store_bills[0].net_payable - ( +this.store_bills[0].subtotal_payment + +this.store_bills[0].payment )).toFixed(2)
+							// this.store_bills[0].due =  parseFloat(this.store_bills[0].net_payable - ( +this.store_bills[0].payment )).toFixed(2)
+							this.store_bills[0].old_payment_detail_id = store.id
+							let filteredStoreBills = this.store_bills;
+							this.payment_store_bills = filteredStoreBills;
+						});
 					});
 				})
-			},
-			
-			
-			
-			clearOrderDetails() {
-				this.order_details = {
-				
-				}
-			},
-
-			clearOrderInfo() {
-				this.order_info = {};
+				.then(res => {
+					console.log(res)
+				})
 			},
 		}
 	})

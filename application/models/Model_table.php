@@ -197,32 +197,55 @@ class Model_Table extends CI_Model{
         return $code;
     }
 
+    public function getCollectionSummary($date = null){
+        $transactionSummary = $this->db->query("
+            select
+            /* Generated */
+            m.*,
+            (
+                select ifnull(sum(bs.total_amount), 0) from tbl_bill_sheet bs
+                where bs.branch_id = " . $this->session->userdata('BRANCHid') . "
+                and bs.status = 'a'
+                " . ($date == null ? "" : " and bs.process_date < '$date'") . "
+                and bs.month_id = m.month_id
+            ) as generated_bill,
+
+            /* Received */
+            (
+                select ifnull(sum(up.total_payment), 0) from tbl_utility_payment up
+                where up.branch_id= " . $this->session->userdata('BRANCHid') . "
+                and up.status = 'a'
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+                and up.month_id = m.month_id
+            ) as received_bill,
+
+            /* Due */
+            (
+                select ifnull(sum(up.total_due), 0) from tbl_utility_payment up
+                where up.branch_id= " . $this->session->userdata('BRANCHid') . "
+                and up.status = 'a'
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+                and up.month_id = m.month_id
+            ) as due_bill
+
+            from tbl_month m
+            group by m.month_id
+            order by m.month_id desc
+        ")->result();
+
+        return $transactionSummary;
+    }
+
     public function getTransactionSummary($date = null){
         $transactionSummary = $this->db->query("
             select
             /* Received */
-            (
-                select ifnull(sum(sm.SaleMaster_PaidAmount), 0) from tbl_salesmaster sm
-                where sm.SaleMaster_branchid= " . $this->session->userdata('BRANCHid') . "
-                and sm.Status = 'a'
-                " . ($date == null ? "" : " and sm.SaleMaster_SaleDate < '$date'") . "
-            ) as received_sales,
-            (
-                select ifnull(sum(cp.CPayment_amount), 0) from tbl_customer_payment cp
-                where cp.CPayment_TransactionType = 'CR'
-                and cp.CPayment_status = 'a'
-                and cp.CPayment_Paymentby != 'bank'
-                and cp.CPayment_brunchid= " . $this->session->userdata('BRANCHid') . "
-                " . ($date == null ? "" : " and cp.CPayment_date < '$date'") . "
-            ) as received_customer,
-            (
-                select ifnull(sum(sp.SPayment_amount), 0) from tbl_supplier_payment sp
-                where sp.SPayment_TransactionType = 'CR'
-                and sp.SPayment_status = 'a'
-                and sp.SPayment_Paymentby != 'bank'
-                and sp.SPayment_brunchid= " . $this->session->userdata('BRANCHid') . "
-                " . ($date == null ? "" : " and sp.SPayment_date < '$date'") . "
-            ) as received_supplier,
+            (   
+                select ifnull(sum(up.total_payment), 0) from tbl_utility_payment up
+                where up.branch_id = " . $this->session->userdata('BRANCHid') . "
+                and up.status = 'a'
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+            ) as received_payment,
             (
                 select ifnull(sum(ct.In_Amount), 0) from tbl_cashtransaction ct
                 where ct.Tr_Type = 'In Cash'
@@ -267,28 +290,6 @@ class Model_Table extends CI_Model{
 
             /* paid */
             (
-                select ifnull(sum(pm.PurchaseMaster_PaidAmount), 0) from tbl_purchasemaster pm
-                where pm.status = 'a'
-                and pm.PurchaseMaster_BranchID= " . $this->session->userdata('BRANCHid') . "
-                " . ($date == null ? "" : " and pm.PurchaseMaster_OrderDate < '$date'") . "
-            ) as paid_purchase,
-            (
-                select ifnull(sum(sp.SPayment_amount), 0) from tbl_supplier_payment sp
-                where sp.SPayment_TransactionType = 'CP'
-                and sp.SPayment_status = 'a'
-                and sp.SPayment_Paymentby != 'bank'
-                and sp.SPayment_brunchid= " . $this->session->userdata('BRANCHid') . "
-                " . ($date == null ? "" : " and sp.SPayment_date < '$date'") . "
-            ) as paid_supplier,
-            (
-                select ifnull(sum(cp.CPayment_amount), 0) from tbl_customer_payment cp
-                where cp.CPayment_TransactionType = 'CP'
-                and cp.CPayment_status = 'a'
-                and cp.CPayment_Paymentby != 'bank'
-                and cp.CPayment_brunchid= " . $this->session->userdata('BRANCHid') . "
-                " . ($date == null ? "" : " and cp.CPayment_date < '$date'") . "
-            ) as paid_customer,
-            (
                 select ifnull(sum(ct.Out_Amount), 0) from tbl_cashtransaction ct
                 where ct.Tr_Type = 'Out Cash'
                 and ct.status = 'a'
@@ -331,10 +332,10 @@ class Model_Table extends CI_Model{
             ) as buy_asset,
             /* total */
             (
-                select received_sales + received_customer + received_supplier + received_cash + bank_withdraw + loan_received + loan_initial_balance + invest_received + sale_asset
+                select received_payment + received_cash + bank_withdraw + loan_received + loan_initial_balance + invest_received + sale_asset
             ) as total_in,
             (
-                select paid_purchase + paid_customer + paid_supplier + paid_cash + bank_deposit + employee_payment + loan_payment + invest_payment + buy_asset
+                select paid_cash + bank_deposit + employee_payment + loan_payment + invest_payment + buy_asset
             ) as total_out,
             (
                 select total_in - total_out
@@ -364,40 +365,9 @@ class Model_Table extends CI_Model{
                     and bt.branch_id = " . $this->session->userdata('BRANCHid') . "
                     " . ($date == null ? "" : " and bt.transaction_date < '$date'") . "
                 ) as total_withdraw,
+
                 (
-                    select ifnull(sum(cp.CPayment_amount), 0) from tbl_customer_payment cp
-                    where cp.account_id = ba.account_id
-                    and cp.CPayment_status = 'a'
-                    and cp.CPayment_TransactionType = 'CR'
-                    and cp.CPayment_brunchid = " . $this->session->userdata('BRANCHid') . "
-                    " . ($date == null ? "" : " and cp.CPayment_date < '$date'") . "
-                ) as total_received_from_customer,
-                (
-                    select ifnull(sum(cp.CPayment_amount), 0) from tbl_customer_payment cp
-                    where cp.account_id = ba.account_id
-                    and cp.CPayment_status = 'a'
-                    and cp.CPayment_TransactionType = 'CP'
-                    and cp.CPayment_brunchid = " . $this->session->userdata('BRANCHid') . "
-                    " . ($date == null ? "" : " and cp.CPayment_date < '$date'") . "
-                ) as total_paid_to_customer,
-                (
-                    select ifnull(sum(sp.SPayment_amount), 0) from tbl_supplier_payment sp
-                    where sp.account_id = ba.account_id
-                    and sp.SPayment_status = 'a'
-                    and sp.SPayment_TransactionType = 'CP'
-                    and sp.SPayment_brunchid = " . $this->session->userdata('BRANCHid') . "
-                    " . ($date == null ? "" : " and sp.SPayment_date < '$date'") . "
-                ) as total_paid_to_supplier,
-                (
-                    select ifnull(sum(sp.SPayment_amount), 0) from tbl_supplier_payment sp
-                    where sp.account_id = ba.account_id
-                    and sp.SPayment_status = 'a'
-                    and sp.SPayment_TransactionType = 'CR'
-                    and sp.SPayment_brunchid = " . $this->session->userdata('BRANCHid') . "
-                    " . ($date == null ? "" : " and sp.SPayment_date < '$date'") . "
-                ) as total_received_from_supplier,
-                (
-                    select (ba.initial_balance + total_deposit + total_received_from_customer + total_received_from_supplier) - (total_withdraw + total_paid_to_customer + total_paid_to_supplier)
+                    select (ba.initial_balance + total_deposit) - (total_withdraw)
                 ) as balance
             from tbl_bank_accounts ba
             where ba.branch_id = " . $this->session->userdata('BRANCHid') . "
@@ -650,6 +620,80 @@ class Model_Table extends CI_Model{
         ")->result();
 
         return $supplierDues;
+    }
+    public function renterDue($clauses = "" , $date = null) {
+        $branchId = $this->session->userdata('BRANCHid');
+
+        $renterDues = $this->db->query("
+            select
+            r.Renter_SlNo,
+            r.Renter_Code,
+            r.Renter_Name,
+            r.Renter_Mobile,
+            r.Renter_PreAddress,
+            r.Renter_NID,
+            (select (ifnull(sum(bsd.net_payable), 0.00) + ifnull(r.previous_due, 0.00)) 
+                from tbl_bill_sheet_details bsd
+                join tbl_bill_sheet bs on bs.id = bsd.bill_id
+                join tbl_store s on s.Store_SlNo = bsd.store_id
+                where s.renter_id = r.Renter_SlNo
+                " . ($date == null ? "" : " and bs.process_date < '$date'") . "
+                and bsd.status = 'a'
+            ) as bill,
+
+            (select (ifnull(sum(upd.payment), 0.00)) 
+                from tbl_utility_payment_details upd
+                join tbl_utility_payment up on up.id = upd.utility_payment_id
+                join tbl_store s on s.Store_SlNo = upd.store_id
+                where s.renter_id = r.Renter_SlNo
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+                and upd.status = 'a'
+            ) as paid,
+
+            (select bill - paid) as due
+
+            from tbl_renter r
+            where r.Renter_brunchid = '$branchId' $clauses
+        ")->result();
+
+        return $renterDues;
+    }
+    public function storeDue($clauses = "" , $date = null) {
+        $branchId = $this->session->userdata('BRANCHid');
+
+        $storeDues = $this->db->query("
+            select
+            s.Store_SlNo,
+            s.Store_Code,
+            s.Store_Name,
+            s.Store_Mobile,
+            s.meter_no,
+            s.Store_Email,
+            f.Floor_Name,
+            (select (ifnull(sum(bsd.net_payable), 0.00) + ifnull(s.previous_due, 0.00)) 
+                from tbl_bill_sheet_details bsd
+                join tbl_bill_sheet bs on bs.id = bsd.bill_id
+                where bsd.store_id = s.Store_SlNo
+                " . ($date == null ? "" : " and bs.process_date < '$date'") . "
+                and bsd.status = 'a'
+            ) as bill,
+
+            (select (ifnull(sum(upd.payment), 0.00)) 
+                from tbl_utility_payment_details upd
+                join tbl_utility_payment up on up.id = upd.utility_payment_id
+                where upd.store_id = s.Store_SlNo
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+                and upd.status = 'a'
+            ) as paid,
+
+            (select bill - paid) as due
+
+            from tbl_store s
+            join tbl_floor f on f.Floor_SlNo = s.floor_id
+            where s.Store_branchid = '$branchId' $clauses
+        ")->result();
+
+        return $storeDues;
     }
 
     public function customerDue($clauses = "" , $date = null) {

@@ -1910,7 +1910,7 @@ class Bills extends CI_Controller {
                     s.Store_SlNo,
                     s.Store_No,
                     s.Store_Name,
-                    s.Store_Floor,
+                    s.floor_id,
                     o.Owner_Name,
                     re.Renter_Name,
                     f.Floor_Name,
@@ -1920,7 +1920,7 @@ class Bills extends CI_Controller {
                     join tbl_store s on s.Store_SlNo = bd.store_id
                     left join tbl_owner o on o.Owner_SlNo = s.owner_id
                     left join tbl_renter re on re.Renter_SlNo = s.renter_id
-                    left join tbl_floor f on f.Floor_SlNo = s.Store_Floor
+                    left join tbl_floor f on f.Floor_SlNo = s.floor_id
                     where bd.status = 'a'
                     and bd.bill_id = '$payment->id'
                 ")->result();
@@ -2088,7 +2088,6 @@ class Bills extends CI_Controller {
             select
                 bs.*,
                 m.month_name,
-                u.user_name as added_by,
                 (
                     select ifnull(sum(bsd.net_payable), 0)
                     from tbl_bill_sheet_details bsd
@@ -2096,7 +2095,6 @@ class Bills extends CI_Controller {
                 ) as total_amount
             from tbl_bill_sheet bs
             join tbl_month m on m.month_id = bs.month_id
-            left join tbl_user u on u.User_SlNo = bs.added_by 
             where branch_id = ?
             $clauses
         ", $this->session->userdata("BRANCHid") )->result();
@@ -2104,13 +2102,84 @@ class Bills extends CI_Controller {
         echo json_encode($res);
     }
 
-    public function billSheetRecord() {
+    public function billRecord() {
         $access = $this->mt->userAccess();
         if(!$access){
             redirect(base_url());
         }
-        $data['title'] = "Bill Sheet Record";
-        $data['content'] = $this->load->view('Administrator/bills/bill_sheet_record', $data, true);
+        $data['title'] = "Bill Record";
+        $data['content'] = $this->load->view('Administrator/bills/bill_record', $data, true);
         $this->load->view('Administrator/index', $data);
+    }
+
+    public function bill_invoice() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/bill_invoice', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    
+    public function getCompanyProfile(){
+        $companyProfile = $this->db->query("select * from tbl_company order by Company_SlNo desc limit 1")->row();
+        echo json_encode($companyProfile);
+    }
+
+    public function utility_rate()  {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Utility Rate Entry";
+        $data['selected'] = $this->db->query("
+            select * from tbl_utility_rate order by Rate_SlNo desc limit 1
+        ")->row();
+        $data['content'] = $this->load->view('Administrator/bills/utility_rate', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+   
+    public function utility_rate_insert(){
+        
+        $id = $this->sbrunch;
+        $data['Electricity_Rate']=  $this->input->post('Electricity_Rate',true);
+        $data['Generator_Rate']=  $this->input->post('Generator_Rate',true);
+        $data['Service_Rate']=  $this->input->post('Service_Rate',true);
+        $data['Wasa_Rate']=  $this->input->post('Wasa_Rate',true);
+        $data['Mosque_Rate']=  $this->input->post('Mosque_Rate',true);        
+        $data['rate_branchid'] = $id;
+
+        $result= $this->db->insert("tbl_utility_rate", $data);
+
+        if ($result) {                    
+           $this->Id = $this->db->insert_id();
+           redirect('Administrator/bills/utility_rate');
+        } else {
+            echo $this->Err = mysql_error();
+            redirect('Administrator/bills/utility_rate');
+        }
+     
+    }
+	
+    public function utility_rate_update(){
+        $data = $this->input->post();
+        unset($data['iidd']);
+        unset($data['btnSubmit']);
+       
+        $xx = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
+        $this->db->where('Rate_SlNo', $xx->Rate_SlNo);
+        $this->db->update('tbl_utility_rate', $data);
+
+        $error = $this->db->error();
+
+        if($error['message'] != '') {
+            print_r($this->db->error());
+        } else {
+            redirect('Administrator/bills/utility_rate');
+
+        }
+        
     }
 }

@@ -115,6 +115,11 @@ $route['product_ledger']	=	'Administrator/Services/productLedger';
 $route['get_product_ledger']	=	'Administrator/Services/getProductLedger';
 $route['reorder_list']	=	'Administrator/Reports/reOrderList';
 
+$route['utilityRates'] = 'Administrator/Bills/utility_rate';
+$route['utility_rate_update'] = 'Administrator/Bills/utility_rate_update';
+$route['utility_rate_insert'] = 'Administrator/Bills/utility_rate_insert';
+$route['get_utility_rate'] = 'Administrator/PaBillsge/getUtilityRate';
+
 $route['totalStock'] = 'Administrator/Services/total_stock';
 $route['totalStockPrint'] = 'Administrator/Reports/total_stock';
 
@@ -136,13 +141,15 @@ $route['update_store'] = 'Administrator/Store/updateStore';
 $route['storelist'] = 'Administrator/Store/storelist';
 $route['delete_store'] = 'Administrator/Store/deleteStore';
 $route['get_stores'] = 'Administrator/Store/getStores';
-$route['get_store_due'] = 'Administrator/Store/getStoreDue';
-$route['get_store_ledger'] = 'Administrator/Store/getStoreLedger';
 $route['add_store_payment'] = 'Administrator/Store/addStorePayment';
 $route['update_store_payment'] = 'Administrator/Store/updateStorePayment';
 $route['delete_store_payment'] = 'Administrator/Store/deleteStorePayment';
 $route['storePaymentPage'] = 'Administrator/Store/storePaymentPage';
 $route['store_payment_history'] = 'Administrator/Store/storePaymentHistory';
+$route['get_store_due'] = 'Administrator/Store/getStoreDue';
+$route['get_store_ledger'] = 'Administrator/Store/getStoreLedger';
+$route['storePaymentReport'] = 'Administrator/Store/store_payment_report';
+$route['get_store_ledger'] = 'Administrator/Store/getStoreLedger';
 
 
 $route['owner'] = 'Administrator/Owner';
@@ -167,37 +174,46 @@ $route['add_renter'] = 'Administrator/Renter/addRenter';
 $route['update_renter'] = 'Administrator/Renter/updateRenter';
 $route['get_renters'] = 'Administrator/Renter/getRenters';
 $route['delete_renter'] = 'Administrator/Renter/deleteRenter';
+$route['get_renter_due'] = 'Administrator/Renter/getRenterDue';
+$route['get_renter_ledger'] = 'Administrator/Renter/getRenterLedger';
+$route['renterPaymentReport'] = 'Administrator/Renter/renter_payment_report';
+$route['renterList'] = 'Administrator/Reports/renterList';
+$route['ownerList'] = 'Administrator/Reports/ownerList';
+
 
 
 
 // $route['get_utilities'] = 'Administrator/Utility/getUtilities';
-$route['get_utilitydetails'] = 'Administrator/Utility/getUtilityDetails';
-$route['get_utilitydetails_for_return'] = 'Administrator/Utility/getUtilityDetailsForReturn';
-$route['add_utility_return'] = 'Administrator/Utility/addUtilityReturn';
-$route['update_purchase_return'] = 'Administrator/Utility/updateUtilityReturn';
-$route['get_purchase_return_details'] = 'Administrator/Utility/getUtilityReturnDetails';
-$route['paymentRecord'] = 'Administrator/Utility/payment_Record';
+$route['get_utilitydetails'] = 'Administrator/Payment/getUtilityDetails';
+$route['get_utilitydetails_for_return'] = 'Administrator/Payment/getUtilityDetailsForReturn';
+
+
 
 
 $route['get_payment_sheet'] = 'Administrator/Bills/getBillSheet';
 $route['payment_sheet/(:any)'] = 'Administrator/Bills/billSheet/$1';
 $route['payment_sheet_record'] = 'Administrator/Bills/billSheetRecord';
 $route['store_bill_report'] = 'Administrator/Store/storeBillReport';
-// $route['get_store_payments'] = 'Administrator/Store/getStoreBills';
+$route['storeDue'] = 'Administrator/Store/Store_due'; 
 
-$route['get_utility_payment'] = 'Administrator/Utility/getUtilityPayment';
-$route['get_payment_record'] = 'Administrator/Utility/getUtilityPaymentsRecord';
-$route['get_store_payments'] = 'Administrator/Utility/getStorePayments';
+$route['get_utility_payment'] = 'Administrator/Payment/getUtilityPayment';
+$route['get_payment_record'] = 'Administrator/Payment/getUtilityPaymentsRecord';
+$route['get_store_payments'] = 'Administrator/Payment/getStorePayments';
+$route['get_store_due_for_payment'] = 'Administrator/Payment/getStoreDueForPayment';
 
-$route['utility/payment'] = 'Administrator/Utility/index';
-$route['utility/payment/(:any)'] = 'Administrator/Utility/utilityEdit/$1';
-$route['store_payment_report'] = 'Administrator/Utility/storePaymentReport';
-
+$route['utility/payment'] = 'Administrator/Payment/index';
+$route['utility/payment/(:any)'] = 'Administrator/Payment/utilityEdit/$1';
+$route['store_payment_report'] = 'Administrator/Payment/storePaymentReport';
+$route['paymentRecord'] = 'Administrator/Payment/payment_Record';
+$route['acPaymentRecord'] = 'Administrator/Payment/ac_payment_record';
+$route['payment_invoice_print/(:any)'] = 'Administrator/Payment/paymentInvoicePrint/$1';
+$route['ac_invoice_print/(:any)'] = 'Administrator/Payment/paymentAcInvoicePrint/$1';
+$route['paymentinvoice'] = 'Administrator/Payment/payment_invoice';
 
 
 $route['purchase/(:any)'] = 'Administrator/Purchase/purchaseEdit/$1';
-$route['add_utility_payment'] = 'Administrator/Utility/addUtilityPayment';
-$route['update_utility_payment'] = 'Administrator/Utility/updateUtilityPayment';
+$route['add_utility_payment'] = 'Administrator/Payment/addUtilityPayment';
+$route['update_utility_payment'] = 'Administrator/Payment/updateUtilityPayment';
 $route['purchaseExcel'] = 'Administrator/Purchase/purchaseExcel';
 $route['excelFileFormate'] = 'Administrator/Purchase/excelFileFormate';
 $route['createProductSheet'] = 'Administrator/Purchase/createProductSheet';
@@ -212,7 +228,7 @@ $route['purchase_update_TOcart'] = 'Administrator/Addcart/purchase_update_TOcart
 $route['purchaseExcelTOcart'] = 'Administrator/Addcart/purchaseExcelTOcart';
 $route['ajaxCartRemove'] = 'Administrator/Addcart/ajax_cart_remove/';
 $route['ajax_purchase_update_CartRemove'] = 'Administrator/Addcart/ajax_purchase_update_CartRemove/';
-$route['purchaseInvoice'] = 'Administrator/Purchase/purchase_bill';
+
 $route['purchaseInvoiceSearch'] = 'Administrator/Purchase/purchase_invoice_search';
 $route['PurchaseInvoicePrint'] = 'Administrator/Reports/Purchase_invoice';
 $route['purchaseRecord'] = 'Administrator/Purchase/purchase_record';
@@ -222,7 +238,7 @@ $route['selectSupplierForReport'] = 'Administrator/Purchase/select_supplier';
 $route['selectProductReport'] = 'Administrator/Purchase/select_product';
 $route['searchPurchaseRecord'] = 'Administrator/Purchase/search_purchase_record';
 $route['purchaseRecordPrint'] = 'Administrator/Reports/search_purchase_record';
-$route['supplierDue'] = 'Administrator/Supplier/supplier_due';
+$route['renterDue'] = 'Administrator/Renter/renter_due';
 $route['supplierPayment'] = 'Administrator/Supplier/supplierPaymentPage';
 $route['supplierDuePrint'] = 'Administrator/Reports/search_supplier_due';
 $route['searchSupplierDue'] = 'Administrator/Supplier/search_supplier_due';
@@ -230,6 +246,7 @@ $route['supplierPaymentReport'] = 'Administrator/Supplier/supplier_payment_repor
 $route['searchSupplierPayments'] = 'Administrator/Supplier/search_supplier_payments';
 $route['get_suppliers'] = 'Administrator/Supplier/getSuppliers';
 $route['get_supplier_due'] = 'Administrator/Supplier/getSupplierDue';
+
 $route['get_supplier_ledger'] = 'Administrator/Supplier/getSupplierLedger';
 $route['get_supplier_payments'] = 'Administrator/Supplier/getSupplierPayments';
 $route['add_supplier_payment'] = 'Administrator/Supplier/addSupplierPayment';
@@ -295,7 +312,7 @@ $route['sale_return_invoice/(:any)'] = 'Administrator/Sales/saleReturnInvoice/$1
 $route['sale_return_details'] = 'Administrator/Sales/saleReturnDetails';
 $route['check_sale_return/(:any)'] = 'Administrator/Sales/checkSaleReturn/$1';
 
-$route['utility_invoice_print/(:any)'] = 'Administrator/Utility/utilityInvoicePrint/$1';
+
 $route['craditlimit'] = 'Administrator/Sales/craditlimit/';
 $route['salesrecord'] = 'Administrator/Sales/sales_record';   
 $route['search_sales_record'] = 'Administrator/Reports/search_sales_record';
@@ -417,9 +434,10 @@ $route['update_bill_payment'] = 'Administrator/Bills/updateBill';
 
 $route['get_bill_sheet'] = 'Administrator/Bills/getBillSheet';
 $route['bill_sheet/(:any)'] = 'Administrator/Bills/billSheet/$1';
-$route['bill_sheet_record'] = 'Administrator/Bills/billSheetRecord';
+$route['bill_record'] = 'Administrator/Bills/billRecord';
 $route['store_bill_report'] = 'Administrator/Store/storeBillReport';
 $route['get_store_bills'] = 'Administrator/Store/getStoreBills';
+$route['billInvoice'] = 'Administrator/Bills/bill_invoice';
 
 
 
@@ -558,6 +576,7 @@ $route['get_all_bank_transactions'] = 'Administrator/Account/getAllBankTransacti
 $route['remove_bank_transaction'] = 'Administrator/Account/removeBankTransaction';
 $route['get_bank_balance'] = 'Administrator/Account/getBankBalance';
 
+$route['collection_view'] = 'Administrator/Account/collectionView';
 $route['cash_view'] = 'Administrator/Account/cashView';
 $route['bank_ledger'] = 'Administrator/Account/bankLedger';
 

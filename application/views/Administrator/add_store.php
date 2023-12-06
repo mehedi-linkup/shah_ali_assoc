@@ -430,8 +430,8 @@
 				}
 
                 this.store.Store_Type = this.selectedType.ProductType_SlNo ;
-                this.store.Store_Grade = this.selectedGrade.Grade_SlNo;
-                this.store.Store_Floor = this.selectedFloor.Floor_SlNo;
+                this.store.grade_id = this.selectedGrade.Grade_SlNo;
+                this.store.floor_id = this.selectedFloor.Floor_SlNo;
                 this.store.owner_id = this.selectedOwner.Owner_SlNo;
                 this.store.renter_id = this.selectedRenter.Renter_SlNo;
 
@@ -479,11 +479,11 @@
 					ProductType_Name: store.ProductType_Name
 				}
 				this.selectedGrade = {
-					Grade_SlNo: store.Store_Grade,
+					Grade_SlNo: store.grade_id,
 					Grade_Name: store.Grade_Name
 				}
 				this.selectedFloor = {
-					Floor_SlNo: store.Store_Floor,
+					Floor_SlNo: store.floor_id,
 					Floor_Name: store.Floor_Name
 				}
 				this.selectedOwner = {

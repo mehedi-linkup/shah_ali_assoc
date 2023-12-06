@@ -39,7 +39,6 @@
 	#searchForm *{
 		font-size: 13px;
 	}
-
 	.record-table{
 		width: 100%;
 		border-collapse: collapse;
@@ -49,24 +48,51 @@
 		color:white;
 	}
 	.record-table th, .record-table td{
-		padding: 3px;
+		padding: 5px;
 		border: 1px solid #454545;
 	}
     .record-table th{
         text-align: center;
     }
-	.record-table thead>tr>th {
-			background-color: #0097df !important;
-			color: white;
-			border: 1px solid #4e4e4e;
-		}
-
 </style>
 
 <div id="processBill">
     <div class="row" style="border-bottom: 1px solid #ccc;padding: 3px 0;">
 		<div class="col-md-12">
-            <form class="form-inline" id="searchForm" @submit.prevent="getBillPaymentsPost">
+            <form class="form-inline" id="searchForm" @submit.prevent="getBillPayments">
+
+                <div class="form-group">
+					<label>Search Type</label>
+					<select class="form-control" v-model="searchType" @change="onChangeSearchType">
+						<option value="">All</option>
+						<option value="month">By Month</option>
+						<option value="renter">By Renter</option>
+						<option value="store">By Store</option>
+						<option value="floor">By Floor</option>
+					</select>
+				</div>
+
+                <div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'month' && months.length > 0 ? '' : 'none'}">
+					<label>Month</label>
+					<v-select v-bind:options="months" v-model="selectedMonth" label="month_name"></v-select>
+				</div>
+
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'renter' && renters.length > 0 ? '' : 'none'}">
+					<label>Renter</label>
+					<v-select v-bind:options="renters" v-model="selectedRenter" label="display_name"></v-select>
+				</div>
+
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'store' && stores.length > 0 ? '' : 'none'}">
+					<label>Store</label>
+					<v-select v-bind:options="stores" v-model="selectedStore" label="display_name"></v-select>
+				</div>
+
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'floor' && floors.length > 0 ? '' : 'none'}">
+					<label>Floor</label>
+					<v-select v-bind:options="floors" v-model="selectedFloor" label="Floor_Name"></v-select>
+				</div>
+
+
                 <div class="form-group">
                     <input type="date" class="form-control" v-model="dateFrom">
                 </div>
@@ -81,60 +107,59 @@
             </form>
         </div>
 	</div>
-    <div class="row">
-        <div class="col-md-12" style="margin-bottom:10px;margin-top:5px;">
-            <a href="" @click.prevent="print"><i class="fa fa-print"></i> Print</a>
-        </div>
-    </div>
-    <div v-if="billPayments.length > 0" style="display:none;" v-bind:style="{ display: billPayments.length > 0 ? '' : 'none'}">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="table-responsive" id="reportContent">
-                    <table class="table table-bordered record-table">
-                        <thead>
-                            <tr>
-                                <th>Sl</th>
-								<th>Invoice</th>
-                                <th>Month Name</th>
-								<th>Store Name</th>
-								<th>Renter Name</th>
-								<th>Floor Name</th>
-								<th>Electricity</th>
-								<th>Generator</th>
-								<th>AC Bill</th>
-								<th>Other Bill</th>
-								<th>Late Fee</th>
-                                <th>Total Amount</th>
-                                <th>Payment Date</th>
-                                <th>Payment By</th>
-                                <!-- <th style="text-align: center;">View</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(payment, ind) in billPayments">
-                                <td>{{ ind + 1 }}</td>
-                                <td style="text-align:left;">{{ payment.invoice }}</td>
-                                <td style="text-align:left;">{{ payment.month_name }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].Store_Name }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].Renter_Name }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].Floor_Name }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].electricity_bill }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].generator_bill }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].ac_bill }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].others_bill }}</td>
-                                <td style="text-align:left;">{{ payment.details[0].late_fee }}</td>
-                                <td style="text-align:center;">{{ payment.total_payment_amount }}</td>
-                                <td style="text-align:center;">{{ payment.payment_date }}</td>
-                                <td style="text-align:left;">{{ payment.User_Name }}</td>
-                                <!-- <td style="text-align: center;">
-                                    <a href="" @click.prevent="viewBillPayment(payment.id)" class="" title="View">
-                                        <i class="fa fa-file"></i>
-                                    </a>
-                                </td> -->
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+   
+    <div class="row" style="margin-top:15px;display:none;" v-bind:style="{display: billPayments.length > 0 ? '' : 'none'}">
+		<div class="col-md-12" style="margin-bottom: 10px;">
+			<a href="" @click.prevent="print"><i class="fa fa-print"></i> Print</a>
+		</div>
+		<div class="col-md-12">
+			<div class="table-responsive" id="reportContent">
+                <table class="record-table">
+                    <thead>
+                        <tr>
+                            <th>Sl</th>
+                            <th>Invoice</th>
+                            <th>Month Name</th>
+                            <th>Store Name</th>
+                            <th>Renter Name</th>
+                            <th>Floor Name</th>
+                            <th>Electricity</th>
+                            <th>Generator</th>
+                            <th>AC Bill</th>
+                            <th>Other Bill</th>
+                            <th>Late Fee</th>
+                            <th>Total Amount</th>
+                            <th>Payment Date</th>
+                            <th>Payment By</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(payment, ind) in billPayments">
+                            <td>{{ ind + 1 }}</td>
+                            <td style="text-align:left;">{{ payment.invoice }}</td>
+                            <td style="text-align:left;">{{ payment.month_name }}</td>
+                            <td style="text-align:left;">{{ payment.Store_Name }}</td>
+                            <td style="text-align:left;">{{ payment.Renter_Name }}</td>
+                            <td style="text-align:left;">{{ payment.Floor_Name }}</td>
+                            <td style="text-align:left;">{{ payment.electricity_bill }}</td>
+                            <td style="text-align:left;">{{ payment.generator_bill }}</td>
+                            <td style="text-align:left;">{{ payment.ac_bill }}</td>
+                            <td style="text-align:left;">{{ payment.others_bill }}</td>
+                            <td style="text-align:left;">{{ payment.late_fee }}</td>
+                            <td style="text-align:center;">{{ payment.total_payment }}</td>
+                            <td style="text-align:center;">{{ payment.payment_date }}</td>
+                            <td style="text-align:left;">{{ payment.User_Name }}</td>
+                            <td style="text-align:center;">
+                                <a href="" title="Bill Invoice" v-bind:href="`/payment_invoice_print/${payment.id}`" target="_blank"><i class="fa fa-file"></i></a>
+                                <?php if($this->session->userdata('accountType') != 'u'){?>
+                                <a href="javascript:" title="Edit Purchase" @click="checkReturnAndEdit(payment)"><i class="fa fa-edit"></i></a>
+                                <a href="" title="Delete Purchase" @click.prevent="deletePurchase(payment.PurchaseMaster_SlNo)"><i class="fa fa-trash"></i></a>
+                                <?php }?>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -149,54 +174,129 @@
     Vue.component('v-select', VueSelect.VueSelect);
     new Vue({
         el: '#processBill',
-        filters: {
-            decimal(value) {
-                return value == null ? '0.00' : parseFloat(value).toFixed(2);
-            }
-        },
 
         data() {
             return {
+                searchType: '',
                 processingDate: moment().format('YYYY-MM-DD'),
                 months: [],
                 selectedMonth: null,
+                stores: [],
+                selectedStore: null,
+                floors: [],
+                selectedFloor: null,
+                renters: [],
+                selectedRenter: null,
                 billPayments: [],
                 dateFrom: moment().format('YYYY-MM-DD'),
                 dateTo: moment().format('YYYY-MM-DD'),
             }
         },
 
+        filters: {
+            decimal(value) {
+                return value == null ? '0.00' : parseFloat(value).toFixed(2);
+            }
+        },
         created() {
             this.getMonths();
-            this.getBillPayments();
+            // this.getBillPayments();
         },
 
         methods: {
-            getMonths() {
-                axios.get('/get_months').then(res => {
-                    this.months = res.data;
-                })
-            },
+            getStores(){
+				axios.get('/get_stores').then(res => {
+					this.stores = res.data;
+					this.stores.unshift({
+						Store_SlNo: '',
+						display_name: 'All'
+					})
+				})
+			},
+			getMonths(){
+				axios.get('/get_months').then(res => {
+					this.months = res.data;
+					this.months.unshift({
+						month_id: '',
+						month_name: 'All'
+					})
+				})
+			},
+            getRenters(){
+				axios.get('/get_renters').then(res => {
+					this.renters = res.data;
+					this.renters.unshift({
+						Renter_SlNo: '',
+						display_name: 'All'
+					})
+				})
+			},
+			getFloors(){
+				axios.get('/get_floors').then(res => {
+					this.floors = res.data;
+					this.floors.unshift({
+						Floor_SlNo: '',
+						Floor_Name: 'All'
+					})
+				})
+			},
+
+            // getBillPayments() {
+            //     axios.post('/get_payment_record', { details: true }).then(res => {
+			// 		console.log(res.data)
+            //         this.billPayments = res.data;
+            //     })
+            // },
             getBillPayments() {
-                axios.post('/get_payment_record', { details: true }).then(res => {
-					console.log(res.data)
-                    this.billPayments = res.data;
-                })
-            },
-            getBillPaymentsPost() {
+
+                if(this.searchType != 'store'){
+					this.selectedStore = null;
+				}
+
+				if(this.searchType != 'renter'){
+					this.selectedRenter = null;
+				}
+
+				if(this.searchType != 'month'){
+					this.selectedMonth = null;
+				}
+
+				if(this.searchType != 'floor'){
+					this.selectedFloor = null;
+				}
+
                 let filter = {
+                    storeId: this.selectedStore == null || this.selectedStore.Store_SlNo == '' ? '' : this.selectedStore.Store_SlNo,
+					renterId: this.selectedRenter == null || this.selectedRenter.Renter_SlNo == '' ? '' : this.selectedRenter.Renter_SlNo,
+                    floorId: this.selectedFloor == null || this.selectedFloor.Floor_SlNo == '' ? '' : this.selectedFloor.Floor_SlNo,
+					month: this.selectedMonth == null || this.selectedMonth.month_id == '' ? '' : this.selectedMonth.month_id,
                     dateFrom: this.dateFrom,
 					dateTo: this.dateTo,
 					details: true
                 };
-                axios.post('/get_payment_record', filter).then(res => {
-					console.log(res.data)
-                    this.billSheets = res.data;
+                axios.post('/get_store_payments', filter).then(res => {
+                    this.billPayments = res.data;
                 })
             },
             viewBillPayment(id) {
                 window.open(`/bill_sheet/${id}`, '_blank');
             },
+
+            onChangeSearchType(){
+				this.billPayments = [];
+				if(this.searchType == 'month'){
+					this.getMonths();
+				} 
+				else if(this.searchType == 'renter'){
+					this.getRenters();
+				}
+				else if(this.searchType == 'store'){
+					this.getStores();
+				}
+				else if(this.searchType == 'floor'){
+					this.getFloors();
+				}
+			},
 
             async print() {
                 let reportContent = `
@@ -219,8 +319,27 @@
 					<?php $this->load->view('Administrator/reports/reportHeader.php');?>
 				`);
 
-              
+                printWindow.document.head.innerHTML += `
+					<style>
+						.record-table{
+							width: 100%;
+							border-collapse: collapse;
+						}
+						.record-table thead{
+							background-color: #0097df;
+							color:white;
+						}
+						.record-table th, .record-table td{
+							padding: 3px;
+							border: 1px solid #454545;
+						}
+						.record-table th{
+							text-align: center;
+						}
+					</style>
+                `;
 
+            
 				printWindow.document.body.innerHTML += reportContent;
 
                 let rows = printWindow.document.querySelectorAll('.record-table tr');

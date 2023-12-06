@@ -499,6 +499,7 @@ class Billing_model extends CI_Model {
 			'Company_Logo_thum' => $company->Company_Logo_thum,
 			'Company_Logo_org' => $company->Company_Logo_org,
 			'Company_Name' => $branch->Brunch_title,
+			'Company_Name_Bangla' => $branch->Brunch_bangla_title,
 			'Repot_Heading' => $branch->Brunch_address,
 			'print_type' => $company->print_type
 		];

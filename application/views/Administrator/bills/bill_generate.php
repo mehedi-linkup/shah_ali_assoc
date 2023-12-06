@@ -235,7 +235,7 @@
 						this.billPayment.last_date = payment.last_date;
 						this.billPayment.month_id = payment.month_id;
 
-						let stores = _.chain(payment.details).groupBy('Store_Floor')
+						let stores = _.chain(payment.details).groupBy('floor_id')
 							.map(store => {
 									return {
 										floor_name: store[0].Floor_Name,
@@ -265,7 +265,7 @@
 							store.net_payable = 0;
 							return store;
 						});
-						stores = _.chain(stores).groupBy('Store_Floor')
+						stores = _.chain(stores).groupBy('floor_id')
 							.map(store => {
 									return {
 										floor_name: store[0].Floor_Name,

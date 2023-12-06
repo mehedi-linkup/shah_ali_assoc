@@ -63,12 +63,8 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td>Total Sales</td>
-								<td style="text-align:right;">{{ totalSales | decimal }}</td>
-							</tr>
-							<tr>
-								<td>Customer Payment Received</td>
-								<td style="text-align:right;">{{ totalReceivedFromCustomers | decimal }}</td>
+								<td>Total Payments</td>
+								<td style="text-align:right;">{{ totalPayments | decimal }}</td>
 							</tr>
 							<tr>
 								<td>Cash Received</td>
@@ -87,10 +83,6 @@
 							<tr>
 								<td>Invest Received</td>
 								<td style="text-align:right;">{{ totalInvestReceived | decimal }}</td>
-							</tr>
-							<tr>
-								<td>Supplier Payment Received</td>
-								<td style="text-align:right;">{{ totalReceivedFromSuppliers | decimal }}</td>
 							</tr>
 							<tr>
 								<td>Assets Sales</td>
@@ -117,14 +109,6 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td>Total Purchase</td>
-								<td style="text-align:right;">{{ totalPurchase | decimal }}</td>
-							</tr>
-							<tr>
-								<td>Supplier Payment Paid</td>
-								<td style="text-align:right;">{{ totalPaidToSuppliers | decimal }}</td>
-							</tr>
-							<tr>
 								<td>Cash Paid</td>
 								<td style="text-align:right;">{{ totalCashPaid | decimal }}</td>
 							</tr>
@@ -145,10 +129,6 @@
 							<tr>
 								<td>Employee Payment</td>
 								<td style="text-align:right;">{{ totalEmployeePayments | decimal }}</td>
-							</tr>
-							<tr>
-								<td>Customer Payment Paid</td>
-								<td style="text-align:right;">{{ totalPaidToCustomers | decimal }}</td>
 							</tr>
 							<tr>
 								<td>Assets Cost</td>
@@ -197,12 +177,7 @@
 					dateFrom: moment().format('YYYY-MM-DD'),
 					dateTo: moment().format('YYYY-MM-DD')
 				},
-				sales: [],
-				purchases: [],
-				receivedFromCustomers: [],
-				paidToCustomers: [],
-				receivedFromSuppliers: [],
-				paidToSuppliers: [],
+				payments: [],
 				cashReceived: [],
 				cashPaid: [],
 				bankDeposits: [],
@@ -224,34 +199,9 @@
 			}
 		},
 		computed: {
-			totalSales() {
-				return this.sales.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SaleMaster_PaidAmount)
-				}, 0).toFixed(2);
-			},
-			totalPurchase() {
-				return this.purchases.reduce((prev, curr) => {
-					return prev + parseFloat(curr.PurchaseMaster_PaidAmount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromCustomers() {
-				return this.receivedFromCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.CPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToCustomers() {
-				return this.paidToCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.CPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromSuppliers() {
-				return this.receivedFromSuppliers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SPayment_amount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToSuppliers() {
-				return this.paidToSuppliers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.SPayment_amount)
+			totalPayments() {
+				return this.payments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.total_payment)
 				}, 0).toFixed(2);
 			},
 			totalCashReceived() {
@@ -301,9 +251,7 @@
 				}, 0).toFixed(2);
 			},
 			totalCashIn() {
-				return parseFloat(this.totalSales) +
-					parseFloat(this.totalReceivedFromCustomers) +
-					parseFloat(this.totalReceivedFromSuppliers) +
+				return parseFloat(this.totalPayments) +
 					parseFloat(this.totalCashReceived) +
 					parseFloat(this.totalLoanReceived) +
 					parseFloat(this.totalInvestReceived) +
@@ -311,10 +259,7 @@
 					parseFloat(this.totalBankWithdraw);
 			},
 			totalCashOut() {
-				return parseFloat(this.totalPurchase) +
-					parseFloat(this.totalPaidToCustomers) +
-					parseFloat(this.totalPaidToSuppliers) +
-					parseFloat(this.totalCashPaid) +
+				return parseFloat(this.totalCashPaid) +
 					parseFloat(this.totalBankDeposit) +
 					parseFloat(this.totalLoanPayment) +
 					parseFloat(this.totalInvestPayment) +
@@ -328,12 +273,7 @@
 		methods: {
 			async getStatements() {
 				this.showReport = false;
-				await this.getSales();
-				await this.getPurchases();
-				await this.getReceivedFromCustomers();
-				await this.getPaidToCustomers();
-				await this.getPaidToSuppliers();
-				await this.getReceivedFromSuppliers();
+				await this.getPayments();
 				await this.getCashReceived();
 				await this.getCashPaid();
 				await this.getBankDeposits();
@@ -348,65 +288,10 @@
 				this.showReport = true;
 			},
 
-			async getSales() {
-				await axios.post('/get_sales', this.filter)
+			async getPayments() {
+				await axios.post('/get_utility_payment', this.filter)
 					.then(res => {
-						this.sales = res.data.sales;
-					})
-			},
-
-			async getPurchases() {
-				await axios.post('/get_purchases', this.filter)
-					.then(res => {
-						this.purchases = res.data.purchases;
-					})
-			},
-
-			async getReceivedFromCustomers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'received'
-				}
-				await axios.post('/get_customer_payments', filter)
-					.then(res => {
-						this.receivedFromCustomers = res.data.filter(p => p.CPayment_Paymentby != 'bank');
-					})
-			},
-
-			async getPaidToCustomers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'paid'
-				}
-				await axios.post('/get_customer_payments', filter)
-					.then(res => {
-						this.paidToCustomers = res.data.filter(p => p.CPayment_Paymentby != 'bank');
-					})
-			},
-
-			async getPaidToSuppliers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'paid'
-				}
-				await axios.post('/get_supplier_payments', filter)
-					.then(res => {
-						this.paidToSuppliers = res.data.filter(p => p.SPayment_Paymentby != 'bank');
-					})
-			},
-
-			async getReceivedFromSuppliers() {
-				let filter = {
-					dateFrom: this.filter.dateFrom,
-					dateTo: this.filter.dateTo,
-					paymentType: 'received'
-				}
-				await axios.post('/get_supplier_payments', filter)
-					.then(res => {
-						this.receivedFromSuppliers = res.data.filter(p => p.SPayment_Paymentby != 'bank');
+						this.payments = res.data.payments;
 					})
 			},
 

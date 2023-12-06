@@ -113,6 +113,14 @@
 			</div>
 			
 			<div class="form-group">
+				<label class="col-sm-12 control-label" for="form-field-1" style="margin-top:15px;"> Company Name </label>
+				<div class="col-sm-12">
+					<input name="Company_name" type="text" id="Company_name" value="" class="form-control" />
+					<input name="iidd" type="hidden" id="iidd" value="" class="txt" />
+				</div>
+			</div>
+			
+			<div class="form-group">
 				<label class="control-label" for="form-field-1" style="margin-top:15px;"> Description  </label>
 				<div>
 					<textarea id="Description" name="Description" class="form-control"></textarea>
@@ -181,6 +189,14 @@
 							</div>
 
 							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"> Branch Title (Bangla) </label>
+								<label class="col-sm-1 control-label no-padding-right">:</label>
+								<div class="col-sm-8">
+									<input type="text" placeholder="Branch Title" class="form-control" v-model="branch.bangla_title" required/>
+								</div>
+							</div>
+
+							<div class="form-group">
 								<label class="col-sm-3 control-label no-padding-right"> Branch Address </label>
 								<label class="col-sm-1 control-label no-padding-right">:</label>
 								<div class="col-sm-8">
@@ -209,6 +225,7 @@
 									<th>Sl</th>
 									<th>Branch Name</th>
 									<th>Branch Title</th>
+									<th>Branch Title (Bangla)</th>
 									<th>Branch Address</th>
 									<th>Status</th>
 									<th>Action</th>
@@ -219,6 +236,7 @@
 									<td>{{ sl + 1 }}</td>
 									<td>{{ branch.Brunch_name }}</td>
 									<td>{{ branch.Brunch_title }}</td>
+									<td>{{ branch.Brunch_bangla_title }}</td>
 									<td>{{ branch.Brunch_address }}</td>
 									<td><span v-bind:class="branch.active_status">{{ branch.active_status }}</span></td>
 									<td>
@@ -285,6 +303,7 @@
                 this.branch.branchId = branch.brunch_id;
                 this.branch.name = branch.Brunch_name;
                 this.branch.title = branch.Brunch_title;
+                this.branch.bangla_title = branch.Brunch_bangla_title;
                 this.branch.address = branch.Brunch_address;
             },
 
@@ -307,6 +326,7 @@
                     branchId: 0,
                     name: '',
                     title: '',
+                    bangla_title: '',
                     address: ''
                 }
             }

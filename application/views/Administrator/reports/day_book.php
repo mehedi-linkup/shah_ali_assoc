@@ -129,14 +129,14 @@
 									<td class="main-heading">Receipt</td>
 									<td></td>
 								</tr>
-								<template v-if="sales.length > 0">
+								<template v-if="payments.length > 0">
 									<tr>
-										<td class="sub-heading">Sales</td>
-										<td class="sub-value">{{ totalSales }}</td>
+										<td class="sub-heading">Payment</td>
+										<td class="sub-value">{{ totalPayments }}</td>
 									</tr>
-									<tr v-for="sale in sales">
-										<td>{{ sale.Customer_Name }}</td>
-										<td>{{ sale.totalAmount | decimal }}</td>
+									<tr v-for="sale in payments">
+										<td>{{ '----'}}</td>
+										<td>{{ sale.total_payment | decimal }}</td>
 									</tr>
 								</template>
 								<template v-if="asset_sales.length > 0">
@@ -149,16 +149,7 @@
 										<td>{{ sale.totalAmount | decimal }}</td>
 									</tr>
 								</template>
-								<template v-if="receivedFromCustomers.length > 0">
-									<tr>
-										<td class="sub-heading">Customer Payment</td>
-										<td class="sub-value">{{ totalReceivedFromCustomers }}</td>
-									</tr>
-									<tr v-for="payment in receivedFromCustomers">
-										<td>{{ payment.Customer_Name }}</td>
-										<td>{{ payment.totalAmount | decimal }}</td>
-									</tr>
-								</template>
+								
 								<template v-if="cashReceived.length > 0">
 									<tr>
 										<td class="sub-heading">Cash Received</td>
@@ -169,16 +160,7 @@
 										<td>{{ transaction.totalAmount | decimal }}</td>
 									</tr>
 								</template>
-								<template v-if="receivedFromSuppliers.length > 0">
-									<tr>
-										<td class="sub-heading">Received from Suppliers</td>
-										<td class="sub-value">{{ totalReceivedFromSuppliers }}</td>
-									</tr>
-									<tr v-for="payment in receivedFromSuppliers">
-										<td>{{ payment.Supplier_Name }}</td>
-										<td>{{ payment.totalAmount | decimal }}</td>
-									</tr>
-								</template>
+								
 								<template v-if="loanInitials.length > 0">
 									<tr>
 										<td class="sub-heading">Loan Initial Balance</span></td>
@@ -253,16 +235,7 @@
 									<td class="main-heading">Payment</td>
 									<td></td>
 								</tr>
-								<template v-if="purchases.length > 0">
-									<tr>
-										<td class="sub-heading">Purchases</td>
-										<td class="sub-value">{{ totalPurchase }}</td>
-									</tr>
-									<tr v-for="purchase in purchases">
-										<td>{{ purchase.Supplier_Name }}</td>
-										<td>{{ purchase.totalAmount | decimal }}</td>
-									</tr>
-								</template>
+								
 								<template v-if="asset_purchases.length > 0">
 									<tr>
 										<td class="sub-heading">Asset Purchases</td>
@@ -273,16 +246,7 @@
 										<td>{{ sale.totalAmount | decimal }}</td>
 									</tr>
 								</template>
-								<template v-if="paidToSuppliers.length > 0">
-									<tr>
-										<td class="sub-heading">Supplier Payment</td>
-										<td class="sub-value">{{ totalPaidToSuppliers }}</td>
-									</tr>
-									<tr v-for="payment in paidToSuppliers">
-										<td>{{ payment.Supplier_Name }}</td>
-										<td>{{ payment.totalAmount | decimal }}</td>
-									</tr>
-								</template>
+								
 								<template v-if="cashPaid.length > 0">
 									<tr>
 										<td class="sub-heading">Cash Paid</td>
@@ -293,16 +257,7 @@
 										<td>{{ transaction.totalAmount | decimal }}</td>
 									</tr>
 								</template>
-								<template v-if="paidToCustomers.length > 0">
-									<tr>
-										<td class="sub-heading">Paid to Customers</td>
-										<td class="sub-value">{{ totalPaidToCustomers }}</td>
-									</tr>
-									<tr v-for="payment in paidToCustomers">
-										<td>{{ payment.Customer_Name }}</td>
-										<td>{{ payment.totalAmount | decimal }}</td>
-									</tr>
-								</template>
+								
 								<template v-if="employeePayments.length > 0">
 									<tr>
 										<td class="sub-heading">Employee Payments</td>
@@ -422,14 +377,9 @@
 					bankBalance: [],
 					cashBalance: 0.00
 				},
-				sales: [],
+				payments: [],
 				asset_sales: [],
 				asset_purchases: [],
-				purchases: [],
-				receivedFromCustomers: [],
-				paidToCustomers: [],
-				receivedFromSuppliers: [],
-				paidToSuppliers: [],
 				cashReceived: [],
 				cashPaid: [],
 				bankDeposits: [],
@@ -458,9 +408,9 @@
 					return prev + parseFloat(curr.balance)
 				}, 0).toFixed(2);
 			},
-			totalSales() {
-				return this.sales.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
+			totalPayments() {
+				return this.payments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.total_payment)
 				}, 0).toFixed(2);
 			},
 			totalAssetSales() {
@@ -470,31 +420,6 @@
 			},
 			totalAssetPurchases() {
 				return this.asset_purchases.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
-				}, 0).toFixed(2);
-			},
-			totalPurchase() {
-				return this.purchases.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromCustomers() {
-				return this.receivedFromCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToCustomers() {
-				return this.paidToCustomers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
-				}, 0).toFixed(2);
-			},
-			totalReceivedFromSuppliers() {
-				return this.receivedFromSuppliers.reduce((prev, curr) => {
-					return prev + parseFloat(curr.totalAmount)
-				}, 0).toFixed(2);
-			},
-			totalPaidToSuppliers() {
-				return this.paidToSuppliers.reduce((prev, curr) => {
 					return prev + parseFloat(curr.totalAmount)
 				}, 0).toFixed(2);
 			},
@@ -551,20 +476,15 @@
 			totalIn(){
 				return parseFloat(this.openingBalance.cashBalance.cash_balance) +
 					parseFloat(this.totalBankOpeningBalance) +  
-					parseFloat(this.totalSales) + 
+					parseFloat(this.totalPayments) + 
 					parseFloat(this.totalLoanReceived) + 
 					parseFloat(this.totalInvestReceived) + 
 					parseFloat(this.totalAssetSales) + 
 					parseFloat(this.totalInitialLoan) + 
-					parseFloat(this.totalReceivedFromCustomers) + 
-					parseFloat(this.totalReceivedFromSuppliers) + 
 					parseFloat(this.totalCashReceived);
 			},
 			totalOut(){
-				return parseFloat(this.totalPurchase) +
-					parseFloat(this.totalPaidToCustomers) +
-					parseFloat(this.totalPaidToSuppliers) +
-					parseFloat(this.totalCashPaid) +
+				return parseFloat(this.totalCashPaid) +
 					parseFloat(this.totalLoanPayment) +
 					parseFloat(this.totalInvestPayment) +
 					parseFloat(this.totalAssetPurchases) +
@@ -583,14 +503,9 @@
 			getDayBookData() {
 				this.getOpeningBalance();
 				this.getClosingBalance();
-				this.getSales();
+				this.getPayments();
 				this.getAssetSales();
 				this.getAssetPurchases();
-				this.getPurchases();
-				this.getReceivedFromCustomers();
-				this.getPaidToCustomers();
-				this.getPaidToSuppliers();
-				this.getReceivedFromSuppliers();
 				this.getCashReceived();
 				this.getCashPaid();
 				this.getBankDeposits();
@@ -614,17 +529,19 @@
 				})
 			},
 
-			getSales() {
-				axios.post('/get_sales', this.filter)
+			getPayments() {
+				axios.post('/get_utility_payment', this.filter)
 					.then(res => {
-						let sales = res.data.sales.filter(sale => sale.SaleMaster_PaidAmount > 0);
-						sales = _.groupBy(sales, 'SalseCustomer_IDNo');
-						sales = _.toArray(sales);
-						sales = sales.map(sale => {
-							sale[0].totalAmount = sale.reduce((p, c) => { return p + parseFloat(c.SaleMaster_PaidAmount) }, 0);
-							return sale[0];
-						})
-						this.sales = sales;
+						// let sales = res.data.sales.filter(sale => sale.SaleMaster_PaidAmount > 0);
+						// sales = _.groupBy(sales, 'SalseCustomer_IDNo');
+						// sales = _.toArray(sales);
+						// sales = sales.map(sale => {
+						// 	sale[0].totalAmount = sale.reduce((p, c) => { return p + parseFloat(c.SaleMaster_PaidAmount) }, 0);
+						// 	return sale[0];
+						// })
+						// this.sales = sales;
+
+						this.payments = res.data.payments;
 					})
 			},
 			getAssetSales(){

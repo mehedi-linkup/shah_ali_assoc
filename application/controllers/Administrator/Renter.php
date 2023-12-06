@@ -63,22 +63,6 @@ class Renter extends CI_Controller
         echo json_encode($customers);
     }
 
-    public function getRenterDue(){
-        $data = json_decode($this->input->raw_input_stream);
-        
-        $clauses = "";
-        if(isset($data->customerId) && $data->customerId != null){
-            $clauses .= " and c.Renter_SlNo = '$data->customerId'";
-        }
-        if(isset($data->districtId) && $data->districtId != null){
-            $clauses .= " and c.area_ID = '$data->districtId'";
-        }
-
-        $dueResult = $this->mt->customerDue($clauses);
-
-        echo json_encode($dueResult);
-    }
-
     public function getRenterPayments(){
         $data = json_decode($this->input->raw_input_stream);
 
@@ -776,5 +760,107 @@ class Renter extends CI_Controller
         $data['content'] = $this->load->view('Administrator/reports/customer_payment_history', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
+
+    function renter_due(){
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = 'Renter Due';
+        $data['content'] = $this->load->view('Administrator/due_report/renter_due', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    } 
+
+    public function getRenterDue(){
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+        if(isset($data->renterId) && $data->renterId != null){
+            $clauses = " and r.Renter_SlNo = '$data->renterId'";
+        }
+        $renterDues = $this->mt->renterDue($clauses);
+
+        echo json_encode($renterDues);
+    }
+
+    function renter_payment_report() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Renter Payment Reports";
+        $data['content'] = $this->load->view('Administrator/payment_reports/renter_payment_report', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function getRenterLedger(){
+        $data = json_decode($this->input->raw_input_stream);
+        $previousDueQuery = $this->db->query("select ifnull(previous_due, 0.00) as previous_due from tbl_renter where Renter_SlNo = '$data->renterId'")->row();
+        $payments = $this->db->query("
+            select
+                'a' as sequence,
+                bsd.id as id,
+                bs.process_date as date,
+                s.Store_Name as store_name,
+                concat('Generate Bill -', s.Store_Name,' - ', m.month_name) as description,
+                bsd.net_payable as bill,
+                0.00 as paid,
+                0.00 as due
+            from tbl_bill_sheet_details bsd
+            join tbl_bill_sheet bs on bs.id = bsd.bill_id
+            join tbl_month m on m.month_id = bs.month_id
+            join tbl_store s on s.Store_SlNo = bsd.store_id
+            join tbl_renter r on r.Renter_SlNo = s.renter_id
+            where r.Renter_SlNo = '$data->renterId'
+            and r.status = 'a'
+            and bsd.status = 'a'
+            
+            UNION
+
+            select
+                'b' as sequence,
+                upd.id as id,
+                up.payment_date as date,
+                 s.Store_Name as store_name,
+                concat('Payment Bill -', s.Store_Name,' - ', m.month_name) as description,
+                0.00 as bill,
+                upd.payment as paid,
+                upd.due as due
+            from tbl_utility_payment_details upd
+            join tbl_utility_payment up on up.id = upd.utility_payment_id
+            join tbl_month m on m.month_id = up.month_id
+            join tbl_store s on s.Store_SlNo = upd.store_id
+            join tbl_renter r on r.Renter_SlNo = s.renter_id
+            where r.Renter_SlNo = '$data->renterId'
+            and r.status = 'a'
+            and upd.status = 'a'
+
+            order by date, sequence, id
+        ")->result();
+
+        $previousBalance = $previousDueQuery->previous_due;
+
+        foreach($payments as $key=>$payment){
+            $lastBalance = $key == 0 ? $previousDueQuery->previous_due : $payments[$key - 1]->balance;
+            $payment->balance = ($lastBalance + $payment->bill - $payment->paid);
+        }
+
+        if((isset($data->dateFrom) && $data->dateFrom != null) && (isset($data->dateTo) && $data->dateTo != null)){
+            $previousPayments = array_filter($payments, function($payment) use ($data){
+                return $payment->date < $data->dateFrom;
+            });
+
+            $previousBalance = count($previousPayments) > 0 ? $previousPayments[count($previousPayments) - 1]->balance : $previousBalance;
+
+            $payments = array_filter($payments, function($payment) use ($data){
+                return $payment->date >= $data->dateFrom && $payment->date <= $data->dateTo;
+            });
+        }
+
+        $res['previousBalance'] = $previousBalance;
+        $res['payments'] = $payments;
+        echo json_encode($res);
+    }
+
 
 }
