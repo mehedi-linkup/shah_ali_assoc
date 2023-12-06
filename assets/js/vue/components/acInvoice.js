@@ -24,8 +24,8 @@ const paymentInvoice = Vue.component('payment-invoice', {
                         <strong>আয়তনঃ </strong> {{ cart[0]?.square_feet }}<br>
                     </div>
                     <div class="col-xs-5 text-right">
-                        <strong>বিল তৈরির তারিখঃ </strong> {{ (cart[0]?.process_date) }}<br>
-                        <strong>বিল প্রদানের তারিখঃ </strong>{{ (payment.payment_date) }}<br>
+                        <strong>বিল তৈরির তারিখঃ </strong> {{ (dateFormat(cart[0]?.process_date)) }}<br>
+                        <strong>বিল প্রদানের তারিখঃ </strong>{{ (dateFormat(payment.payment_date)) }}<br>
                         <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
                     </div>
                 </div>
@@ -173,30 +173,85 @@ const paymentInvoice = Vue.component('payment-invoice', {
             const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth();
             const startDate = new Date(year, monthIndex, 1);
             const endDate = new Date(year, monthIndex + 1, 0);
+
+            const formattedSDate = startDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+            const formattedEDate = endDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+
+            const [smonth, sday, syear] = formattedSDate.split('/');
+            const formattedSDateDDMMYYYY = `${sday}/${smonth}/${syear}`;
+            const [emonth, eday, eyear] = formattedEDate.split('/');
+            const formattedEDateDDMMYYYY = `${emonth}/${eday}/${eyear}`;
+
+            this.startDate  = this.convertToBengaliNumerals(formattedSDateDDMMYYYY);
+            this.endDate = this.convertToBengaliNumerals(formattedEDateDDMMYYYY);
+
+
             
-            const startDay = this.padWithBengaliNumerals(startDate.getDate());
-            const startMonth = this.padWithBengaliNumerals(startDate.getMonth() + 1); // Months are zero-based
-            const startYear = this.padWithBengaliNumerals(startDate.getFullYear());
+            // const startDay = this.padWithBengaliNumerals(startDate.getDate());
+            // const startMonth = this.padWithBengaliNumerals(startDate.getMonth() + 1); // Months are zero-based
+            // const startYear = this.padWithBengaliNumerals(startDate.getFullYear());
 
-            const endDay = this.padWithBengaliNumerals(endDate.getDate());
-            const endMonth = this.padWithBengaliNumerals(endDate.getMonth() + 1); // Months are zero-based
-            const endYear = this.padWithBengaliNumerals(endDate.getFullYear());
+            // const endDay = this.padWithBengaliNumerals(endDate.getDate());
+            // const endMonth = this.padWithBengaliNumerals(endDate.getMonth() + 1); // Months are zero-based
+            // const endYear = this.padWithBengaliNumerals(endDate.getFullYear());
 
-            this.startDate = `${startDay}/${startMonth}/${startYear}`;
-            this.endDate = `${endDay}/${endMonth}/${endYear}`;
+            // this.startDate = `${startDay}/${startMonth}/${startYear}`;
+            // this.endDate = `${endDay}/${endMonth}/${endYear}`;
             // this.startDate = startDate.toISOString().split('T')[0];
             // this.endDate = endDate.toISOString().split('T')[0];
         },
-        addMonthsToDate(inputDate, monthsToAdd) {
-            const date = new Date(inputDate);
-            date.setMonth(date.getMonth() + monthsToAdd);
-            return date;
+        dateFormat(inputDate) {
+            let date = new Date(inputDate);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+
+            const [month, day, year] = formattedDate.split('/');
+            const formattedDateDDMMYYYY = `${day}/${month}/${year}`;
+            const convertedDate = this.convertToBengaliNumerals(formattedDateDDMMYYYY);
+
+            return convertedDate;
         },
-        // padWithBengalidate(date) {
-        //     const date = new Date(date).getMonth();
-        //     const startDate = new Date(year, monthIndex, 1);
-        //     const endDate = new Date(year, monthIndex + 1, 0);
-        // },
+        addMonthsToDate(inputDate, monthsToAdd) {
+            let date = new Date(inputDate);
+            date.setMonth(date.getMonth() + monthsToAdd);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+
+            const [month, day, year] = formattedDate.split('/');
+            const formattedDateDDMMYYYY = `${day}/${month}/${year}`;
+
+            //   console.log(formattedDate)
+
+            // const Day = this.padWithBengaliNumerals(formattedDate);
+            // const Month = this.padWithBengaliNumerals(formattedDate.getMonth() + 1); // Months are zero-based
+            // const Year = this.padWithBengaliNumerals(formattedDate.getFullYear());
+            // date = `${Day}/${Month}/${Year}`;
+            const convertedDate = this.convertToBengaliNumerals(formattedDateDDMMYYYY);
+
+            return convertedDate;
+        },
+        convertToBengaliNumerals(dateString) {
+            const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+          
+            const convertedString = dateString.replace(/\d/g, (digit) => bengaliNumerals[digit]);
+          
+            return convertedString;
+        },
+       
         padWithBengaliNumerals(number) {
             const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
             return String(number).split('').map(digit => bengaliNumerals[parseInt(digit)]).join('');

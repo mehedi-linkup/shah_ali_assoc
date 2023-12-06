@@ -375,6 +375,8 @@ if ($module == 'dashboard' or $module == '') {
 			</li>
 		<?php endif; ?>
 
+		
+
 
 		<!-- <?php if (array_search("currentStock", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
@@ -474,6 +476,7 @@ if ($module == 'dashboard' or $module == '') {
 			|| array_search("quotation_invoice_report", $access) > -1
 			|| array_search("quotation_record", $access) > -1
 			|| array_search("store_wise_report", $access) > -1
+			|| array_search("billInvoice", $access) > -1
 			|| isset($CheckSuperAdmin) || isset($CheckAdmin)
 		) : ?>
 			<li class="">
@@ -587,11 +590,51 @@ if ($module == 'dashboard' or $module == '') {
 						</li>
 					<?php endif; ?> -->
 
+					<?php if (array_search("billInvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>billInvoice">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Bill Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
 					<?php if (array_search("store_bill_report", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 						<li class="">
 							<a href="<?php echo base_url(); ?>store_bill_report">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Store Bill Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("storeDue", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>storeDue">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Store Due Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("storePaymentReport", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>storePaymentReport">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Store Payment Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("storelist", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>storelist">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Store List
 							</a>
 							<b class="arrow"></b>
 						</li>
@@ -633,7 +676,7 @@ if ($module == 'dashboard' or $module == '') {
 		<?php if (array_search("paymentRecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 		<li class="">
 			<a href="<?php echo base_url(); ?>paymentRecord">
-				<i class="menu-icon fa fa-list"></i>
+				<i class="menu-icon fa fa-th-list"></i>
 				<span class="menu-text">Payment Record</span>
 			</a>
 			<b class="arrow"></b>
@@ -776,12 +819,72 @@ if ($module == 'dashboard' or $module == '') {
 							<b class="arrow"></b>
 						</li>
 					<?php endif; ?> -->
+					
+					<?php if (array_search("paymentinvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>paymentinvoice">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Payment Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("acinvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>acinvoice">
+								<i class="menu-icon fa fa-caret-right"></i>
+								AC Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
 
 					<?php if (array_search("store_payment_report", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 						<li class="">
 							<a href="<?php echo base_url(); ?>store_payment_report">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Store Payment Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("renterDue", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>renterDue">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Renter Due Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("renterPaymentReport", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>renterPaymentReport">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Renter Payment Report
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("renterList", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>renterList" target="_blank">
+								<i class="menu-icon fa fa-caret-right"></i>
+								<span class="menu-text"> Renter List </span>
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("ownerList", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>ownerList" target="_blank">
+								<i class="menu-icon fa fa-caret-right"></i>
+								<span class="menu-text"> Owner List </span>
 							</a>
 							<b class="arrow"></b>
 						</li>
@@ -1472,7 +1575,7 @@ if ($module == 'dashboard' or $module == '') {
 						<li class="">
 							<a href="<?php echo base_url(); ?>renterPaymentReport">
 								<i class="menu-icon fa fa-caret-right"></i>
-								Renter Payment
+								Renter Payment Report
 							</a>
 							<b class="arrow"></b>
 						</li>

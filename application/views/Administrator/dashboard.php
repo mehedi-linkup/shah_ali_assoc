@@ -704,12 +704,13 @@ if ($module == 'dashboard' or $module == '') { ?>
 						</div>
 					</div>
 				<?php endif; ?> -->
+
 				<?php if (array_search("bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>bill_record">
 								<div class="logo">
-									<i class="menu-icon fa fa-file-text-o"></i>
+									<i class="menu-icon fa fa-th-list"></i>
 								</div>
 								<div class="textModule">
 									Bill Record
@@ -719,15 +720,30 @@ if ($module == 'dashboard' or $module == '') { ?>
 					</div>
 				<?php endif; ?>
 
-				<?php if (array_search("ac_bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+				<?php if (array_search("utilityRates", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>ac_bill_record">
+							<a href="<?php echo base_url(); ?>utilityRates">
 								<div class="logo">
-									<i class="menu-icon fa fa-file-text"></i>
+									<i class="menu-icon fa fa-wrench"></i>
 								</div>
 								<div class="textModule">
-									AC Bill Record
+									Rates Entry
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("billInvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>billInvoice">
+								<div class="logo">
+									<i class="menu-icon fa fa-file"></i>
+								</div>
+								<div class="textModule">
+									Bill Invoice
 								</div>
 							</a>
 						</div>
@@ -743,6 +759,51 @@ if ($module == 'dashboard' or $module == '') { ?>
 								</div>
 								<div class="textModule">
 									Store Bill Report
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("storeDue", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>storeDue">
+								<div class="logo">
+									<i class="menu-icon fa fa-file-text-o"></i>
+								</div>
+								<div class="textModule">
+									Store Due Report
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("storePaymentReport", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>storePaymentReport">
+								<div class="logo">
+									<i class="menu-icon fa fa-file-text-o"></i>
+								</div>
+								<div class="textModule" style="margin-top: 1px;">
+									Store Payment Report
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("storelist", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>storelist">
+								<div class="logo">
+									<i class="menu-icon fa fa-th-list"></i>
+								</div>
+								<div class="textModule">
+									Store List
 								</div>
 							</a>
 						</div>
@@ -784,10 +845,58 @@ if ($module == 'dashboard' or $module == '') { ?>
 							<a href="<?php echo base_url(); ?>paymentRecord">
 								<div class="logo">
 								
-									<i class="menu-icon fa fa-list"></i>
+									<i class="menu-icon fa fa-th-list"></i>
 								</div>
 								<div class="textModule">
 									 Payment Record
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("acPaymentRecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>acPaymentRecord">
+								<div class="logo">
+								
+									<i class="menu-icon fa fa-th-list"></i>
+								</div>
+								<div class="textModule">
+									 AC Record
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("paymentinvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>paymentinvoice">
+								<div class="logo">
+								
+									<i class="menu-icon fa fa-file"></i>
+								</div>
+								<div class="textModule">
+									 Payment Invoice
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("acinvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>acinvoice">
+								<div class="logo">
+								
+									<i class="menu-icon fa fa-file"></i>
+								</div>
+								<div class="textModule">
+									 AC Invoice
 								</div>
 							</a>
 						</div>
@@ -800,15 +909,47 @@ if ($module == 'dashboard' or $module == '') { ?>
 							<a href="<?php echo base_url(); ?>store_payment_report">
 								<div class="logo">
 								
-									<i class="menu-icon fa fa-file"></i>
+									<i class="menu-icon fa fa-file-text-o"></i>
 								</div>
 								<div class="textModule">
-									 Payment Report
+									Store Payment Report
 								</div>
 							</a>
 						</div>
 					</div>
 				<?php endif; ?>
+
+				<?php if (array_search("renterDue", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>renterDue">
+								<div class="logo">
+								
+									<i class="menu-icon fa fa-file-text"></i>
+								</div>
+								<div class="textModule">
+									Renter Due Report
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (array_search("renterPaymentReport", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>renterPaymentReport">
+								<div class="logo">
+									<i class="menu-icon fa fa-file-text-o"></i>
+								</div>
+								<div class="textModule">
+									 Renter Payment Report
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
 				<!-- <?php if (array_search("utilityReturns", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
