@@ -85,7 +85,7 @@
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Owner Name:</label>
 					<div class="col-md-7">
-						<input type="text" class="form-control" v-model="owner.Owner_Name" required>
+						<input type="text" class="form-control" v-model="owner.Owner_Name" required @input="generateUserName">
 					</div>
 				</div>
 
@@ -107,6 +107,13 @@
 					<label class="control-label col-md-4">Permanent Address:</label>
 					<div class="col-md-7">
 						<textarea type="text" class="form-control" v-model="owner.Owner_PerAddress"></textarea>
+					</div>
+				</div>
+
+				<div class="form-group clearfix" style="display:none;" :style="{display: owner.Owner_SlNo == '0' ? '' : 'none'}">
+					<label class="control-label col-md-4">User Name:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="owner.Owner_UserName" readonly>
 					</div>
 				</div>
 
@@ -215,6 +222,7 @@
 							<tr>
 								<td>{{ row.AddTime | dateOnly('DD-MM-YYYY') }}</td>
 								<td>{{ row.Owner_Code }}</td>
+								<td>{{ row.Owner_UserName }}</td>
 								<td>{{ row.Owner_Name }}</td>
 								<td>{{ row.Owner_Mobile }}</td>
 								<td>{{ row.Owner_OfficePhone }}</td>
@@ -263,6 +271,7 @@
 					Owner_OfficePhone: '',
 					Owner_PreAddress: '',
 					Owner_PerAddress: '',
+					Owner_UserName: '',
 					Owner_NID: '',
 					area_ID: '',
 					previous_due: 0
@@ -276,6 +285,7 @@
 				columns: [
                     { label: 'Added Date', field: 'AddTime', align: 'center', filterable: false },
                     { label: 'Owner Id', field: 'Owner_Code', align: 'center', filterable: false },
+                    { label: 'Owner Username', field: 'Owner_UserName', align: 'center', filterable: false },
                     { label: 'Owner Name', field: 'Owner_Name', align: 'center' },
                     { label: 'Contact Number', field: 'Owner_Mobile', align: 'center' },
                     { label: 'Office Phone', field: 'Owner_OfficePhone', align: 'center' },
@@ -315,6 +325,17 @@
 					this.selectedFile = null;
 					this.imageUrl = null;
 				}
+			},
+			generateUserName() {
+				const initials = this.getInitials(this.owner.Owner_Name);
+				const uniqueIdentifier = initials != '' ? Math.floor(Math.random() * 1000) : ''; //
+				this.owner.Owner_UserName = `${initials}${uniqueIdentifier}`;
+			},
+			getInitials(name) {
+				// Get initials from the name
+				const words = name.split(' ');
+				const initials = words.map(word => word.charAt(0).toLowerCase()).join('');
+				return initials;
 			},
 			saveOwner(){
 

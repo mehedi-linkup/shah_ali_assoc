@@ -1,4 +1,4 @@
-const paymentInvoice = Vue.component('payment-invoice', {
+const acInvoice = Vue.component('ac-invoice', {
     template: `
         <div>
             <div class="row">
@@ -18,10 +18,10 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 </div>
                 <div class="row">
                     <div class="col-xs-7">
-                        <strong>মিটার নংঃ  </strong> {{ cart[0]?.meter_no }}<br>
+                        <strong>মিটার নংঃ  </strong> {{ convertToBanglaNumber(cart[0]?.meter_no) }}<br>
                         <strong>নামঃ </strong> {{ cart[0]?.Store_Name }}<br>
-                        <strong>দোকান নংঃ </strong> {{ cart[0]?.Owner_Name }}<br>
-                        <strong>আয়তনঃ </strong> {{ cart[0]?.square_feet }}<br>
+                        <strong>দোকান নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.Store_No) }}<br>
+                        <strong>আয়তনঃ </strong> {{ convertToBanglaNumber(cart[0]?.square_feet) }}<br>
                     </div>
                     <div class="col-xs-5 text-right">
                         <strong>বিল তৈরির তারিখঃ </strong> {{ (dateFormat(cart[0]?.process_date)) }}<br>
@@ -46,9 +46,9 @@ const paymentInvoice = Vue.component('payment-invoice', {
                             </thead>
                             <tbody>
                                 <tr v-for="(product, sl) in cart">
-                                    <td>{{ payment.invoice }}</td>
+                                    <td>{{ convertToBanglaNumber(payment.invoice) }}</td>
                                     <td>এ সি চার্জ</td>
-                                    <td>{{ product.ac_bill }}</td>
+                                    <td>{{ convertToBanglaNumber(product.ac_bill) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -61,24 +61,24 @@ const paymentInvoice = Vue.component('payment-invoice', {
                         <table _t92sadbc2>
                             <tr>
                                 <td><strong>মোট বিল</strong></td>
-                                <td style="text-align:right">{{ cart[0]?.ac_bill }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.ac_bill) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>পূর্বের বকেয়া</strong></td>
-                                <td style="text-align:right">{{ cart[0]?.previous_due }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.previous_due) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>সর্বমোট :</strong></td>
-                                <td style="text-align:right">{{ +cart[0]?.ac_bill + +cart[0]?.previous_due }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill + +cart[0]?.previous_due).toFixed(2)) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>বিলম্ব ফি:</strong></td>
-                                <td style="text-align:right">{{ cart[0]?.late_fee }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.late_fee) }}</td>
                             </tr>
                             <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
                             <tr>
                                 <td><strong>বিলম্ব ফি সহ সর্বমোট :</strong></td>
-                                <td style="text-align:right">{{ +cart[0]?.ac_bill + +cart[0]?.previous_due + +cart[0]?.late_fee }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill + +cart[0]?.previous_due + +cart[0]?.late_fee).toFixed(2)) }}</td>
                             </tr>
                         </table>
                     </div>
@@ -188,25 +188,10 @@ const paymentInvoice = Vue.component('payment-invoice', {
             const [smonth, sday, syear] = formattedSDate.split('/');
             const formattedSDateDDMMYYYY = `${sday}/${smonth}/${syear}`;
             const [emonth, eday, eyear] = formattedEDate.split('/');
-            const formattedEDateDDMMYYYY = `${emonth}/${eday}/${eyear}`;
+            const formattedEDateDDMMYYYY = `${eday}/${emonth}/${eyear}`;
 
             this.startDate  = this.convertToBengaliNumerals(formattedSDateDDMMYYYY);
             this.endDate = this.convertToBengaliNumerals(formattedEDateDDMMYYYY);
-
-
-            
-            // const startDay = this.padWithBengaliNumerals(startDate.getDate());
-            // const startMonth = this.padWithBengaliNumerals(startDate.getMonth() + 1); // Months are zero-based
-            // const startYear = this.padWithBengaliNumerals(startDate.getFullYear());
-
-            // const endDay = this.padWithBengaliNumerals(endDate.getDate());
-            // const endMonth = this.padWithBengaliNumerals(endDate.getMonth() + 1); // Months are zero-based
-            // const endYear = this.padWithBengaliNumerals(endDate.getFullYear());
-
-            // this.startDate = `${startDay}/${startMonth}/${startYear}`;
-            // this.endDate = `${endDay}/${endMonth}/${endYear}`;
-            // this.startDate = startDate.toISOString().split('T')[0];
-            // this.endDate = endDate.toISOString().split('T')[0];
         },
         dateFormat(inputDate) {
             let date = new Date(inputDate);
@@ -230,18 +215,10 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 month: '2-digit',
                 day: '2-digit',
               });
-
+              
             const [month, day, year] = formattedDate.split('/');
             const formattedDateDDMMYYYY = `${day}/${month}/${year}`;
-
-            //   console.log(formattedDate)
-
-            // const Day = this.padWithBengaliNumerals(formattedDate);
-            // const Month = this.padWithBengaliNumerals(formattedDate.getMonth() + 1); // Months are zero-based
-            // const Year = this.padWithBengaliNumerals(formattedDate.getFullYear());
-            // date = `${Day}/${Month}/${Year}`;
             const convertedDate = this.convertToBengaliNumerals(formattedDateDDMMYYYY);
-
             return convertedDate;
         },
         convertToBengaliNumerals(dateString) {
@@ -252,10 +229,14 @@ const paymentInvoice = Vue.component('payment-invoice', {
             return convertedString;
         },
        
-        padWithBengaliNumerals(number) {
+        convertToBanglaNumber(number) {
             const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-            return String(number).split('').map(digit => bengaliNumerals[parseInt(digit)]).join('');
-          },
+            const [integerPart, decimalPart] = String(number).split('.');
+            const convertedIntegerPart = integerPart.split('').map(digit => bengaliNumerals[parseInt(digit)]).join('');
+            const convertedDecimalPart = decimalPart ? `.${decimalPart.split('').map(digit => bengaliNumerals[parseInt(digit)]).join('')}` : '';
+            const convertedNumber = `${convertedIntegerPart}${convertedDecimalPart}`;
+            return convertedNumber;
+        },
         convertNumberToWords(amountToWord) {
             var words = new Array();
             words[0] = '';
@@ -340,71 +321,6 @@ const paymentInvoice = Vue.component('payment-invoice', {
         async print(){
             let invoiceContent = document.querySelector('#invoiceContent').innerHTML;
             let printWindow = window.open('', 'PRINT', `width=${screen.width}, height=${screen.height}, left=0, top=0`);
-            if (this.currentBranch.print_type == '3') {
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Invoice</title>
-                            <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-                            <style>
-                                body, table{
-                                    font-size:11px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div style="text-align:center;">
-                                <img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;margin:0px;" /><br>
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name_Bangla}</strong><br><br>
-                                <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
-                            </div>
-                            ${invoiceContent}
-                        </body>
-                    </html>
-                `);
-            } else if (this.currentBranch.print_type == '2') {
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                        <title>Invoice</title>
-                        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-                        <style>
-                            html, body{
-                                width:500px!important;
-                            }
-                            body, table{
-                                font-size: 13px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="row">
-                            <div class="col-xs-2" style="padding-top:20px;"><img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;" /></div>
-                            <div class="col-xs-10" style="padding-top:20px;">
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name_Bangla}</strong><br><br>
-                                <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <div style="border-bottom: 2px solid #454545;margin-top:7px;margin-bottom:7px;"></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12">
-                                ${invoiceContent}
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-				`);
-            } else {
 				printWindow.document.write(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -482,7 +398,6 @@ const paymentInvoice = Vue.component('payment-invoice', {
                     </body>
                     </html>
 				`);
-            }
             let invoiceStyle = printWindow.document.createElement('style');
             invoiceStyle.innerHTML = this.style.innerHTML;
             printWindow.document.head.appendChild(invoiceStyle);

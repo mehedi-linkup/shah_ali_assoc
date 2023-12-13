@@ -81,12 +81,16 @@
 						<?php 
 							$userID =  $this->session->userdata('userId');
 							$CheckSuperAdmin = $this->db->where('UserType','m')->where('User_SlNo',$userID)->get('tbl_user')->row();
-							
+							$CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
+							$CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
 						?>
+						<?php if(isset($CheckRenter) || isset($CheckOwner)) : ?>
 						<li class="light-blue dropdown-modal">
+
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color:unset">
-										<span style="font-size: 20px;"><i class="fa fa-globe" aria-hidden="true" style="font-size:20px;"></i></span>
+								<span style="font-size: 20px;"><i class="fa fa-bell" aria-hidden="true" style="font-size:20px;"></i></span>
 							</a>
+							
 
 							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
 									
@@ -97,12 +101,13 @@
 										<li>
 											<a class="btn-add fancybox fancybox.ajax" href="<?php echo base_url();?>brachAccess/<?php echo $row->brunch_id; ?>">
 												<i class="ace-icon fa fa-bank"></i>
-												<?php echo $row->Brunch_name; ?>
+												<?php echo $row->Brunch_name; ?> Here the line will be larger than you think   <i class="ace-icon fa fa-rotate"></i>
 											</a>
 										</li>
 								<?php } ?>
 							</ul>
 						</li>
+						<?php endif ?>
 						<?php if(isset($CheckSuperAdmin)): ?>
 						<li class="light-blue dropdown-modal">
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
@@ -161,10 +166,17 @@
 								<li class="divider"></li>
 
 								<li>
+									<?php if (isset($CheckOwner) && isset($CheckRenter) ) : ?>
 									<a href="<?php echo base_url(); ?>Login/logout">
 										<i class="ace-icon fa fa-power-off"></i>
 										Logout
 									</a>
+									<?php else: ?>
+									<a href="<?php echo base_url(); ?>Login/logout">
+										<i class="ace-icon fa fa-power-off"></i>
+										Logout
+									</a>
+									<?php endif; ?>
 								</li>
 							</ul>
 						</li>
@@ -186,6 +198,7 @@
 
 				<div class="sidebar-shortcuts" id="sidebar-shortcuts">
 					<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+						<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 						<a href="/graph" class="btn btn-success">
 							<i class="ace-icon fa fa-signal"></i>
 						</a>
@@ -201,6 +214,12 @@
 						<a href="/module/Administration" class="btn btn-danger">
 							<i class="ace-icon fa fa-cogs"></i>
 						</a>
+						<?php endif; ?>
+						<?php if (isset($CheckOwner) || isset($CheckRenter) ) : ?>
+						<a href="javascript:void(0)" class="btn btn-success" style="background-color:#525252!important;border-radius:0;border-width:1px;border-color:transparent;padding:5px;width:100%">
+							<span id="timer1" style="font-size:12px;"></span>
+						</a>
+						<?php endif; ?>
 					</div>
 
 					<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
@@ -216,9 +235,11 @@
 
 				 <?php include('menu.php'); ?>
 
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
 					<i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
 				</div>
+				<?php endif; ?>
 			</div>
 
 			<div class="main-content">
@@ -276,6 +297,7 @@
 			<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
 				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
 			</a>
+			
 		</div><!-- /.main-container -->
 
 		<!-- basic scripts -->
@@ -344,6 +366,7 @@
             var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds + " " + timeOfDay;
 
             document.getElementById("timer").innerHTML = currentTimeString;
+            document.getElementById("timer1").innerHTML = currentTimeString;
 
         }, 1000);
 

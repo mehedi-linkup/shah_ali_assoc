@@ -68,7 +68,7 @@
 				<div class="form-group">
 					<label class="col-sm-4 control-label no-padding-right"> Month </label>
 					<div class="col-sm-7">
-					<v-select v-bind:options="months" label="month_name" v-model="month" v-on:input="stores = []"></v-select>
+					<v-select v-bind:options="months" label="month_name" v-model="month" v-on:input="onChangeMonth"></v-select>
 					</div>
 					<div class="col-sm-1" style="padding: 0;">
 						<a href="<?= base_url('month')?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;" target="_blank" title="Add New Month"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
@@ -83,15 +83,23 @@
 	</div>
 	<br>
 	<div class="row" v-if="stores.length > 0">
-		<div class="col-md-12">
-			
-			<div style="margin-top: -15px; margin-bottom: 2px;">
-				<label>Process Date</label>
+		<div style="margin-top: -15px; margin-bottom: 2px;">
+			<div class="form-group">
+				<label class="col-sm-1 control-label no-padding-right">Floor</label>
+				<div class="col-sm-2">
+					<v-select v-bind:options="floors" label="Floor_Name" v-model="selectedFloor" @input="onChangeFloor"></v-select>
+				</div>
+			</div>
+			<label class="col-sm-1 control-label no-padding">Process Date</label>
+			<div class="col-sm-2">
 				<input style="height: 25px;" type="date" v-model="billPayment.process_date">
-				<label>Last Date</label>
+			</div>
+			<label class="col-sm-1 control-label no-padding">Last Date</label>
+			<div class="col-sm-2 no-padding-left">
 				<input style="height: 25px;" type="date" v-model="billPayment.last_date">
 			</div>
-
+		</div>
+		<div class="col-md-12">
 			<div class="table-responsive">
 				<table class="table table-bordered">
 					<thead>
@@ -105,7 +113,8 @@
 							<th>Cur. Unit</th>
 							<th>Elctr. Unit</th>
 							<th>Elctr. Bill</th>
-							<th>Generator</th>
+							<th>Gen. Unit</th>
+							<th>Gen. Bill</th>
 							<th>Ac</th>
 							<th>Others</th>
 							<th>Net Payable</th>
@@ -115,7 +124,7 @@
 					<tbody>
 						<template v-for="store in stores">
 							<tr>
-								<td colspan="12" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
+								<td colspan="13" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
 							</tr>
 							<tr v-for="(store, i) in store.stores" v-bind:style="{background: store.net_payable!=0 ? '#709fd9' : ''}">
 								<td>{{ ++i }}</td>
@@ -127,7 +136,8 @@
 								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td>
 								<td style="text-align: center;">{{ store.electricity_unit }}</td>
 								<td style="text-align: center;">{{ store.electricity_bill }}</td>
-								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.generator_bill" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:50px;height:20px;text-align:center;" type="number" v-model="store.generator_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:70px;height:20px;text-align:center;" type="number" v-model="store.generator_bill" v-on:input="calculateNetPayable(store)" readonly></td>
 								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.ac_bill" v-on:input="calculateNetPayable(store)"></td>
 								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.others_bill" v-on:input="calculateNetPayable(store)"></td>
 								<td style="text-align: center;">{{store.net_payable}}</td>
@@ -142,7 +152,7 @@
 							<td></td>
 						</tr>
 						<tr>
-							<td colspan="12">
+							<td colspan="13">
 								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-danger pull-right">
 									Save
 									<i class="ace-icon fa fa-arrow-right icon-on-right bigger-110"></i>
@@ -178,11 +188,19 @@
 				stores: [],
 				months: [],
 				month: null,
+				utilityRate: null,
 				payment: false,
+				floors: [],
+				selectedFloor: {
+					Floor_SlNo: '',
+					Floor_Name: 'All'
+				}
 			}
 		},
 		created() {
 			this.getMonths();
+			this.getFloors();
+			this.getUtilityRate();
 		},
 		methods: {
 			// checkPayment(employee){
@@ -191,7 +209,19 @@
 			// 		employee.payment = employee.net_payable;
 			// 	}
 			// },
+			async onChangeFloor() {
+				await this.getStores();
+			},
+			onChangeMonth() {
+				this.stores = [],
+				this.selectedFloor = {
+					Floor_SlNo: '',
+					Floor_Name: 'All'
+				}
+			},
 			calculateNetPayable(store){
+				store.generator_bill = store.generator_unit * this.utilityRate.Generator_Rate;
+
 				setTimeout(() => {
 					if(+store.current_unit < +store.previous_unit) {
 						store.current_unit = store.previous_unit
@@ -202,7 +232,7 @@
 				}, 2000);
 
 				store.electricity_unit = store.current_unit - store.previous_unit;
-				store.electricity_bill = parseFloat(store.electricity_unit * 4.83).toFixed(2);
+				store.electricity_bill = parseFloat(store.electricity_unit * this.utilityRate.Electricity_Rate).toFixed(2);
 
 				let payable = ( parseFloat(store.electricity_bill) + parseFloat(store.generator_bill) + parseFloat(store.ac_bill) + parseFloat(store.others_bill) ).toFixed(2);
 
@@ -210,8 +240,7 @@
 				// store.payment = payable;
 			},
 			async getStores() {
-				
-				if(this.month == null && this.month.month_id == ''){
+				if(this.month == null || this.month.month_id == ''){
 					alert("Select Month");
 					return;
 				}
@@ -226,9 +255,15 @@
 						this.payment = true;
 					}
 				})
+
+				let filter = {
+					month_id: month_id, 
+					floor_id: this.selectedFloor.Floor_SlNo,
+					details: true
+				}
 				
 				if(this.payment){
-					await axios.post('/get_bill_payments/', {month_id: month_id, details: true}).then(res => {
+					await axios.post('/get_bill_payments/', filter).then(res => {
 						let payment = res.data[0];
 						this.billPayment.id = payment.id;
 						this.billPayment.process_date = payment.process_date;
@@ -251,7 +286,7 @@
 						// this.stores = payment.details;
 					})
 				} else {
-					await axios.get('/get_stores').then(res => {
+					await axios.post('/get_stores', filter).then(res => {
 						let stores = res.data;
 
 						stores.map(store => {
@@ -294,12 +329,25 @@
 					this.months = res.data;
 				})
 			},
-
+			getFloors() {
+				axios.get('/get_floors').then(res => {
+					this.floors = res.data;
+					this.floors.unshift({
+						Floor_SlNo: '',
+						Floor_Name: 'All'
+					})
+				})
+			},
+			getUtilityRate() {
+				axios.get('/get_utility_rate').then(res => {
+					this.utilityRate = res.data;
+				})
+			},
 			SaveBillPayment() {
 				let stores = _.chain(this.stores)
 					.flatMap(function(item) {
 						return item.stores.map(function(store) {
-						return store;
+							return store;
 						});
 					})
 					.value();

@@ -5,15 +5,27 @@ class Page extends CI_Controller {
         parent::__construct();
         $this->brunch = $this->session->userdata('BRANCHid');
         $access = $this->session->userdata('userId');
-         if($access == '' ){
-            redirect("Login");
+        $accountType = $this->session->userdata('accountType');
+        if($access == '' ){
+            redirect("Login/userindex");
         }
+
+        $userID =  $this->session->userdata('userId');
+        $CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
+        $CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
+
+
         $this->load->model('Billing_model');
         $this->load->model("Model_myclass", "mmc", TRUE);
         $this->load->model('Model_table', "mt", TRUE);
         date_default_timezone_set('Asia/Dhaka');
     }
     public function index()  {
+        $data['title'] = "Dashboard";
+        $data['content'] = $this->load->view('Administrator/dashboard', $data, TRUE);
+        $this->load->view('Administrator/master_dashboard', $data);
+    }
+    public function customerIndex()  {
         $data['title'] = "Dashboard";
         $data['content'] = $this->load->view('Administrator/dashboard', $data, TRUE);
         $this->load->view('Administrator/master_dashboard', $data);
@@ -451,6 +463,238 @@ class Page extends CI_Controller {
             from tbl_brunch
         ")->result();
         echo json_encode($branches);
+    }
+    public function getNews(){
+        $branches = $this->db->query("
+            select 
+            *,
+            case status
+                when 'a' then 'Active'
+                else 'Inactive'
+            end as active_status
+            from tbl_news
+        ")->result();
+        echo json_encode($branches);
+    }
+    public function getNotice(){
+        $branches = $this->db->query("
+            select 
+            *,
+            case status
+                when 'a' then 'Active'
+                else 'Inactive'
+            end as active_status
+            from tbl_notice
+        ")->result();
+        echo json_encode($branches);
+    }
+
+    public function news_notice()  {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "News & Notice";
+        $data['newsCode'] = $this->mt->generateNewsCode();
+        $data['noticeCode'] = $this->mt->generateNoticeCode();
+        $data['selectedNews'] = $this->db->query("select * from tbl_news order by news_sl desc limit 1")->row();
+        $data['selectedNotice'] = $this->db->query("select * from tbl_notice order by notice_sl desc limit 1")->row();
+        $data['content'] = $this->load->view('Administrator/news_notice', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function addNews()  {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->post('data'));
+
+            $news_file = @$_FILES['news_file'];
+            $newsCount = $this->db->query("select * from tbl_news where news_code = ?", $data->news_code)->num_rows();
+
+            if($newsCount > 0){
+                $res = ['success'=>false, 'message'=> $data->news_code . ' already exists'];
+                echo json_encode($res);
+                exit;
+            }
+            $news = array(
+                'news_code' => $data->news_code,
+                'news_title' => $data->news_title,
+                'news_description' => $data->news_description,
+                'status' => 'a',
+                'branch_id' => $this->brunch,
+                'add_by' => $this->session->userdata("FullName"),
+                'add_date' => date('Y-m-d'),
+                'add_time' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('tbl_news', $news);
+           
+            $newsId = $this->db->insert_id();
+
+            if(isset($news_file) and !empty($news_file)) {
+                $fileName = $this->fileUpload($_FILES['news_file']);
+                $this->db->query("update tbl_news set news_file = ? where news_sl = ?", [$fileName, $newsId]);
+            }
+            $res = ['success'=>true, 'message'=>'News inserted!', 'newsCode'=>$this->mt->generateNewsCode()];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function updateNews()  {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->post('data'));
+            // echo json_encode($data);
+            // return;
+            $news_file = @$_FILES['news_file'];
+            $newsCount = $this->db->query("select * from tbl_news where news_code = ? and news_sl != ?", [$data->news_code, $data->newsId,])->num_rows();
+            $currentNews = $this->db->query("select * from tbl_news where news_sl = ? limit 1", $data->newsId)->row();
+            // echo json_encode($currentNews);
+            // return;
+            if($newsCount > 0){
+                $res = ['success'=>false, 'message'=> $data->news_code . ' already exists'];
+                echo json_encode($res);
+                exit;
+            }
+
+            $newNews = array(
+                'news_code' => $data->news_code,
+                'news_title' => $data->news_title,
+                'news_description' => $data->news_description,
+                'branch_id' => $this->brunch,
+                'update_by' => $this->session->userdata("FullName"),
+            );
+
+            $this->db->set($newNews)->where('news_sl', $data->newsId)->update('tbl_news');
+
+            if(isset($news_file) and !empty($news_file)) {
+                if(file_exists($currentNews->news_file) && $currentNews->news_file != null) {
+                    unlink($currentNews->news_file);
+                }
+                $fileName = $this->fileUpload($_FILES['news_file']);
+                $this->db->query("update tbl_news set news_file = ? where news_sl = ?", [$fileName, $data->newsId]);
+            }
+
+            $res = ['success'=>true, 'message'=>'News updated', 'newsCode'=>$this->mt->generateNewsCode()];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function addNotice()  {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->post('data'));
+            $notice_file = @$_FILES['notice_file'];
+        
+            $noticeCount = $this->db->query("select * from tbl_notice where notice_code = ?", $data->notice_code)->num_rows();
+
+            if($noticeCount > 0){
+                $res = ['success'=>false, 'message'=> $data->notice_code . ' already exists'];
+                echo json_encode($res);
+                exit;
+            }
+            $notice = array(
+                'notice_code' => $data->notice_code,
+                'notice_title' => $data->notice_title,
+                'notice_description' => $data->notice_description,
+                'status' => 'a',
+                'branch_id' => $this->brunch,
+                'add_by' => $this->session->userdata("FullName"),
+                'add_date' => date('Y-m-d'),
+                'add_time' => date('Y-m-d H:i:s'),
+            );
+            $this->db->insert('tbl_notice', $notice);
+           
+            $noticeId = $this->db->insert_id();
+
+            if(isset($notice_file) and !empty($notice_file)) {
+                $fileName = $this->noticeFileUpload($_FILES['notice_file']);
+                $this->db->query("update tbl_notice set notice_file = ? where notice_sl = ?", [$fileName, $noticeId]);
+            }
+            $res = ['success'=>true, 'message'=>'notice inserted!', 'noticeCode'=>$this->mt->generateNoticeCode()];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function updateNotice()  {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+
+            $data = json_decode($this->input->post('data'));
+            $notice_file = @$_FILES['notice_file'];
+            $noticeCount = $this->db->query("select * from tbl_notice where notice_code = ? and notice_sl != ?", [$data->notice_code, $data->noticeId,])->num_rows();
+            $currentNotice = $this->db->query("select * from tbl_notice where notice_sl = ? limit 1", $data->noticeId)->row();
+
+            if($noticeCount > 0){
+                $res = ['success'=>false, 'message'=> $data->notice_code . ' already exists'];
+                echo json_encode($res);
+                exit;
+            }
+
+            $newNotice = array(
+                'notice_code' => $data->notice_code,
+                'notice_title' => $data->notice_title,
+                'notice_file' => $data->notice_file,
+                'notice_description' => $data->notice_description,
+                'branch_id' => $this->brunch,
+                'update_by' => $this->session->userdata("FullName"),
+            );
+
+            $this->db->set($newNotice)->where('notice_sl', $data->noticeId)->update('tbl_notice');
+
+            if(isset($notice_file) and !empty($notice_file)) {
+                if(file_exists($currentNotice->notice_file) && $currentNotice->notice_file != null) {
+                    unlink($currentNotice->notice_file);
+                }
+                $fileName = $this->noticeFileUpload($_FILES['notice_file']);
+                $this->db->query("update tbl_notice set notice_file = ? where notice_sl = ?", [$fileName, $data->noticeId]);
+            }
+            $res = ['success'=>true, 'message'=>'Notice updated', 'noticeCode'=>$this->mt->generateNoticeCode()];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    
+    public function changeNewsStatus(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->raw_input_stream);
+            $status = $this->db->query("select * from tbl_news where news_sl = ?", $data->newsId)->row()->status;
+            $status = $status == 'a' ? 'd' : 'a';
+            $this->db->set('status', $status)->where('news_sl', $data->newsId)->update('tbl_news');
+            $res = ['success'=>true, 'message'=>'Status changed'];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    
+    public function changeNoticeStatus(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->raw_input_stream);
+            $status = $this->db->query("select * from tbl_notice where notice_sl = ?", $data->noticeId)->row()->status;
+            $status = $status == 'a' ? 'd' : 'a';
+            $this->db->set('status', $status)->where('notice_sl', $data->noticeId)->update('tbl_notice');
+            $res = ['success'=>true, 'message'=>'Status changed'];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
     }
 
     public function getCurrentBranch(){
@@ -1048,6 +1292,104 @@ class Page extends CI_Controller {
             echo json_encode($floors);
         }
 
+        public function noticeView() {
+            if(isset($CheckRenter) || isset($CheckOwner)) {
+                redirect(base_url());
+            }
+            $data['title'] = "Latest Notice";
+            $data['content'] = $this->load->view('Administrator/notice', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        public function notice_view($code){
+            // echo $code;
+            // return;
+            $data['title'] = "Latest Notice";
+            // $notice = $this->db->query("select * from tbl_notice where notice_code = ?", $code)->row();
+            // $data['noticeId'] = $notice->notice_sl;
+            $data['content'] = $this->load->view('Administrator/notice_view', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        public function newsView() {
+            if(isset($CheckRenter) || isset($CheckOwner)) {
+                redirect(base_url());
+            }
+            $data['title'] = "Latest News";
+            $data['content'] = $this->load->view('Administrator/news', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        public function news_view($code){
+            // echo $code;
+            // return;
+            $data['title'] = "Latest Notice";
+            // $notice = $this->db->query("select * from tbl_notice where notice_code = ?", $code)->row();
+            // $data['noticeId'] = $notice->notice_sl;
+            $data['content'] = $this->load->view('Administrator/news_view', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        public function billView()
+        {
+            if(isset($CheckRenter) || isset($CheckOwner)) {
+                redirect(base_url());
+            }
+            $accountType = $this->session->userdata('accountType');
+            $userName = $this->session->userdata('User_Name');
+            $data['title'] = "Bill View";
+            if($accountType == 'o') {
+                $ownerUser = $this->db->query("select * from tbl_owner where Owner_UserName = ?", $userName)->row();
+                $data['userId'] = $ownerUser->Owner_SlNo;
+            } else if($accountType == 'r') {
+                $renterUser = $this->db->query("select * from tbl_renter where Renter_UserName = ?", $userName)->row();
+                $data['userId'] = $renterUser->Renter_SlNo;
+            }
+            $data['accountType'] = $accountType;
+            $data['content'] = $this->load->view('Administrator/store/bills_view', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        public function paymentView()
+        {
+            if(isset($CheckRenter) || isset($CheckOwner)) {
+                redirect(base_url());
+            }
+            $accountType = $this->session->userdata('accountType');
+            $userName = $this->session->userdata('User_Name');
+            $data['title'] = "Payment View";
+            if($accountType == 'o') {
+                $ownerUser = $this->db->query("select * from tbl_owner where Owner_UserName = ?", $userName)->row();
+                $data['userId'] = $ownerUser->Owner_SlNo;
+            } else if($accountType == 'r') {
+                $renterUser = $this->db->query("select * from tbl_renter where Renter_UserName = ?", $userName)->row();
+                $data['userId'] = $renterUser->Renter_SlNo;
+            }
+            $data['accountType'] = $accountType;
+            $data['content'] = $this->load->view('Administrator/utility/payment_view', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        }
+
+        function dueView(){
+            if(isset($CheckRenter) || isset($CheckOwner)) {
+                redirect(base_url());
+            }
+            $accountType = $this->session->userdata('accountType');
+            $userName = $this->session->userdata('User_Name');
+            $data['title'] = 'Due View';
+            if($accountType == 'o') {
+                $ownerUser = $this->db->query("select * from tbl_owner where Owner_UserName = ?", $userName)->row();
+                $data['userId'] = $ownerUser->Owner_SlNo;
+            } else if($accountType == 'r') {
+                $renterUser = $this->db->query("select * from tbl_renter where Renter_UserName = ?", $userName)->row();
+                $data['userId'] = $renterUser->Renter_SlNo;
+            }
+            $data['accountType'] = $accountType;
+            $data['content'] = $this->load->view('Administrator/due_report/due_view', $data, TRUE);
+            $this->load->view('Administrator/index', $data);
+        } 
+
+
         public function grade() {
             $access = $this->mt->userAccess();
             if(!$access){
@@ -1182,6 +1524,29 @@ class Page extends CI_Controller {
                 echo json_encode($message);
             }
         }
+
+        
+    public function fileUpload($file_name_get){
+        $file_name = $file_name_get['name'];
+        $file_temp = $file_name_get['tmp_name'];
+    
+        $div = explode('.', $file_name);
+        $get_last_e = end($div);
+        $new_name =  rand().'.'.$get_last_e;
+        move_uploaded_file($file_temp,'uploads/news/'.$new_name);
+        return 'uploads/news/'.$new_name;
+    }
+
+    public function noticeFileUpload($file_name_get){
+        $file_name = $file_name_get['name'];
+        $file_temp = $file_name_get['tmp_name'];
+    
+        $div = explode('.', $file_name);
+        $get_last_e = end($div);
+        $new_name =  rand().'.'.$get_last_e;
+        move_uploaded_file($file_temp,'uploads/notice/'.$new_name);
+        return 'uploads/notice/'.$new_name;
+    }
 
         public function getMonths(){
             $months = $this->db->query(

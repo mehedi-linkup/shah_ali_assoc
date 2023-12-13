@@ -105,6 +105,30 @@ class Model_Table extends CI_Model{
 
         return $storeCode;
     }
+    public function generateNewsCode(){
+        $newsCode = "NW00001";
+        
+        $lastNews = $this->db->query("select * from tbl_news order by news_sl desc limit 1");
+        if($lastNews->num_rows() != 0){
+            $newNewsId = $lastNews->row()->news_sl + 1;
+            $zeros = array('0', '00', '000', '0000');
+            $newsCode = 'NW' . (strlen($newNewsId) > count($zeros) ? $newNewsId : $zeros[count($zeros) - strlen($newNewsId)] . $newNewsId);
+        }
+
+        return $newsCode;
+    }
+    public function generateNoticeCode(){
+        $noticeCode = "NTC00001";
+        
+        $lastNotice = $this->db->query("select * from tbl_notice order by notice_sl desc limit 1");
+        if($lastNotice->num_rows() != 0){
+            $newNoticeId = $lastNotice->row()->notice_sl + 1;
+            $zeros = array('0', '00', '000', '0000');
+            $noticeCode = 'NTC' . (strlen($newNoticeId) > count($zeros) ? $newNoticeId : $zeros[count($zeros) - strlen($newNoticeId)] . $newNoticeId);
+        }
+
+        return $noticeCode;
+    }
 
     public function generateServiceCode(){
         $serviceCode = "SU00001";
@@ -658,6 +682,45 @@ class Model_Table extends CI_Model{
 
         return $renterDues;
     }
+
+    public function ownerDue($clauses = "" , $date = null) {
+        $branchId = $this->session->userdata('BRANCHid');
+
+        $ownerDues = $this->db->query("
+            select
+            o.Owner_SlNo,
+            o.Owner_Code,
+            o.Owner_Name,
+            o.Owner_Mobile,
+            o.Owner_PreAddress,
+            o.Owner_NID,
+            (select (ifnull(sum(bsd.net_payable), 0.00) + ifnull(o.previous_due, 0.00)) 
+                from tbl_bill_sheet_details bsd
+                join tbl_bill_sheet bs on bs.id = bsd.bill_id
+                join tbl_store s on s.Store_SlNo = bsd.store_id
+                where s.owner_id = o.Owner_SlNo
+                " . ($date == null ? "" : " and bs.process_date < '$date'") . "
+                and bsd.status = 'a'
+            ) as bill,
+
+            (select (ifnull(sum(upd.payment), 0.00)) 
+                from tbl_utility_payment_details upd
+                join tbl_utility_payment up on up.id = upd.utility_payment_id
+                join tbl_store s on s.Store_SlNo = upd.store_id
+                where s.owner_id = o.Owner_SlNo
+                " . ($date == null ? "" : " and up.payment_date < '$date'") . "
+                and upd.status = 'a'
+            ) as paid,
+
+            (select bill - paid) as due
+
+            from tbl_owner o
+            where o.Owner_brunchid = '$branchId' $clauses
+        ")->result();
+
+        return $ownerDues;
+    }
+
     public function storeDue($clauses = "" , $date = null) {
         $branchId = $this->session->userdata('BRANCHid');
 

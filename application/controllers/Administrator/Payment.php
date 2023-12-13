@@ -51,17 +51,20 @@ class Payment extends CI_Controller
             $clauses .= " and up.id = '$data->id'";
             $paymentDetails = $this->db->query("
                 SELECT upd.*,
-                s.Store_SlNo,
-                s.Store_No,
-                s.Store_Name,
-                s.floor_id,
-                s.meter_no,
-                s.square_feet,
-                o.Owner_Name,
-                re.Renter_Name,
-                f.Floor_Name,
-                f.Floor_Ranking,
-                bs.process_date
+                    s.Store_SlNo,
+                    s.Store_No,
+                    s.Store_Name,
+                    s.floor_id,
+                    s.meter_no,
+                    s.square_feet,
+                    o.Owner_Name,
+                    re.Renter_Name,
+                    f.Floor_Name,
+                    f.Floor_Ranking,
+                    bs.process_date,
+                    bsd.electricity_unit,
+                    bsd.current_unit,
+                    bsd.generator_unit
                 from tbl_utility_payment_details upd
                 join tbl_bill_sheet_details bsd on bsd.id = upd.bill_detail_id
                 join tbl_bill_sheet bs on bs.id = bsd.bill_id
@@ -1311,6 +1314,16 @@ class Payment extends CI_Controller
         $this->load->view('Administrator/index', $data);
     }
 
+    public function ac_invoice()  {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Ac Invoice"; 
+		$data['content'] = $this->load->view('Administrator/utility/ac_invoice', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
     public function storePaymentReport()
     {
         $access = $this->mt->userAccess();
@@ -1351,6 +1364,9 @@ class Payment extends CI_Controller
       
         if(isset($data->renterId) && $data->renterId != ''){
             $clauses .= " and s.renter_id = '$data->renterId'";
+        }
+        if(isset($data->ownerId) && $data->ownerId != ''){
+            $clauses .= " and s.owner_id = '$data->ownerId'";
         }
         if(isset($data->floorId) && $data->floorId != ''){
             $clauses .= " and s.floor_id = '$data->floorId'";

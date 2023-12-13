@@ -57,6 +57,15 @@
 				</div>
 
 				<div class="form-group">
+					<label>Renter</label>
+					<select class="form-control" style="min-width:200px;" v-bind:style="{display: comRenters.length > 0 ? 'none' : ''}"></select>
+					<v-select v-bind:options="comRenters" v-model="selectedRenter" label="display_text" 
+							style="display:none"
+							v-bind:style="{display: comRenters.length > 0 ? '' : 'none'}"
+					></v-select>
+				</div>
+
+				<div class="form-group">
 					<label>Month</label>
 					<select class="form-control" style="min-width:150px;" v-bind:style="{display: months.length > 0 ? 'none' : ''}"></select>
 					<v-select v-bind:options="months" v-model="selectedMonth" label="month_name"
@@ -151,6 +160,12 @@
 					Store_Name: 'All',
 					display_text: 'All',
 				},
+				renters: [],
+				selectedRenter: {
+					Renter_SlNo: '',
+					Renter_Name: 'All',
+					display_text: 'All',
+				},
 				months: [],
 				selectedMonth: {
 					month_id: '',
@@ -165,10 +180,18 @@
 					store.display_text = store.Store_SlNo == '' ? store.Store_Name : `${store.Store_Name} - ${store.Store_No}`;
 					return store;
 				})
+			},
+			comRenters(){
+				return this.renters.map(renter => {
+					// renter.display_text = renter.Renter_SlNo == '' ? renter.Renter_Name : `${renter.Renter_Name} - ${renter.Renter_Code}`;
+					renter.display_text = renter.display_name
+					return renter;
+				})
 			}
 		},
 		created(){
 			this.getStores();
+			this.getRenters();
 			this.getMonths();
 		},
 		methods: {
@@ -178,6 +201,16 @@
 					this.stores.unshift({
 						Store_SlNo: '',
 						Store_Name: 'All'
+					})
+				})
+			},
+			getRenters(){
+				axios.get('/get_renters').then(res => {
+					this.renters = res.data;
+					this.renters.unshift({
+						Renter_SlNo: '',
+						display_name: 'All',
+						Renter_Name: 'All'
 					})
 				})
 			},
@@ -210,6 +243,11 @@
 					data.storeId = '';
 				} else {
 					data.storeId = this.selectedStore.Store_SlNo;
+				}
+				if(this.selectedRenter == null) {
+					data.renterId = '';
+				} else {
+					data.renterId = this.selectedRenter.Renter_SlNo;
 				}
 
 				if(this.selectedMonth == null){

@@ -11,27 +11,28 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div _h098asdh>
-                            Payment Invoice
+                            <span style="font-size:20px;font-weight:bold">ইউটিলিটি বিল</span>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-7">
-                        <strong>Floor:</strong> {{ cart[0]?.Floor_Name }}<br>
-                        <strong>Store Name:</strong> {{ cart[0]?.Store_Name }}<br>
-                        <strong>Owner Name:</strong> {{ cart[0]?.Owner_Name }}<br>
-                        <strong>Renter Name:</strong> {{ cart[0]?.Renter_Name }}<br>
+                        <strong>মিটার নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.meter_no) }}<br>
+                        <strong>নামঃ </strong> {{ cart[0]?.Store_Name }}<br>
+                        <strong>দোকান নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.Store_No) }}<br>
+                        <strong>মাসঃ </strong> {{ payment.month_name }}<br>
+                        <strong>তারিখঃ </strong> {{ startDate }} হইতে {{ endDate }} পর্যন্ত <br>
                     </div>
                     <div class="col-xs-5 text-right">
-                        <strong>Month:</strong> {{ payment.month_name }}<br>
-                        <strong>payment by:</strong> {{ payment.saved_by }}<br>
-                        <strong>Invoice No.:</strong> {{ payment.invoice }}<br>
-                        <strong>Payment Date:</strong> {{ payment.payment_date }}
+                        <strong>বিল নংঃ </strong> {{ convertToBanglaNumber(payment.invoice) }}<br>
+                        <strong>বিল তৈরির তারিখঃ </strong> {{ dateFormat(cart[0]?.process_date) }}<br>
+                        <strong>বিল প্রদানের তারিখঃ </strong> {{ dateFormat(payment.payment_date) }}<br>
+                        <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        <div _d9283dsc></div>
+                        <div _d9283dsc style="border-color:transparent"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -39,43 +40,91 @@ const paymentInvoice = Vue.component('payment-invoice', {
                         <table _a584de>
                             <thead>
                                 <tr>
-                                    <td>Sl.</td>
-                                    <td>Electricity</td>
-                                    <td>Generator</td>
-                                    <td>Ac</td>
-                                    <td>Others</td>
-                                    <td>Late Fee</td>
-                                    <td>Total</td>
+                                    <td>নং </td>
+                                    <td>খাতের নাম </td>
+                                    <td>রিডিং </td>
+                                    <td>ইউনিট</td>
+                                    <td>দর</td>
+                                    <td>মোট টাকা </td>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(product, sl) in cart">
-                                    <td>{{ sl + 1 }}</td>
-                                    <td>{{ product.electricity_bill }}</td>
-                                    <td>{{ product.generator_bill }}</td>
-                                    <td>{{ product.ac_bill }}</td>
-                                    <td>{{ product.others_bill }}</td>
-                                    <td>{{ product.late_fee }}</td>
-                                    <td align="right">{{ product.payment }}</td>
+                                <tr>
+                                    <td>১</td>
+                                    <td>বিদ্যুৎ বিল</td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.current_unit) }}</td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.electricity_unit) }}</td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Electricity_Rate) }}</td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.electricity_bill) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>২</td>
+                                    <td>জেনারেটর</td>
+                                    <td></td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.generator_unit) }}</td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Generator_Rate) }}</td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.generator_bill) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>৩</td>
+                                    <td>সার্ভিস চার্জ</td>
+                                    <td></td>
+                                    <td>১</td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Service_Rate) }} </td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Service_Rate) }} </td>
+                                </tr>
+                                <tr>
+                                    <td>৪</td>
+                                    <td>ওয়াসা বিল</td>
+                                    <td></td>
+                                    <td>১</td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Wasa_Rate) }} </td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Wasa_Rate) }} </td>
+                                </tr>
+                                <tr>
+                                    <td>৫</td>
+                                    <td>মসজিদ চার্জ</td>
+                                    <td></td>
+                                    <td>১</td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Mosque_Rate) }} </td>
+                                    <td>{{ convertToBanglaNumber(utilityRate?.Mosque_Rate) }} </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" align="center">মোট বিলঃ</td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.payment) }} </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
                 <div class="row">
-                    
-                    <div class="col-xs-12">
+                    <div class="col-xs-12"><hr style="margin-top:10px;border-color:transparent;margin-bottom:10px;"></div>
+                    <div class="col-xs-6"></div>
+                    <div class="col-xs-6">
                         <table _t92sadbc2>
-                            <tr style="border: 1px solid #ccc;border-top:none">
-                                <td></td>
-                                <td><strong>Total Paid :</strong></td>
-                                <td style="text-align:right">{{ payment.total_payment }}</td>
+                            <tr>
+                                <td><strong>পূর্বের বকেয়া:</strong></td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.previous_due) }}</td>
                             </tr>
-                           <!-- <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>-->
+                           
+                            <tr>
+                                <td><strong>সর্বমোট:</strong></td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.payment) }}</td>
+                            </tr>
+                            <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
+                            <tr>
+                                <td><strong>বিলম্ব ফি:</strong></td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.late_fee) }}</td>
+                            </tr>
+                            <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
+                            <tr>
+                                <td><strong>বিলম্ব ফি সহ সর্বমোট:</strong></td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat( +cart[0]?.previous_due + +cart[0]?.payment + +cart[0]?.late_fee).toFixed(2) ) }}</td>
+                            </tr>
                         </table>
                     </div>
                 </div>
-               
             </div>
         </div>
     `,
@@ -95,7 +144,10 @@ const paymentInvoice = Vue.component('payment-invoice', {
             cart: [],
             style: null,
             companyProfile: null,
-            currentBranch: null
+            utilityRate: null,
+            currentBranch: null,
+            startDate: "",
+            endDate: ""
         }
     },
     filters: {
@@ -107,12 +159,14 @@ const paymentInvoice = Vue.component('payment-invoice', {
         this.setStyle();
         this.getpayment();
         this.getCurrentBranch();
+        this.getUtilityRate();
     },
     methods:{
         getpayment(){
             axios.post('/get_utility_payment', {id: this.payment_id}).then(res=>{
                 this.payment = res.data.payments[0];
                 this.cart = res.data.paymentDetails;
+                this.calculateDates();
             })
         },
         getCurrentBranch() {
@@ -120,17 +174,92 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 this.currentBranch = res.data;
             })
         },
+
+        getUtilityRate() {
+            axios.get('/get_utility_rate').then(res => {
+                this.utilityRate = res.data;
+            })
+        },
+        calculateDates() {
+            const [monthName, year] = this.payment.month_name.split(' ');
+            const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth();
+            const startDate = new Date(year, monthIndex, 1);
+            const endDate = new Date(year, monthIndex + 1, 0);
+
+            const formattedSDate = startDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+            const formattedEDate = endDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+
+            const [smonth, sday, syear] = formattedSDate.split('/');
+            const formattedSDateDDMMYYYY = `${sday}/${smonth}/${syear}`;
+            const [emonth, eday, eyear] = formattedEDate.split('/');
+            const formattedEDateDDMMYYYY = `${eday}/${emonth}/${eyear}`;
+
+            this.startDate  = this.convertToBengaliNumerals(formattedSDateDDMMYYYY);
+            this.endDate = this.convertToBengaliNumerals(formattedEDateDDMMYYYY);
+            console.log(this.startDate);
+        },
+        dateFormat(inputDate) {
+            let date = new Date(inputDate);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+
+            const [month, day, year] = formattedDate.split('/');
+            const formattedDateDDMMYYYY = `${day}/${month}/${year}`;
+            const convertedDate = this.convertToBengaliNumerals(formattedDateDDMMYYYY);
+
+            return convertedDate;
+        },
+        addMonthsToDate(inputDate, monthsToAdd) {
+            let date = new Date(inputDate);
+            date.setMonth(date.getMonth() + monthsToAdd);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              });
+              
+            const [month, day, year] = formattedDate.split('/');
+            const formattedDateDDMMYYYY = `${day}/${month}/${year}`;
+            const convertedDate = this.convertToBengaliNumerals(formattedDateDDMMYYYY);
+            return convertedDate;
+        },
+        convertToBengaliNumerals(dateString) {
+            const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+          
+            const convertedString = dateString.replace(/\d/g, (digit) => bengaliNumerals[digit]);
+          
+            return convertedString;
+        },
+        convertToBanglaNumber(number) {
+            const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            const [integerPart, decimalPart] = String(number).split('.');
+            const convertedIntegerPart = integerPart.split('').map(digit => bengaliNumerals[parseInt(digit)]).join('');
+            const convertedDecimalPart = decimalPart ? `.${decimalPart.split('').map(digit => bengaliNumerals[parseInt(digit)]).join('')}` : '';
+            const convertedNumber = `${convertedIntegerPart}${convertedDecimalPart}`;
+            return convertedNumber;
+        }, 
         setStyle(){
             this.style = document.createElement('style');
             this.style.innerHTML = `
                 div[_h098asdh]{
                     /*background-color:#e0e0e0;*/
-                    font-weight: bold;
+                    // font-weight: bold;
                     font-size:15px;
                     margin-bottom:15px;
                     padding: 5px;
-                    border-top: 1px dotted #454545;
-                    border-bottom: 1px dotted #454545;
+                    // border-top: 1px dotted #454545;
+                    // border-bottom: 1px dotted #454545;
                 }
                 div[_d9283dsc]{
                     padding-bottom:25px;
@@ -241,69 +370,6 @@ const paymentInvoice = Vue.component('payment-invoice', {
         async print(){
             let invoiceContent = document.querySelector('#invoiceContent').innerHTML;
             let printWindow = window.open('', 'PRINT', `width=${screen.width}, height=${screen.height}, left=0, top=0`);
-            if (this.currentBranch.print_type == '3') {
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Invoice</title>
-                            <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-                            <style>
-                                body, table{
-                                    font-size:11px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div style="text-align:center;">
-                                <img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;margin:0px;" /><br>
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
-                                <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
-                            </div>
-                            ${invoiceContent}
-                        </body>
-                    </html>
-                `);
-            } else if (this.currentBranch.print_type == '2') {
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                        <title>Invoice</title>
-                        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-                        <style>
-                            html, body{
-                                width:500px!important;
-                            }
-                            body, table{
-                                font-size: 13px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="row">
-                            <div class="col-xs-2"><img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;" /></div>
-                            <div class="col-xs-10" style="padding-top:20px;">
-                                <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
-                                <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <div style="border-bottom: 4px double #454545;margin-top:7px;margin-bottom:7px;"></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12">
-                                ${invoiceContent}
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-				`);
-            } else {
 				printWindow.document.write(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -326,9 +392,10 @@ const paymentInvoice = Vue.component('payment-invoice', {
                                     <tr>
                                         <td>
                                             <div class="row">
-                                                <div class="col-xs-2"><img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;" /></div>
+                                                <div class="col-xs-2" style="padding-top:20px;"><img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;" /></div>
                                                 <div class="col-xs-10" style="padding-top:20px;">
                                                     <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
+                                                    <strong style="font-size:18px;">${this.currentBranch.Company_Name_Bangla}</strong><br><br>
                                                     <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
                                                 </div>
                                             </div>
@@ -359,23 +426,20 @@ const paymentInvoice = Vue.component('payment-invoice', {
                                     </tr>
                                 </tfoot>
                             </table>
-                            <div class="row" style="border-bottom:1px solid #ccc;margin-bottom:5px;padding-bottom:6px;">
-                                <div class="col-xs-6">
-                                    <span style="text-decoration:overline;">Received by</span><br><br>
-                                    ** THANK YOU FOR YOUR BUSINESS **
+                            <div class="row" style="margin-bottom:5px;padding-bottom:6px;">
+                                <div class="col-xs-4">
+                                    <span style="text-decoration:overline;">ইলেকট্রিশিয়ান</span><br><br>
                                 </div>
-                                <div class="col-xs-6 text-right">
-                                    <span style="text-decoration:overline;">Authorized by</span>
+                                <div class="col-xs-4 text-center">
+                                    <span style="text-decoration:overline;">সেক্রেটারি</span><br><br>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <span style="text-decoration:overline;">আদায়কারী</span>
                                 </div>
                             </div>
                             <div style="position:fixed;left:0;bottom:15px;width:100%;">
                                 <div class="row" style="font-size:12px;">
-                                    <div class="col-xs-6">
-                                        Print Date: ${moment().format('DD-MM-YYYY h:mm a')}, Printed by: ${this.payment.AddBy}
-                                    </div>
-                                    <div class="col-xs-6 text-right">
-                                        Developed by: Link-Up Technologoy, Contact no: 01911978897
-                                    </div>
+                                   <div class="col-xs-12 text-center">(বিলের কপি হারানো গেলে ২০/- জরিমানা দিয়ে নতুন কপি সংগ্রহ করতে হবে)</div>
                                 </div>
                             </div>
                         </div>
@@ -383,7 +447,6 @@ const paymentInvoice = Vue.component('payment-invoice', {
                     </body>
                     </html>
 				`);
-            }
             let invoiceStyle = printWindow.document.createElement('style');
             invoiceStyle.innerHTML = this.style.innerHTML;
             printWindow.document.head.appendChild(invoiceStyle);

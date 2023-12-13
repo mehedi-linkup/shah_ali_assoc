@@ -491,6 +491,11 @@ class Billing_model extends CI_Model {
 		return $result;
 	}	 
 				   
+  	public function utility_rate($id){
+		$rates = $this->db->query("select * from tbl_utility_rate where rate_branchid = '$id' order by Rate_SlNo desc limit 1")->row();
+
+		return $rates;
+	}
   	public function company_branch_profile($id){
 		$company = $this->db->query("select * from tbl_company order by Company_SlNo desc limit 1")->row();
 		$branch = $this->db->query("select * from tbl_brunch where brunch_id = ?", $id)->row();

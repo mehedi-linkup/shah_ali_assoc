@@ -13,7 +13,16 @@ class Login extends CI_Controller {
         $this->load->view('login/login', $data);
     }
 
-    function procedure(){
+    public function userindex() {
+        $data['title'] = "Customer login";
+        $this->load->view('customer_login/login', $data);
+    }
+
+
+    function procedure() {
+
+		// print_r($_POST);
+		// return;
 
         $user = $this->input->post('user_name');
 		$pass = md5($this->input->post('password'));
@@ -21,7 +30,7 @@ class Login extends CI_Controller {
 
 		$data = $query->row();
 
-		if(isset($data)){
+		if(isset($data) && $data->UserType != 'o' && $data->UserType != 'r') {
 			
 			if ($data->userstatus=='a') {
 
@@ -61,6 +70,60 @@ class Login extends CI_Controller {
              $this->load->view('login/login', $sdata);
 		}
     }
+
+    function procedureCustomer() {
+
+		
+        $user = $this->input->post('user_name');
+		$pass = md5($this->input->post('password'));
+		$query = $this->db->query("SELECT u.User_SlNo, u.User_ID, u.FullName, u.User_Name, u.userBrunch_id, u.UserType, u.image_name as user_image, u.status AS userstatus, br.brunch_id, br.Brunch_name, br.Brunch_sales FROM tbl_user AS u LEFT JOIN tbl_brunch AS br ON br.brunch_id = u.userBrunch_id where br.status = 'a' and u.User_Name = ? AND u.User_Password = ?", [$user, $pass]);
+
+		$data = $query->row();
+
+		if(isset($data) && ($data->UserType == 'o' || $data->UserType == 'r') ) {
+			// echo "<pre>";
+			// print_r($data);
+			// echo "</pre>";
+			// return;
+			
+			if ($data->userstatus=='a') {
+
+				$company = $this->db->select(['Company_Logo_org', 'Currency_Name'])->get('tbl_company')->row();
+
+				$this->db->insert('tbl_user_activity', 
+					[
+						'user_id' 		=>	$data->User_SlNo,
+						'ip_address' 	=>	get_client_ip(),
+						'login_time' 	=>	date("Y-m-d H:i:s"),
+						'status' 		=>	'a',
+						'branch_id' 	=>	$data->userBrunch_id,
+					]
+				);
+
+                $sdata['user_activity_id'] = $this->db->insert_id();
+
+				$sdata['userId'] = $data->User_SlNo;
+				$sdata['BRANCHid'] = $data->userBrunch_id;
+				$sdata['FullName'] = $data->FullName;
+				$sdata['User_Name'] = $data->User_Name;
+				$sdata['user_image'] = $data->user_image;
+				$sdata['accountType'] = $data->UserType;
+				$sdata['userBrunch'] = $data->Brunch_sales;
+				$sdata['Brunch_name'] = $data->Brunch_name;
+				$sdata['Brunch_image'] = $company->Company_Logo_org;
+				$sdata['Currency_Name'] = $company->Currency_Name;
+				$this->session->set_userdata($sdata);
+				redirect('Administrator/customerIndex');
+			}else{
+				$sdata['message'] = "Sorry your are deactivated";
+				$this->load->view('customer_login/login', $sdata);
+			}
+
+		}else{
+			$sdata['message'] = "Invalid User name or Password";
+			$this->load->view('customer_login/login', $sdata);
+		}
+    }
     
 
     public function forgotpassword()  {
@@ -69,6 +132,7 @@ class Login extends CI_Controller {
     }
 
     public function logout(){
+		$accountType = $this->session->userdata('accountType');
         $this->db->where('id', $this->session->userdata("user_activity_id"));
         $this->db->update('tbl_user_activity', [ 'logout_time' => date("Y-m-d H:i:s") ]);
 
@@ -78,7 +142,11 @@ class Login extends CI_Controller {
         $this->session->unset_userdata('accountType');
         $this->session->unset_userdata('module');
         //$this->session->unset_userdata('useremail');
-        redirect("Login");
+		if($accountType == 'o' || $accountType == 'r') {
+			redirect('Login/userindex');
+		} else {
+			redirect("Login");
+		}
 	}
 	
 	public function userLogin()

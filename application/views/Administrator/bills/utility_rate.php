@@ -14,7 +14,7 @@
 		
 			<div class="form-group">
 				<label class="col-sm-5 control-label" for="Electricity_Rate"> Electricity Rate (Per unit) </label>
-				<div class="col-sm-1">: </div>
+				
 				<div class="col-sm-5">
 					<input name="Electricity_Rate" type="number" id="Electricity_Rate" value="<?php echo $selected->Electricity_Rate ?>" class="form-control" />
 					<input name="iidd" type="hidden" id="iidd" value="" class="txt" />
@@ -23,43 +23,69 @@
 
 			<div class="form-group">
 				<label class="col-sm-5 control-label" for="Ac_Rate"> Ac Rate (Per unit) </label>
-				<div class="col-sm-1">: </div>
+				
 				<div class="col-sm-5">
 					<input name="Ac_Rate" type="number" id="Ac_Rate" value="<?php echo $selected->Ac_Rate ?>" class="form-control" />
 				</div>
 			</div>
 			
 			<div class="form-group">
-				<label class="col-sm-5 control-label" for="Electricity_Rate"> Generator Rate (Per unit)  </label>
-				<div class="col-sm-1">: </div>
+				<label class="col-sm-5 control-label" for="Generator_Rate"> Generator Rate (Per unit)  </label>
+				
 				<div class="col-sm-5">
-					<input name="Generator_Rate" type="number" id="Electricity_Rate" value="<?php echo $selected->Electricity_Rate ?>" class="form-control" />
+					<input name="Generator_Rate" type="number" id="Generator_Rate" value="<?php echo $selected->Generator_Rate ?>" class="form-control" />
 				</div>
 			</div>
 
 			<div class="form-group">
 				<label class="col-sm-5 control-label" for="Service_Rate"> Service Rate (unit)  </label>
-				<div class="col-sm-1">: </div>
+				
 				<div class="col-sm-5">
-					<input name="Service_Rate" type="number" id="Service_Rate" value="<?php echo $selected->Electricity_Rate ?>" class="form-control" />
+					<input name="Service_Rate" type="number" id="Service_Rate" value="<?php echo $selected->Service_Rate ?>" class="form-control" />
 				</div>
 			</div>
 
 			<div class="form-group">
 				<label class="col-sm-5 control-label" for="Wasa_Rate"> Wasa Rate (unit) </label>
-				<div class="col-sm-1">: </div>
+				
 				<div class="col-sm-5">
-					<input name="Wasa_Rate" type="number" id="Wasa_Rate" value="<?php echo $selected->Electricity_Rate ?>" class="form-control" />
+					<input name="Wasa_Rate" type="number" id="Wasa_Rate" value="<?php echo $selected->Wasa_Rate ?>" class="form-control" />
 				</div>
 			</div>
 
 			<div class="form-group">
 				<label class="col-sm-5 control-label" for="Mosque_Rate"> Mosque charge (unit)  </label>
-				<div class="col-sm-1">: </div>
 				<div class="col-sm-5">
-					<input name="Mosque_Rate" type="number" id="Mosque_Rate" value="<?php echo $selected->Electricity_Rate ?>" class="form-control" />
+					<input name="Mosque_Rate" type="number" id="Mosque_Rate" value="<?php echo $selected->Mosque_Rate ?>" class="form-control" />
 				</div>
 			</div>
+
+			<div class="form-group">
+				<div class="col-sm-12"><hr></div>
+			</div>
+
+			
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Electricity_late"> Eletricity Lates  </label>
+				<div class="col-sm-5">
+					<input name="Electricity_late" type="number" id="Electricity_late" value="<?php echo $selected->Electricity_late ?>" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Generator_late"> Generator Lates  </label>
+				<div class="col-sm-5">
+					<input name="Generator_late" type="number" id="Generator_late" value="<?php echo $selected->Generator_late ?>" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Ac_late"> Ac lates </label>
+				<div class="col-sm-5">
+					<input name="Ac_late" type="number" id="Ac_late" value="<?php echo $selected->Ac_late ?>" class="form-control" />
+				</div>
+			</div>
+
 
 			<div class="form-group" style="margin-top:15px;">
 				<label class="col-sm-4 control-label" for=""> </label>
@@ -124,6 +150,32 @@
 				<div class="col-sm-1">: </div>
 				<div class="col-sm-5">
 					<input name="Mosque_Rate" type="number" id="Mosque_Rate" value="" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-sm-12"><hr></div>
+			</div>
+
+			
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Electricity_late"> Electricity Lates (TK) </label>
+				<div class="col-sm-5">
+					<input name="Electricity_late" type="number" id="Electricity_late" value="" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Generator_late"> Generator Lates (TK)  </label>
+				<div class="col-sm-5">
+					<input name="Generator_late" type="number" id="Generator_late" value="" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Ac_late"> Ac lates (TK) </label>
+				<div class="col-sm-5">
+					<input name="Ac_late" type="number" id="Ac_late" value="" class="form-control" />
 				</div>
 			</div>
 

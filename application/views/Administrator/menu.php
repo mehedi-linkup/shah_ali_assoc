@@ -19,6 +19,8 @@ $userID =  $this->session->userdata('userId');
 $CheckSuperAdmin = $this->db->where('UserType', 'm')->where('User_SlNo', $userID)->get('tbl_user')->row();
 
 $CheckAdmin = $this->db->where('UserType', 'a')->where('User_SlNo', $userID)->get('tbl_user')->row();
+$CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
+$CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
 
 $userAccessQuery = $this->db->where('user_id', $userID)->get('tbl_user_access');
 $access = [];
@@ -28,9 +30,11 @@ if ($userAccessQuery->num_rows() != 0) {
 }
 
 $module = $this->session->userdata('module');
+
 if ($module == 'dashboard' or $module == '') {
 	?>
 	<ul class="nav nav-list">
+		
 		<li class="active">
 			<!-- module/dashboard -->
 			<a href="<?php echo base_url(); ?>">
@@ -39,7 +43,9 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
+		
 
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			<a href="<?php echo base_url(); ?>module/BillModule">
 				<i class="menu-icon fa fa-credit-card"></i>
@@ -47,7 +53,9 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
+		<?php endif; ?>
 
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			<a href="<?php echo base_url(); ?>module/PaymentModule">
 				<i class="menu-icon fa fa-plug" aria-hidden="true"></i>
@@ -55,16 +63,29 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
-
-		<!-- <li class="">
-			<a href="<?php echo base_url(); ?>module/AcModule">
-				<i class="menu-icon fa fa-snowflake-o" aria-hidden="true"></i>
-
-				<span class="menu-text"> Ac Module </span>
+		<?php endif; ?>
+		
+		
+		<li class="">
+			<a href="<?php echo base_url(); ?>module/NoticeModule">
+				<i class="menu-icon fa fa-bell-o" aria-hidden="true"></i>
+				<span class="menu-text"><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notice Module' ?></span>
 			</a>
 			<b class="arrow"></b>
-		</li> -->
+		</li>
 
+		<?php if (isset($CheckOwner) || isset($CheckRenter) ) : ?>
+		<li class="">
+			<a href="<?php echo base_url(); ?>module/TransactionModule">
+				<i class="menu-icon fa fa-exchange" aria-hidden="true"></i>
+				<span class="menu-text"> Transaction </span>
+			</a>
+			<b class="arrow"></b>
+		</li>
+		<?php endif; ?>
+
+		
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			
 			<a href="<?php echo base_url(); ?>module/AccountsModule">
@@ -73,7 +94,10 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
+		<?php endif; ?>
 
+
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			<!-- module/HRPayroll -->
 			<a href="<?php echo base_url(); ?>module/HRPayroll">
@@ -82,7 +106,9 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
+		<?php endif; ?>
 
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			<a href="<?php echo base_url(); ?>module/ReportsModule">
 				<i class="menu-icon fa fa-calendar-check-o"></i>
@@ -90,7 +116,9 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
+		<?php endif; ?>
 
+		<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 		<li class="">
 			<a href="<?php echo base_url(); ?>module/Administration">
 				<i class="menu-icon fa fa-cogs"></i>
@@ -98,14 +126,7 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 			<b class="arrow"></b>
 		</li>
-		
-		<!-- <li class="">
-			<a href="<?php echo base_url(); ?>graph">
-				<i class="menu-icon fa fa-bar-chart"></i>
-				<span class="menu-text"> Business Monitor </span>
-			</a>
-			<b class="arrow"></b>
-		</li> -->
+		<?php endif; ?>
 	</ul>
 <?php } elseif ($module == 'Administration') { ?>
 	<ul class="nav nav-list">
@@ -894,7 +915,131 @@ if ($module == 'dashboard' or $module == '') {
 			</li>
 		<?php endif; ?>
 	</ul><!-- /.nav-list -->
+<?php } elseif ($module == 'NoticeModule') { ?>
+	<ul class="nav nav-list">
+		<li class="active">
+			<a href="<?php echo base_url(); ?>module/dashboard">
+				<i class="menu-icon fa fa-tachometer"></i>
+				<span class="menu-text"> Dashboard </span>
+			</a>
 
+			<b class="arrow"></b>
+		</li>
+
+		<li>
+			<a href="<?php echo base_url(); ?>module/NoticeModule" class="module_title">
+				<span><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notice Module' ?></span>
+			</a>
+		</li>
+
+		<?php if (array_search("newsAndNotice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>newsAndNotice">
+					<i class="menu-icon fa fa-newspaper-o"></i>
+					<span class="menu-text"> News & Notice </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+			<li class="<?php echo $_SERVER['REQUEST_URI']=='/module/NoticeModule' || $_SERVER['REQUEST_URI']=='/notice_view' || $_SERVER['REQUEST_URI']=='/news_view' ? 'open': ''?>">
+				<a href="<?php echo base_url(); ?>" class="dropdown-toggle">
+					<i class="menu-icon fa fa-bell-o"></i>
+					<span class="menu-text"> Notice </span>
+					<b class="arrow fa fa-angle-down"></b>
+
+				</a>
+
+				<b class="arrow"></b>
+
+				<ul class="submenu">
+					<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>notice_view">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Notice View
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>			
+					<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>news_view">
+								<i class="menu-icon fa fa-caret-right"></i>
+								News View
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+		
+				</ul>
+			</li>
+		<?php endif; ?>
+	</ul>
+<?php } elseif ($module == 'TransactionModule') { ?>
+	<ul class="nav nav-list">
+		<li class="active">
+			<a href="<?php echo base_url(); ?>module/dashboard">
+				<i class="menu-icon fa fa-tachometer"></i>
+				<span class="menu-text"> Dashboard </span>
+			</a>
+
+			<b class="arrow"></b>
+		</li>
+
+		<li>
+			<a href="<?php echo base_url(); ?>module/TransactionModule" class="module_title">
+				<span> Transaction </span>
+			</a>
+		</li>
+
+		<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+			<li class="<?php echo $_SERVER['REQUEST_URI']=='/module/TransactionModule' || $_SERVER['REQUEST_URI']=='/bill_view' || $_SERVER['REQUEST_URI']=='/payment_view' || $_SERVER['REQUEST_URI']=='/due_view' ? 'open': ''?>">
+				<a href="<?php echo base_url(); ?>" class="dropdown-toggle">
+					<i class="menu-icon fa fa-exchange"></i>
+					<span class="menu-text"> Transaction</span>
+					<b class="arrow fa fa-angle-down"></b>
+
+				</a>
+
+				<b class="arrow"></b>
+				
+
+				<ul class="submenu">
+					<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>bill_view">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Bill
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>			
+					<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>payment_view">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Payment
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>due_view">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Due
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+		
+				</ul>
+			</li>
+		<?php endif; ?>
+	</ul>
 <?php } elseif ($module == 'AccountsModule') { ?>
 	<ul class="nav nav-list">
 		<li class="active">

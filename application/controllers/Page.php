@@ -5,15 +5,20 @@ class Page extends CI_Controller {
         parent::__construct();
         $this->brunch = $this->session->userdata('BRANCHid');
         $access = $this->session->userdata('userId');
-         if($access == '' ){
-            redirect("Login");
-        }
+        if($access == '' ){
+            redirect("Login/userindex");
+        } 
         $this->load->model("Model_myclass", "mmc", TRUE);
         $this->load->model('Model_table', "mt", TRUE);
 		$this->load->model('Billing_model');
         date_default_timezone_set('Asia/Dhaka');
     }
-    public function index()  {
+    public function index() {
+        $data['title'] = "Dashboard";
+        $data['content'] = $this->load->view('Administrator/dashboard', $data, TRUE);
+        $this->load->view('Administrator/master_dashboard', $data);
+    }
+    public function customerIndex()  {
         $data['title'] = "Dashboard";
         $data['content'] = $this->load->view('Administrator/dashboard', $data, TRUE);
         $this->load->view('Administrator/master_dashboard', $data);

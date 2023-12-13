@@ -1,7 +1,7 @@
 <div id="paymentInvoice">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
-			<payment-invoice v-bind:payment_id="paymentId"></payment-invoice>
+			<ac-invoice v-bind:payment_id="paymentId"></ac-invoice>
 		</div>
 	</div>
 </div>

@@ -8,6 +8,16 @@ $route['translate_uri_dashes'] = FALSE;
 $route['logout'] = 'Login/logout';  
 
 $route['Administrator'] = 'Administrator/Page';
+
+$route['Administrator/customerIndex'] = 'Administrator/Page/customerIndex';
+$route['notice_view'] = 'Administrator/Page/noticeView';
+$route['notice_view/(:any)'] = 'Administrator/Page/notice_view/$1';
+$route['news_view'] = 'Administrator/Page/newsView';
+$route['news_view/(:any)'] = 'Administrator/Page/news_view/$1';
+$route['bill_view'] = 'Administrator/Page/billView';
+$route['payment_view'] = 'Administrator/Page/paymentView';
+$route['due_view'] = 'Administrator/Page/dueView';
+
 $route['module/(:any)'] = 'Administrator/Page/module/$1';
 $route['brachAccess/(:any)'] = 'Administrator/Login/brach_access/$1';
 $route['getBrachAccess'] = 'Administrator/Login/branch_access_main_admin';
@@ -56,7 +66,6 @@ $route['get_assets_cost'] 			= 'Administrator/Assets/getAssetsCost';
 $route['assets_report']				= 'Administrator/Assets/assetsReport';
 $route['get_group_assets']			= 'Administrator/Assets/getGroupAssets';
 $route['get_assets_report']			= 'Administrator/Assets/getAssetsReport';
-
 
 
 $route['unit'] = 'Administrator/Page/unit';
@@ -118,7 +127,7 @@ $route['reorder_list']	=	'Administrator/Reports/reOrderList';
 $route['utilityRates'] = 'Administrator/Bills/utility_rate';
 $route['utility_rate_update'] = 'Administrator/Bills/utility_rate_update';
 $route['utility_rate_insert'] = 'Administrator/Bills/utility_rate_insert';
-$route['get_utility_rate'] = 'Administrator/PaBillsge/getUtilityRate';
+$route['get_utility_rate'] = 'Administrator/Bills/getUtilityRate';
 
 $route['totalStock'] = 'Administrator/Services/total_stock';
 $route['totalStockPrint'] = 'Administrator/Reports/total_stock';
@@ -209,6 +218,7 @@ $route['acPaymentRecord'] = 'Administrator/Payment/ac_payment_record';
 $route['payment_invoice_print/(:any)'] = 'Administrator/Payment/paymentInvoicePrint/$1';
 $route['ac_invoice_print/(:any)'] = 'Administrator/Payment/paymentAcInvoicePrint/$1';
 $route['paymentinvoice'] = 'Administrator/Payment/payment_invoice';
+$route['acinvoice'] = 'Administrator/Payment/ac_invoice';
 
 
 $route['purchase/(:any)'] = 'Administrator/Purchase/purchaseEdit/$1';
@@ -398,6 +408,22 @@ $route['companyProfile'] = 'Administrator/Page/company_profile';
 $route['company_profile_Update'] = 'Administrator/Page/company_profile_Update';
 $route['company_profile_insert'] = 'Administrator/Page/company_profile_insert';
 $route['get_company_profile'] = 'Administrator/Page/getCompanyProfile';
+
+$route['newsAndNotice'] = 'Administrator/Page/news_notice';
+$route['add_news'] = 'Administrator/Page/addNews';
+$route['update_news'] = 'Administrator/Page/updateNews';
+$route['newsEdit'] = 'Administrator/Page/news_edit';
+$route['newsUpdate'] = 'Administrator/Page/news_update';
+$route['newsDelete'] = 'Administrator/Page/news_delete';
+$route['get_news'] = 'Administrator/Page/getNews';
+$route['change_news_status'] = 'Administrator/Page/changeNewsStatus';
+$route['add_notice'] = 'Administrator/Page/addNotice';
+$route['update_notice'] = 'Administrator/Page/updateNotice';
+$route['noticeEdit'] = 'Administrator/Page/notice_edit';
+$route['noticeUpdate'] = 'Administrator/Page/notice_update';
+$route['noticeDelete'] = 'Administrator/Page/notice_delete';
+$route['get_notice'] = 'Administrator/Page/getNotice';
+$route['change_notice_status'] = 'Administrator/Page/changeNoticeStatus';
 
 $route['employee'] = 'Administrator/employee';
 $route['get_employees'] = 'Administrator/Employee/getEmployees';

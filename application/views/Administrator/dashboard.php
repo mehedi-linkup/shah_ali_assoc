@@ -7,6 +7,9 @@ $CheckSuperAdmin = $this->db->where('UserType', 'm')->where('User_SlNo', $userID
 
 $CheckAdmin = $this->db->where('UserType', 'a')->where('User_SlNo', $userID)->get('tbl_user')->row();
 
+$CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
+$CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
+
 $userAccessQuery = $this->db->where('user_id', $userID)->get('tbl_user_access');
 $access = [];
 if ($userAccessQuery->num_rows() != 0) {
@@ -24,131 +27,134 @@ if ($module == 'dashboard' or $module == '') { ?>
 	<div class="row">
 		<div class="col-md-12 col-xs-12">
 			<!-- Header Logo -->
-			<div class="col-md-12 header" style="height: 130px;">
-				<img src="<?php echo base_url(); ?>assets/images/linkup_logo.png" class="img img-responsive center-block">
-			</div>
+			<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+				<div class="col-md-12 header" style="height: 130px;">
+					<img src="<?php echo base_url(); ?>assets/images/linkup_logo.png" class="img img-responsive center-block">
+				</div>
+			<?php endif; ?>
 			<div class="col-md-10 col-md-offset-1">
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#e1e1ff;" onmouseover="this.style.background = '#d2d2ff'" onmouseout="this.style.background = '#e1e1ff'">
-						<a href="<?php echo base_url(); ?>module/BillModule">
-							<div class="logo">
-								<i class="fa fa-credit-card"></i>
-							</div>
-							<div class="textModule">
-								Generate Module
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#e1e1ff;" onmouseover="this.style.background = '#d2d2ff'" onmouseout="this.style.background = '#e1e1ff'">
+							<a href="<?php echo base_url(); ?>module/BillModule">
+								<div class="logo">
+									<i class="fa fa-credit-card"></i>
+								</div>
+								<div class="textModule">
+									Generate Module
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#dcf5ea;" onmouseover="this.style.background = '#bdecd7'" onmouseout="this.style.background = '#dcf5ea'">
-						<a href="<?php echo base_url(); ?>module/PaymentModule">
-							<div class="logo">
-								<i class="fa fa-plug" aria-hidden="true"></i>
-							</div>
-							<div class="textModule">
-								Payment Module
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#dcf5ea;" onmouseover="this.style.background = '#bdecd7'" onmouseout="this.style.background = '#dcf5ea'">
+							<a href="<?php echo base_url(); ?>module/PaymentModule">
+								<div class="logo">
+									<i class="fa fa-plug" aria-hidden="true"></i>
+								</div>
+								<div class="textModule">
+									Payment Module
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
-
-				<!-- <div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#dcf5ea;" onmouseover="this.style.background = '#bdecd7'" onmouseout="this.style.background = '#dcf5ea'">
-						<a href="<?php echo base_url(); ?>module/PaymentModule">
-							<div class="logo">
-								<i class="fa fa-snowflake-o" aria-hidden="true"></i>
-								
-							</div>
-							<div class="textModule">
-								Ac Module
-							</div>
-						</a>
-					</div>
-				</div> -->
+				<?php endif; ?>
 
 				<!-- module/AccountsModule -->
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#A7ECFB;" onmouseover="this.style.background = '#85e6fa'" onmouseout="this.style.background = '#A7ECFB'">
-						<a href="<?php echo base_url(); ?>module/AccountsModule">
-							<div class="logo">
-								<i class="fa fa-clipboard"></i>
-							</div>
-							<div class="textModule">
-								Accounts Module
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#A7ECFB;" onmouseover="this.style.background = '#85e6fa'" onmouseout="this.style.background = '#A7ECFB'">
+							<a href="<?php echo base_url(); ?>module/AccountsModule">
+								<div class="logo">
+									<i class="fa fa-clipboard"></i>
+								</div>
+								<div class="textModule">
+									Accounts Module
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
 				<!-- module/HRPayroll -->
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#ecffd9;" onmouseover="this.style.background = '#cfff9f'" onmouseout="this.style.background = '#ecffd9'">
-						<a href="<?php echo base_url(); ?>module/HRPayroll">
-							<div class="logo">
-								<i class="fa fa-users"></i>
-							</div>
-							<div class="textModule">
-								HR & Payroll
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#ecffd9;" onmouseover="this.style.background = '#cfff9f'" onmouseout="this.style.background = '#ecffd9'">
+							<a href="<?php echo base_url(); ?>module/HRPayroll">
+								<div class="logo">
+									<i class="fa fa-users"></i>
+								</div>
+								<div class="textModule">
+									HR & Payroll
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
 				<!-- module/ReportsModule -->
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#c6e2ff;" onmouseover="this.style.background = '#91c8ff'" onmouseout="this.style.background = '#c6e2ff'">
-						<a href="<?php echo base_url(); ?>module/ReportsModule">
-							<div class="logo">
-								<i class="fa fa-calendar-check-o"></i>
-							</div>
-							<div class="textModule">
-								Reports Module
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#c6e2ff;" onmouseover="this.style.background = '#91c8ff'" onmouseout="this.style.background = '#c6e2ff'">
+							<a href="<?php echo base_url(); ?>module/ReportsModule">
+								<div class="logo">
+									<i class="fa fa-calendar-check-o"></i>
+								</div>
+								<div class="textModule">
+									Reports Module
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#e6e6ff;" onmouseover="this.style.background = '#b9b9ff'" onmouseout="this.style.background = '#e6e6ff'">
-						<a href="<?php echo base_url(); ?>module/Administration">
-							<div class="logo">
-								<i class="fa fa-cogs"></i>
-							</div>
-							<div class="textModule">
-								Administration
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#e6e6ff;" onmouseover="this.style.background = '#b9b9ff'" onmouseout="this.style.background = '#e6e6ff'">
+							<a href="<?php echo base_url(); ?>module/Administration">
+								<div class="logo">
+									<i class="fa fa-cogs"></i>
+								</div>
+								<div class="textModule">
+									Administration
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#d8ebeb;" onmouseover="this.style.background = '#bddddd'" onmouseout="this.style.background = '#d8ebeb'">
-						<a href="<?php echo base_url(); ?>graph">
-							<div class="logo">
-								<i class="fa fa-bar-chart"></i>
-							</div>
-							<div class="textModule">
-								Business Monitor
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#d8ebeb;" onmouseover="this.style.background = '#bddddd'" onmouseout="this.style.background = '#d8ebeb'">
+							<a href="<?php echo base_url(); ?>graph">
+								<div class="logo">
+									<i class="fa fa-bar-chart"></i>
+								</div>
+								<div class="textModule">
+									Business Monitor
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 
-
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#ffe3d7;" onmouseover="this.style.background = '#ffc0a6'" onmouseout="this.style.background = '#ffe3d7'">
-						<a href="<?php echo base_url(); ?>Login/logout">
-							<div class="logo">
-								<i class="fa fa-sign-out"></i>
-							</div>
-							<div class="textModule">
-								LogOut
-							</div>
-						</a>
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
+					<div class="col-md-3 col-xs-6 section4">
+						<div class="col-md-12 section122" style="background-color:#ffe3d7;" onmouseover="this.style.background = '#ffc0a6'" onmouseout="this.style.background = '#ffe3d7'">
+							<a href="<?php echo base_url(); ?>Login/logout">
+								<div class="logo">
+									<i class="fa fa-sign-out"></i>
+								</div>
+								<div class="textModule">
+									LogOut
+								</div>
+							</a>
+						</div>
 					</div>
-				</div>
+				<?php endif; ?>
 			</div>
 			<!-- PAGE CONTENT ENDS -->
 		</div><!-- /.col -->
@@ -417,9 +423,9 @@ if ($module == 'dashboard' or $module == '') { ?>
 						</div>
 					</div>
 				<?php endif; ?> -->
-				
-				
-				<?php if($this->session->userdata('BRANCHid') == 1 && (isset($CheckSuperAdmin) || isset($CheckAdmin))) : ?>
+
+
+				<?php if ($this->session->userdata('BRANCHid') == 1 && (isset($CheckSuperAdmin) || isset($CheckAdmin))) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>companyProfile">
@@ -828,7 +834,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>utility/payment">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-inbox"></i>
 								</div>
 								<div class="textModule">
@@ -844,11 +850,11 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>paymentRecord">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-th-list"></i>
 								</div>
 								<div class="textModule">
-									 Payment Record
+									Payment Record
 								</div>
 							</a>
 						</div>
@@ -860,11 +866,11 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>acPaymentRecord">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-th-list"></i>
 								</div>
 								<div class="textModule">
-									 AC Record
+									AC Record
 								</div>
 							</a>
 						</div>
@@ -876,11 +882,11 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>paymentinvoice">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-file"></i>
 								</div>
 								<div class="textModule">
-									 Payment Invoice
+									Payment Invoice
 								</div>
 							</a>
 						</div>
@@ -892,11 +898,11 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>acinvoice">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-file"></i>
 								</div>
 								<div class="textModule">
-									 AC Invoice
+									AC Invoice
 								</div>
 							</a>
 						</div>
@@ -908,7 +914,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>store_payment_report">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-file-text-o"></i>
 								</div>
 								<div class="textModule">
@@ -924,7 +930,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>renterDue">
 								<div class="logo">
-								
+
 									<i class="menu-icon fa fa-file-text"></i>
 								</div>
 								<div class="textModule">
@@ -943,7 +949,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 									<i class="menu-icon fa fa-file-text-o"></i>
 								</div>
 								<div class="textModule">
-									 Renter Payment Report
+									Renter Payment Report
 								</div>
 							</a>
 						</div>
@@ -1095,7 +1101,32 @@ if ($module == 'dashboard' or $module == '') { ?>
 			<!-- PAGE CONTENT ENDS -->
 		</div><!-- /.col -->
 	</div><!-- /.row -->
-
+<?php } elseif ($module == 'NoticeModule') { ?>
+	<div class="row">
+		<div class="col-md-12 col-xs-12">
+			<div class="col-md-1"></div>
+			<div class="col-md-10">
+				<!-- Header Logo -->
+				<div class="col-md-12 header">
+					<h3> Notice Module </h3>
+				</div>
+				<?php if (array_search("newsAndNotice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>newsAndNotice">
+								<div class="logo">
+									<i class="menu-icon fa fa-newspaper-o"></i>
+								</div>
+								<div class="textModule">
+									News & Notice
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
 <?php } elseif ($module == 'AccountsModule') { ?>
 	<div class="row">
 		<div class="col-md-12 col-xs-12">
@@ -1162,7 +1193,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 						</div>
 					</div>
 				<?php endif; ?>
-				
+
 				<?php if (array_search("account", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
@@ -1949,3 +1980,125 @@ if ($module == 'dashboard' or $module == '') { ?>
 		</div><!-- /.col -->
 	</div><!-- /.row -->
 <?php } ?>
+
+<?php if (isset($CheckOwner) || isset($CheckRenter)) : ?>
+
+	<style>
+		.view-all-news {
+			font-weight: bold;
+			color: white !important;
+			border: 1px solid;
+			padding: 4px 11px;
+			height: 32px;
+			border-radius: 5px;
+			background: #72c02c !important;
+		}
+		.view-all-news a {
+			color: white !important;
+			text-decoration: none;
+		}
+		.breakingNews a {
+			color: #f00;
+		}
+		.breakingNews {
+			display: flex;
+			margin-bottom: 20px;
+		}
+		.breakingNews i {
+			color: #72c02c;
+		}
+		.news-panel {
+			height: 400px; 
+			overflow: hidden; 
+			border: 1px solid #ddd; 
+			position: relative;
+		}
+
+		.news-content {
+			padding: 15px; 
+			animation: scroll-up 15s linear infinite; 
+			animation-play-state: running;
+		}
+
+		.news-content:hover {
+			animation-play-state: paused; /* Pause the animation on hover */
+		}
+
+		#notice-board-ticker ul li {
+			list-style: none;
+			background: url("/assets/extra/img/bullet_tick.png") no-repeat center left;
+		}
+		#notice-board-ticker ul a {
+			margin-left: 20px;
+			border-bottom: 1px dotted #666;
+		}
+
+		@keyframes scroll-up {
+		0% {
+			transform: translateY(100%); 
+		}
+
+		100% {
+			transform: translateY(-100%); 
+		}
+		}
+  </style>
+<div class="row">
+	<div class="col-md-12 col-xs-12">
+		<div class="breakingNews">
+			<marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();" scrollamount="8">
+				<ul class="list-inline">
+					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1383.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
+					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1382.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
+					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1377.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
+				</ul>
+			</marquee>
+			<!-- <span class="view-all-news"> -->
+				<a class="btn btn-sm btn-warning" href="/media-communication/allscrollnews.html">All Latest News</a>
+			<!-- </span> -->
+		</div>
+	</div>
+
+	<div class="col-md-7 col-xs-7">
+		<div class="panel panel-default news-panel">
+			<h2 style="padding:15px">নোটিশ বোর্ড</h2>
+			<div id="notice-board-ticker">
+				<ul>
+				<?php $notice_code = 234; ?>
+					<li>
+						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong>
+					</li>
+					<li>
+						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬২ [জনাব মো: উজ্জল, অফিস সহকারী কাম-কম্পিউটার মুদ্রাক্ষরিক]">শ্রান্তি ও বিনোদন ছুটি-৯৬২ [জনাব মো: উজ্জল, অফিস সহকারী কাম-কম্পিউটার মুদ্রাক্ষরিক]</a><strong style="color:red"> (নতুন)</strong>
+					</li>
+					<li>
+						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="বাংলাদেশ ও ভিয়েতনামের মধ্যে অনুষ্ঠিত 3rd JTC জন্য আলোচ্যসূচি (Agenda) প্রেরণ।">বাংলাদেশ ও ভিয়েতনামের মধ্যে অনুষ্ঠিত 3rd JTC জন্য আলোচ্যসূচি (Agenda) প্রেরণ।</a><strong style="color:red"> (নতুন)</strong>
+					</li>
+					<li>
+						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="Office Order 311 : Ex- Bangladesh Leave [Mr. Khalilur Rahman, Asistant Manager, BJMC]...">Office Order 311 : Ex- Bangladesh Leave [Mr. Khalilur Rahman, Asistant Manager, BJMC]...</a><strong style="color:red"> (নতুন)</strong>
+					</li>
+					<li>
+						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="১০ম-২০তম গ্রেড পর্যন্ত কর্মকর্তা/কর্মচারীদের গোপনীয় অনুবেদন ফর্ম এবং '১০ম-২০তম গ্রেডভ...">১০ম-২০তম গ্রেড পর্যন্ত কর্মকর্তা/কর্মচারীদের গোপনীয় অনুবেদন ফর্ম এবং '১০ম-২০তম গ্রেডভ...</a><strong style="color:red"> (নতুন)</strong>
+					</li>
+				</ul>	
+				<a style="position: absolute;bottom: 0;" class="btn right" href="<?php echo base_url(); ?>notice_view" title="সকল নোটিশ">সকল</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-5 col-xs-5">
+		<div class="panel panel-default news-panel">
+			<div class="panel-body news-content">
+				<?php $news_code = 234; ?>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>						
+			</div>
+			<div style="position: absolute;bottom: 0;"><a class="btn btn-primary" style="float:right" href="<?php echo base_url(); ?>news_view" title="সকল নোটিশ">সকল</a></div>
+		</div>
+	</div>
+</div>
+<?php endif; ?>

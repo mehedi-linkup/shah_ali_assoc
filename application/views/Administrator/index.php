@@ -102,10 +102,34 @@
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
 						<?php 
-						$userID =  $this->session->userdata('userId');
+							$userID =  $this->session->userdata('userId');
 							$CheckSuperAdmin = $this->db->where('UserType','m')->where('User_SlNo',$userID)->get('tbl_user')->row();
-							if(isset($CheckSuperAdmin)):
+							$CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
+							$CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
 						?>
+
+						<?php if(isset($CheckRenter) || isset($CheckOwner)) : ?>
+						<li class="light-blue dropdown-modal">
+							<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color:unset">
+								<span style="font-size: 20px;"><i class="fa fa-bell" aria-hidden="true" style="font-size:20px;"></i></span>
+							</a>
+							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+								<?php 
+								$sql = $this->db->query("SELECT * FROM tbl_brunch where status = 'a' order by Brunch_name asc ");
+								$row = $sql->result();
+								foreach($row as $row){ ?>
+										<li>
+											<a class="btn-add fancybox fancybox.ajax" href="<?php echo base_url();?>brachAccess/<?php echo $row->brunch_id; ?>">
+												<i class="ace-icon fa fa-bank"></i>
+												<?php echo $row->Brunch_name; ?> Here the line will be larger than you think   <i class="ace-icon fa fa-rotate"></i>
+											</a>
+										</li>
+								<?php } ?>
+							</ul>
+						</li>
+						<?php endif; ?>
+
+						<?php if(isset($CheckSuperAdmin)): ?>
 						<li class="light-blue dropdown-modal">
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
 										<span>Branch Acess</span>
@@ -127,15 +151,13 @@
 								<?php } ?>
 							</ul>
 						</li>	
-					<?php endif; ?>
+						<?php endif; ?>
 
 						<li class="clock_li">
 							<a class="clock" style="background:green">
 								<span style="font-size:15px;"><i class="ace-icon fa fa-clock-o"></i></span> <span style="font-size:12px;"><?php  date_default_timezone_set('Asia/Dhaka'); echo date("l, d F Y"); ?>,&nbsp;<span id="timer" style="font-size:12px;"></span></span>
 							</a>
 						</li>
-						
-
 
 						<li class="light-blue dropdown-modal">
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
@@ -190,6 +212,7 @@
 
 				<div class="sidebar-shortcuts" id="sidebar-shortcuts">
 					<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+						<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 						<a href="/graph" class="btn btn-success">
 							<i class="ace-icon fa fa-signal"></i>
 						</a>
@@ -205,6 +228,12 @@
 						<a href="/module/Administration" class="btn btn-danger">
 							<i class="ace-icon fa fa-cogs"></i>
 						</a>
+						<?php endif; ?>
+						<?php if (isset($CheckOwner) || isset($CheckRenter) ) : ?>
+						<a href="javascript:void(0)" class="btn btn-success" style="background-color:#525252!important;border-radius:0;border-width:1px;border-color:transparent;padding:5px;width:100%">
+							<span id="timer1" style="font-size:12px;"></span>
+						</a>
+						<?php endif; ?>
 					</div>
 
 					<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
@@ -220,9 +249,11 @@
 
 				<?php include('menu.php'); ?>
 
+				<?php if (!isset($CheckOwner) && !isset($CheckRenter) ) : ?>
 				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
 					<i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
 				</div>
+				<?php endif; ?>
 			</div>
 
 			<div class="main-content">
@@ -403,6 +434,9 @@
             var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds + " " + timeOfDay;
 
             document.getElementById("timer").innerHTML = currentTimeString;
+			<?php if (isset($CheckOwner) || isset($CheckRenter) ) : ?>
+            document.getElementById("timer1").innerHTML = currentTimeString;
+			<?php endif; ?>
 
         }, 1000);
 

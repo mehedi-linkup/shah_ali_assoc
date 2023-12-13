@@ -378,15 +378,15 @@ class Store extends CI_Controller
         $this->load->view('Administrator/edit/customer_edit', $data);
     }
 
-    public function deleteCustomer()
+    public function deleteStore()
     {
         $res = ['success'=>false, 'message'=>''];
         try{
             $data = json_decode($this->input->raw_input_stream);
 
-            $this->db->query("update tbl_customer set status = 'd' where Customer_SlNo = ?", $data->customerId);
+            $this->db->query("update tbl_store set status = 'd' where Store_SlNo = ?", $data->storeId);
 
-            $res = ['success'=>true, 'message'=>'Customer deleted'];
+            $res = ['success'=>true, 'message'=>'Store deleted'];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
         }
@@ -831,6 +831,14 @@ class Store extends CI_Controller
             $clauses .= " and s.Store_SlNo = '$data->storeId'";
         }
 
+        if(isset($data->renterId) && $data->renterId != ''){
+            $clauses .= " and r.Renter_SlNo = '$data->renterId'";
+        }
+
+        if(isset($data->ownerId) && $data->ownerId != ''){
+            $clauses .= " and o.Owner_SlNo = '$data->ownerId'";
+        }
+
         if(isset($data->month) && $data->month != ''){
             $clauses .= " and bs.month_id = '$data->month'";
         }
@@ -849,15 +857,14 @@ class Store extends CI_Controller
                 concat_ws('-', s.Store_No, s.Store_Name) as display_text,
                 s.meter_no,
                 o.Owner_Name,
-                re.Renter_Name,
+                r.Renter_Name,
                 m.month_name
-
             from tbl_bill_sheet_details bsd
             join tbl_bill_sheet bs on bs.id = bsd.bill_id
             join tbl_month m on m.month_id = bs.month_id
             join tbl_store s on s.Store_SlNo = bsd.store_id
             left join tbl_owner o on o.Owner_SlNo = s.owner_id
-            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            left join tbl_renter r on r.Renter_SlNo = s.renter_id
             where bsd.branch_id = ?
             and bsd.status = 'a'
             $clauses

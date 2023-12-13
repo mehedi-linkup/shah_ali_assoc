@@ -67,15 +67,10 @@ class Owner extends CI_Controller
         $data = json_decode($this->input->raw_input_stream);
         
         $clauses = "";
-        if(isset($data->customerId) && $data->customerId != null){
-            $clauses .= " and c.Owner_SlNo = '$data->customerId'";
+        if(isset($data->ownerId) && $data->ownerId != null){
+            $clauses .= " and o.Owner_SlNo = '$data->ownerId'";
         }
-        if(isset($data->districtId) && $data->districtId != null){
-            $clauses .= " and c.area_ID = '$data->districtId'";
-        }
-
-        $dueResult = $this->mt->customerDue($clauses);
-
+        $dueResult = $this->mt->ownerDue($clauses);
         echo json_encode($dueResult);
     }
 
@@ -203,10 +198,20 @@ class Owner extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $ownerObj = json_decode($this->input->post('data'));
+
+            // echo json_encode($ownerObj);
+            // return;
             
             $ownerCodeCount = $this->db->query("select * from tbl_owner where Owner_Code = ?", $ownerObj->Owner_Code)->num_rows();
             if($ownerCodeCount > 0){
                 $ownerObj->Owner_Code = $this->mt->generateOwnerCode();
+            }
+
+            $ownerUserCount = $this->db->query("select * from tbl_owner where Owner_UserName = ?", $ownerObj->Owner_UserName)->num_rows();
+            if($ownerUserCount > 0){
+                $res = ['success'=>false, 'message'=>"Username Exist!"];
+                echo json_encode($res);
+                return;
             }
 
             $owner = (array)$ownerObj;
@@ -265,6 +270,28 @@ class Owner extends CI_Controller
 
                 $this->db->query("update tbl_owner set image_name = ? where Owner_SlNo = ?", [$imageName, $ownerId]);
             }
+
+            
+            // Insert user as owner role
+            $ownerObj->Owner_UserName;
+            $checkUsername = $this->db->query("select * from tbl_user where User_Name = ?", $ownerObj->Owner_UserName)->num_rows();
+            if($checkUsername > 0){
+                $res = ['success'=>false, 'message'=>'Username already exists'];
+                echo json_encode($res);
+                exit;
+            }
+    
+            $udata = array(
+                "User_Name"                 => $ownerObj->Owner_UserName,
+                "FullName"                  => $ownerObj->Owner_Name,
+                "UserEmail"                 => $ownerObj->Owner_Email,
+                "Brunch_ID"                 => $this->session->userdata("BRANCHid"),
+                "userBrunch_id"             => $this->session->userdata("BRANCHid"),
+                "User_Password"             => md5(12345),
+                "UserType"                  => 'o',
+                "AddTime"                   => date('Y-m-d H:i:s')
+            );
+            $this->mt->save_data("tbl_user", $udata);
 
             $res = ['success'=>true, 'message' => $res_message, 'ownerCode'=>$this->mt->generateOwnerCode()];
         } catch (Exception $ex){

@@ -1888,6 +1888,13 @@ class Bills extends CI_Controller {
             $clauses .= " and bs.month_id = '$data->month_id'";
         }
 
+        $clausesDetails = "";
+        if(isset($data->floor_id) && $data->floor_id != ''){
+            $clausesDetails .= " and f.Floor_SlNo = '$data->floor_id'";
+        }
+
+
+
         $sheets = $this->db->query("
             SELECT bs.*,
             m.month_name,
@@ -1923,6 +1930,7 @@ class Bills extends CI_Controller {
                     left join tbl_floor f on f.Floor_SlNo = s.floor_id
                     where bd.status = 'a'
                     and bd.bill_id = '$payment->id'
+                    $clausesDetails
                 ")->result();
             }
         }
@@ -2145,10 +2153,14 @@ class Bills extends CI_Controller {
         
         $id = $this->sbrunch;
         $data['Electricity_Rate']=  $this->input->post('Electricity_Rate',true);
+        $data['Ac_Rate']=  $this->input->post('Ac_Rate',true);
         $data['Generator_Rate']=  $this->input->post('Generator_Rate',true);
         $data['Service_Rate']=  $this->input->post('Service_Rate',true);
         $data['Wasa_Rate']=  $this->input->post('Wasa_Rate',true);
-        $data['Mosque_Rate']=  $this->input->post('Mosque_Rate',true);        
+        $data['Mosque_Rate']=  $this->input->post('Mosque_Rate',true);    
+        $data['Electricity_late']=  $this->input->post('Electricity_late',true);
+        $data['Generator_late']=  $this->input->post('Generator_late',true);    
+        $data['Ac_late']=  $this->input->post('Ac_late',true);    
         $data['rate_branchid'] = $id;
 
         $result= $this->db->insert("tbl_utility_rate", $data);
@@ -2164,11 +2176,22 @@ class Bills extends CI_Controller {
     }
 	
     public function utility_rate_update(){
-        $data = $this->input->post();
-        unset($data['iidd']);
-        unset($data['btnSubmit']);
-       
-        $xx = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
+        // echo "<pre>";
+        // print_r($this->input->post());
+        // echo "</pre>";
+        // return;
+        $branchId = $this->session->userdata("BRANCHid"); 
+        $data['Electricity_Rate']=  $this->input->post('Electricity_Rate',true);
+        $data['Ac_Rate']=  $this->input->post('Ac_Rate',true);
+        $data['Generator_Rate']=  $this->input->post('Generator_Rate',true);
+        $data['Service_Rate']=  $this->input->post('Service_Rate',true);
+        $data['Wasa_Rate']=  $this->input->post('Wasa_Rate',true);
+        $data['Mosque_Rate']=  $this->input->post('Mosque_Rate',true);    
+        $data['Electricity_late']=  $this->input->post('Electricity_late',true);
+        $data['Generator_late']=  $this->input->post('Generator_late',true);    
+        $data['Ac_late']=  $this->input->post('Ac_late',true);    
+
+        $xx = $this->db->query("select * from tbl_utility_rate where rate_branchid = '$branchId' order by Rate_SlNo desc limit 1")->row();
         $this->db->where('Rate_SlNo', $xx->Rate_SlNo);
         $this->db->update('tbl_utility_rate', $data);
 
@@ -2181,5 +2204,11 @@ class Bills extends CI_Controller {
 
         }
         
+    }
+
+    public function getUtilityRate() {
+        $branchId = $this->session->userdata("BRANCHid"); 
+        $rate = $this->Billing_model->utility_rate($branchId);
+        echo json_encode($rate);
     }
 }
