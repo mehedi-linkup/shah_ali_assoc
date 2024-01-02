@@ -84,24 +84,45 @@
 							$CheckRenter = $this->db->where('UserType', 'r')->where('User_SlNo', $userID)->get('tbl_user')->row();
 							$CheckOwner = $this->db->where('UserType', 'o')->where('User_SlNo', $userID)->get('tbl_user')->row();
 						?>
-						<?php if(isset($CheckRenter) || isset($CheckOwner)) : ?>
+						<?php if(isset($CheckRenter) || isset($CheckOwner)) : 
+							$this->load->model('Model_table', "mt", TRUE);
+
+							$userData = $this->session->userdata();
+							$userTableData = $this->db->query("select * from tbl_user where User_SlNo = ". $userData['userId'])->row();
+							$clauses = "";
+							if($userTableData->UserType == 'o') {
+								$clauses .= "and s.owner_id = '$userTableData->ref_id'";
+							} else if($userTableData->UserType == 'r') {
+								$clauses .= "and s.renter_id = '$userTableData->ref_id'";
+							}
+							$billDetails = $this->mt->lastBillDetails($clauses);
+
+							$filteredData = array_filter($billDetails, function($element) {
+								return $element->is_show == '0';
+							});
+
+							$count = count($filteredData);
+						?>
+						
 						<li class="light-blue dropdown-modal">
 
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color:unset">
 								<span style="font-size: 20px;"><i class="fa fa-bell" aria-hidden="true" style="font-size:20px;"></i></span>
+								<?php if($count > 0) { ?>
+									<span class="badge"><?php echo $count ?></span>
+								<?php } ?>
 							</a>
 							
 
 							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
 									
 								<?php 
-								$sql = $this->db->query("SELECT * FROM tbl_brunch where status = 'a' order by Brunch_name asc ");
-								$row = $sql->result();
-								foreach($row as $row){ ?>
-										<li>
-											<a class="btn-add fancybox fancybox.ajax" href="<?php echo base_url();?>brachAccess/<?php echo $row->brunch_id; ?>">
+								
+								foreach($billDetails as $row){ ?>
+										<li class="<?php echo $row->is_show == '0' ? 'bg-blue' : '' ?>">
+											<a class="btn-add fancybox fancybox.ajax <?php echo $row->is_show == '0' ? 'text-white' : '' ?>" href="<?php echo base_url();?>lastBillDetails/<?php echo $row->id; ?>">
 												<i class="ace-icon fa fa-bank"></i>
-												<?php echo $row->Brunch_name; ?> Here the line will be larger than you think   <i class="ace-icon fa fa-rotate"></i>
+												<?php echo $row->bill_text; ?><i class="ace-icon fa fa-rotate"></i>
 											</a>
 										</li>
 								<?php } ?>
@@ -338,7 +359,7 @@
 		<!-- ace scripts -->
 		<script src="<?php echo base_url(); ?>assets/js/ace-elements.min.js"></script>
 		<script src="<?php echo base_url(); ?>assets/js/ace.min.js"></script>
-<script type="text/javascript" src="<?php echo base_url()?>assets/fancyBox/js/jquery.fancybox.js?v=2.1.5"></script>
+		<script type="text/javascript" src="<?php echo base_url()?>assets/fancyBox/js/jquery.fancybox.js?v=2.1.5"></script>
 		<!-- inline scripts related to this page -->
 				
     <script type="text/javascript">
@@ -366,8 +387,9 @@
             var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds + " " + timeOfDay;
 
             document.getElementById("timer").innerHTML = currentTimeString;
+			<?php if (isset($CheckOwner) || isset($CheckRenter) ) : ?>
             document.getElementById("timer1").innerHTML = currentTimeString;
-
+			<?php endif; ?>
         }, 1000);
 
     </script>
@@ -421,7 +443,7 @@
 
             $('.fancyboxview').fancybox({
 
-            padding: 0,
+            	padding: 0,
 
                 openEffect : 'elastic',
 

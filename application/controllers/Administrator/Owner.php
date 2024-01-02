@@ -47,6 +47,10 @@ class Owner extends CI_Controller
         if(isset($data->ownerType) && $data->ownerType != null){
             $ownerTypeClause = " and Owner_Type  = '$data->ownerType'";
         }
+        $clauses = "";
+        if(isset($data->is_member) && $data->is_member != null) {
+            $clauses .= " and c.is_member = '$data->is_member'";
+        }
         $owners = $this->db->query("
             select
                 c.*,
@@ -54,10 +58,11 @@ class Owner extends CI_Controller
                 concat_ws(' - ', c.Owner_Code, c.Owner_Name, c.Owner_Mobile) as display_name
             from tbl_owner c
             left join tbl_district d on d.District_SlNo = c.area_ID
+            left join tbl_store s on s.Store_SlNo = c.store_id
             where c.status = 'a'
             and c.Owner_Type != 'G'
             and (c.Owner_brunchid = ? or c.Owner_brunchid = 0)
-            $ownerTypeClause
+            $clauses $ownerTypeClause
             order by c.Owner_SlNo desc
         ", $this->session->userdata('BRANCHid'))->result();
         echo json_encode($owners);
@@ -216,6 +221,7 @@ class Owner extends CI_Controller
 
             $owner = (array)$ownerObj;
             unset($owner['Owner_SlNo']);
+            $owner["is_member"] = $ownerObj->is_member == '1' ? 'true' : 'false';
             $owner["Owner_brunchid"] = $this->session->userdata("BRANCHid");
 
             $ownerId = null;
@@ -273,7 +279,6 @@ class Owner extends CI_Controller
 
             
             // Insert user as owner role
-            $ownerObj->Owner_UserName;
             $checkUsername = $this->db->query("select * from tbl_user where User_Name = ?", $ownerObj->Owner_UserName)->num_rows();
             if($checkUsername > 0){
                 $res = ['success'=>false, 'message'=>'Username already exists'];
@@ -285,6 +290,7 @@ class Owner extends CI_Controller
                 "User_Name"                 => $ownerObj->Owner_UserName,
                 "FullName"                  => $ownerObj->Owner_Name,
                 "UserEmail"                 => $ownerObj->Owner_Email,
+                "ref_id"                    => $ownerId,
                 "Brunch_ID"                 => $this->session->userdata("BRANCHid"),
                 "userBrunch_id"             => $this->session->userdata("BRANCHid"),
                 "User_Password"             => md5(12345),
@@ -306,6 +312,16 @@ class Owner extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $ownerObj = json_decode($this->input->post('data'));
+
+            // echo json_encode($ownerObj);
+            // return;
+
+            $ownerUserCount = $this->db->query("select * from tbl_owner where Owner_UserName = ? and Owner_SlNo != ? ", [$ownerObj->Owner_UserName, $ownerObj->Owner_SlNo])->num_rows();
+            if($ownerUserCount > 0){
+                $res = ['success'=>false, 'message'=>"Username Exist!"];
+                echo json_encode($res);
+                return;
+            }
           
             $ownerMobileCount = $this->db->query("select * from tbl_owner where Owner_Mobile = ? and Owner_SlNo != ? and Owner_brunchid = ?", [$ownerObj->Owner_Mobile, $ownerObj->Owner_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
 
@@ -318,6 +334,7 @@ class Owner extends CI_Controller
             $ownerId = $ownerObj->Owner_SlNo;
 
             unset($owner["Owner_SlNo"]);
+            $owner["is_member"] = $ownerObj->is_member == '1' ? 'true' : 'false';
             $owner["Owner_brunchid"] = $this->session->userdata("BRANCHid");
             $owner["UpdateBy"] = $this->session->userdata("FullName");
             $owner["UpdateTime"] = date("Y-m-d H:i:s");
@@ -351,13 +368,45 @@ class Owner extends CI_Controller
                 $imageName = $ownerObj->Owner_Code . $this->upload->data('file_ext');
 
                 $this->db->query("update tbl_owner set image_name = ? where Owner_SlNo = ?", [$imageName, $ownerId]);
+
             }
 
+            /* update username in user table */
+            $checkUsername = $this->db->query("select * from tbl_user where User_Name = ? and ref_id != ? and UserType = 'o'", [$ownerObj->Owner_UserName, $ownerId])->num_rows();
+            if($checkUsername > 0) {
+                $res = ['success'=>false, 'message'=>'Username already exists'];
+                echo json_encode($res);
+                exit;
+            }
+    
+            $udata = array(
+                "User_Name" => $ownerObj->Owner_UserName
+            );
+
+            $this->db->where("ref_id", $ownerId);
+            $this->db->where("UserType", 'o');
+            $this->db->update("tbl_user", $udata);
+        
             $res = ['success'=>true, 'message'=>'Owner updated successfully', 'ownerCode'=>$this->mt->generateOwnerCode()];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
         }
 
+        echo json_encode($res);
+    }
+
+    public function updateOwnerStorId()
+    {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $ownerObj = json_decode($this->input->post('data'));
+            // echo json_encode($ownerObj);
+            // return;
+            $this->db->query("update tbl_owner set store_id = ? where Owner_SlNo = ? ", [$ownerObj->store_id, $ownerObj->owner_id]);
+            $res = ['success'=>true, 'message'=>'Owner updated successfully'];
+        } catch(Exception $ex) {
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
         echo json_encode($res);
     }
 
@@ -560,6 +609,7 @@ class Owner extends CI_Controller
 
     function paymentAndReport($id = Null)
     {
+        
         $data['title'] = "Customer Payment Reports";
         if ($id != 'pr') {
             $pid["PamentID"] = $id;

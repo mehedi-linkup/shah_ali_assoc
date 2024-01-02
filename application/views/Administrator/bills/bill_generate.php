@@ -111,20 +111,21 @@
 							<th>Renter</th>
 							<th>Prev. Unit</th>
 							<th>Cur. Unit</th>
-							<th>Elctr. Unit</th>
-							<th>Elctr. Bill</th>
+							<th>Elec. Unit</th>
+							<th>Elec. Bill</th>
 							<th>Gen. Unit</th>
 							<th>Gen. Bill</th>
-							<th>Ac</th>
+							<th>Ac Unit</th>
+							<th>Ac Bill</th>
 							<th>Others</th>
 							<th>Net Payable</th>
 							<!-- <th>Paid</th> -->
 						</tr>
 					</thead>
 					<tbody>
-						<template v-for="store in stores">
+						<template v-for="store in filteredStores">
 							<tr>
-								<td colspan="13" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
+								<td colspan="14" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
 							</tr>
 							<tr v-for="(store, i) in store.stores" v-bind:style="{background: store.net_payable!=0 ? '#709fd9' : ''}">
 								<td>{{ ++i }}</td>
@@ -132,14 +133,15 @@
 								<td>{{ store.Store_Name }}</td>
 								<!-- <td>{{ store.Floor_Name }}</td> -->
 								<td>{{ store.Renter_Name }}</td>
-								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.previous_unit" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.previous_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td>
 								<td style="text-align: center;">{{ store.electricity_unit }}</td>
 								<td style="text-align: center;">{{ store.electricity_bill }}</td>
-								<td><input style="width:50px;height:20px;text-align:center;" type="number" v-model="store.generator_unit" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:70px;height:20px;text-align:center;" type="number" v-model="store.generator_bill" v-on:input="calculateNetPayable(store)" readonly></td>
-								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.ac_bill" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:80px;height:20px;text-align:center;" type="number" v-model="store.others_bill" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.generator_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.generator_bill"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.ac_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.ac_bill"></td>
+								<td><input style="width:70px;height:20px;text-align:center;" type="number" v-model="store.others_bill" v-on:input="calculateNetPayable(store)" readonly></td>
 								<td style="text-align: center;">{{store.net_payable}}</td>
 								<!-- <td><input style="width: 80px;height: 20px; text-align:center;" type="number" v-model="store.payment" v-on:input="checkPayment(store)"></td> -->
 							</tr>
@@ -147,12 +149,11 @@
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="11" style="text-align: center;font-weight: 700">Total</td>
-							<td style="font-weight: 700">{{ parseFloat(stores.reduce((prev, curr)=>{ return +prev + +curr.stores.reduce((p, c) => { return +p + +c.net_payable }, 0) }, 0) ).toFixed(2) }}</td>
-							<td></td>
+							<td colspan="13" style="text-align: center;font-weight: 700">Total</td>
+							<td style="font-weight: 700">{{ parseFloat(filteredStores.reduce((prev, curr)=>{ return +prev + +curr.stores.reduce((p, c) => { return +p + +c.net_payable }, 0) }, 0) ).toFixed(2) }}</td>
 						</tr>
 						<tr>
-							<td colspan="13">
+							<td colspan="14">
 								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-danger pull-right">
 									Save
 									<i class="ace-icon fa fa-arrow-right icon-on-right bigger-110"></i>
@@ -194,7 +195,8 @@
 				selectedFloor: {
 					Floor_SlNo: '',
 					Floor_Name: 'All'
-				}
+				},
+				filteredStores: []
 			}
 		},
 		created() {
@@ -203,14 +205,14 @@
 			this.getUtilityRate();
 		},
 		methods: {
-			// checkPayment(employee){
-			// 	if(parseFloat(employee.payment) > parseFloat(employee.net_payable)){
-			// 		alert("Can not paid greater than net payable");
-			// 		employee.payment = employee.net_payable;
-			// 	}
-			// },
 			async onChangeFloor() {
-				await this.getStores();
+				if(this.selectedFloor.Floor_SlNo != '') {
+					let filteredStores = this.stores.filter(item => item.floor_id == this.selectedFloor.Floor_SlNo)
+					this.filteredStores = filteredStores;
+				} else {
+					this.filteredStores = this.stores
+					console.log(this.filteredStores)
+				}
 			},
 			onChangeMonth() {
 				this.stores = [],
@@ -233,11 +235,13 @@
 
 				store.electricity_unit = store.current_unit - store.previous_unit;
 				store.electricity_bill = parseFloat(store.electricity_unit * this.utilityRate.Electricity_Rate).toFixed(2);
+				store.generator_bill = parseFloat(store.generator_unit * this.utilityRate.Generator_Rate).toFixed(2);
+				store.ac_bill = parseFloat(store.ac_unit * this.utilityRate.Ac_Rate).toFixed(2);
+				store.others_bill = parseFloat(+this.utilityRate.Mosque_Rate + +this.utilityRate.Service_Rate + +this.utilityRate.Wasa_Rate).toFixed(2);
 
 				let payable = ( parseFloat(store.electricity_bill) + parseFloat(store.generator_bill) + parseFloat(store.ac_bill) + parseFloat(store.others_bill) ).toFixed(2);
 
 				store.net_payable = payable;
-				// store.payment = payable;
 			},
 			async getStores() {
 				if(this.month == null || this.month.month_id == ''){
@@ -258,7 +262,6 @@
 
 				let filter = {
 					month_id: month_id, 
-					floor_id: this.selectedFloor.Floor_SlNo,
 					details: true
 				}
 				
@@ -273,6 +276,7 @@
 						let stores = _.chain(payment.details).groupBy('floor_id')
 							.map(store => {
 									return {
+										floor_id: store[0].floor_id,
 										floor_name: store[0].Floor_Name,
 										floor_ranking: store[0].Floor_Ranking,
 										stores: store
@@ -286,7 +290,7 @@
 						// this.stores = payment.details;
 					})
 				} else {
-					await axios.post('/get_stores', filter).then(res => {
+					await axios.get('/get_stores').then(res => {
 						let stores = res.data;
 
 						stores.map(store => {
@@ -294,7 +298,9 @@
 							store.current_unit = 0;
 							store.electricity_unit = 0;
 							store.electricity_bill = 0;
+							store.generator_unit = 0;
 							store.generator_bill = 0;
+							store.ac_unit = 0;
 							store.ac_bill = 0;
 							store.others_bill = 0;
 							store.net_payable = 0;
@@ -303,6 +309,7 @@
 						stores = _.chain(stores).groupBy('floor_id')
 							.map(store => {
 									return {
+										floor_id: store[0].floor_id,
 										floor_name: store[0].Floor_Name,
 										floor_ranking: store[0].Floor_Ranking,
 										stores: store
@@ -344,6 +351,16 @@
 				})
 			},
 			SaveBillPayment() {
+				// let storeMap = new Map(this.stores.map(item => [item.floor_id, item]));
+
+				// this.filteredStores.forEach(item => {
+				// 	let existingItem = storeMap.get(item.floor_id);
+				// 	if (existingItem) {
+				// 		existingItem.store = item.store;
+				// 	} else {
+				// 		store.push(item);
+				// 	}
+				// });
 				let stores = _.chain(this.stores)
 					.flatMap(function(item) {
 						return item.stores.map(function(store) {

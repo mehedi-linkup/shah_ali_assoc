@@ -974,4 +974,178 @@ class Employee extends CI_Controller
         echo json_encode($res);
     }
 
+    public function checkPaymentYear()
+    {
+        $data = json_decode($this->input->raw_input_stream);
+        // $yearId = $data->year_id;
+        // echo json_encode($data);
+        // return;
+
+        // $query = $this->db->query("SELECT year_id FROM tbl_bill_sheet WHERE year_id = ? and branch_id = ? and status = 'a'",[$yearId, $this->session->userdata("BRANCHid")]);
+        // if($query->num_rows() > 0 ) {
+        //     echo json_encode(['success' => true]);
+        //     exit();
+        // }
+        echo json_encode(['success' => false]);
+        exit();
+
+    }
+
+    public function generateZamindariBill() {
+        $res = ['success' => false, 'message' => ''];
+
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+ 
+            $billYear = [
+                'process_date' => $data->process_date,
+                'added_by' => $this->session->userdata("FullName"),
+                'added_at' => date('Y-m-d H:i:s'),
+                'year' => $data->year,
+                'status' => 'a',
+                'branch_id' => $this->brunch
+            ];
+
+            $billYearId = null;
+            
+            $duplicateBillYear = $this->db->query("select * from tbl_zamindari_year where year = ? and branch_id = ?", [$data->year, $this->brunch]);
+            
+            if($duplicateBillYear->num_rows() != 0) {
+                $billYearId = $duplicateBillYear->row()->id;
+                $this->db->where(['id' => $billYearId])->update('tbl_zamindari_year', $billYear);
+            } else {
+                $this->db->insert('tbl_zamindari_year', $billYear);
+                $billYearId = $this->db->insert_id();
+            }
+
+            // old exist
+            $oldBillMonths = $this->db->query("select * from tbl_zamindari_month where bill_year_id = ?", $billYearId)->result();
+            foreach ($oldBillMonths as $key => $value) {
+                $oldBillDetails = $this->db->query("select * from tbl_zamindari_details where zamindari_month_id = ?", [$value->id]);
+                if($oldBillDetails->num_rows() != 0) {
+                    $this->db->query("delete from tbl_zamindari_details where zamindari_month_id = ?", [$value->id]);
+                }
+            }
+            $this->db->query("delete from tbl_zamindari_month where bill_year_id = ?", $billYearId);
+            // end old exist
+
+            $yearMonths = $this->db->query("select * from tbl_month where SUBSTRING(month_name, -4) = ?", $data->year)->result();
+
+            $billMonths = array_map(function($item) use ($billYearId, $data) {
+                $date = DateTime::createFromFormat('F Y', $item->month_name);
+                $date->modify('+15 days');
+                $date->modify('last day of this month');
+                $resultDate = $date->format('Y-m-d');
+
+                // $oldBillMonth = $this->db->query("select * from tbl_zamindari_month where month_id = ? and bill_year_id = ?", [$item->month_id, $billYearId]);
+                // $oldBillMonthId = @$oldBillMonth->row()->id;
+                $bill = [
+                    'bill_year_id' => $billYearId, 
+                    'month_id' => $item->month_id,
+                    'process_date' => $data->process_date,
+                    'last_date' => $resultDate,
+                    'status' => 'a',
+                    'added_by' => $this->session->userdata("FullName"),
+                    'added_at' => date('Y-m-d H:i:s'),
+                    'branch_id' => $this->brunch
+                ];
+                
+                // if($oldBillMonth->num_rows() != 0) {
+                //     $this->db->query("delete from tbl_zamindari_month where month_id = ? and bill_year_id = ?", [$item->month_id, $billYearId]);
+                // }
+
+                $this->db->insert('tbl_zamindari_month', $bill);
+                $billMonthId = $this->db->insert_id();
+
+                $rates = $this->db->query("select * from tbl_zamindari_rate order by Rate_SlNo desc limit 1")->row();
+                             
+                $owners = $this->db->query("select * from tbl_owner where status = 'a' and Owner_brunchid = '$this->brunch'")->result();
+
+                $billDetails = array_map(function($variable) use ($billMonthId, $data, $rates, $resultDate) {
+                    // $oldBillDetails = $this->db->query("select * from tbl_zamindari_details where zamindari_month_id = ? and owner_id = ?", [$oldBillMonthId, $variable->Owner_SlNo]);
+                    $ownerBill = [
+                        'zamindari_month_id' => $billMonthId,
+                        'invoice'            => $this->mt->generateZomindariBillInvoice(),
+                        'store_id'           => $variable->store_id,
+                        'owner_id'           => $variable->Owner_SlNo,
+                        'savings_deposit'    => $variable->is_member == 'true' ? $rates->savings_deposit : 0,
+                        'membership_fee'     => $variable->is_member == 'true' ?  $rates->membership_fee : 0,
+                        'shop_rent'          => $rates->shop_rent,
+                        'tax_surcharge'      => $rates->tax_surcharge,
+                        'service_charge'     => $rates->service_charge,
+                        'net_payable'        => ($variable->is_member=='true'?$rates->savings_deposit:0)+($variable->is_member=='true'?$rates->membership_fee:0)+$rates->shop_rent+$rates->tax_surcharge+$rates->service_charge,
+                        'last_date'          => $resultDate,
+                        'saved_by'           => $this->session->userdata("FullName"),
+                        'saved_at'           => date("Y-m-d H:i:s"),
+                        'branch_id'          => $this->session->userdata("BRANCHid"),
+                        'status'             => 'a',
+                    ];
+
+                    // array_push($ownerBillArr, $ownerBill);
+                    $this->db->insert('tbl_zamindari_details', $ownerBill);
+                    
+                    // if($oldBillDetails->num_rows() != 0) {
+                    //     $this->db->query("delete from tbl_zamindari_details where zamindari_month_id = ? and owner_id = ?", [$oldBillMonthId, $variable->Owner_SlNo]);
+                    // }
+                }, $owners);
+                
+            }, $yearMonths);
+
+            $res = ['success' => true, 'message' => 'Success'];
+
+        } catch(Exception $ex) {
+            $res = ['success' => false, 'message' => $ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function getZamindariBill() {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $res = [];
+
+        $clauses = "";
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and sh.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        if(isset($data->id) && $data->id != '') {
+            $clauses = " and sh.id = '$data->id'";
+            $res['zamindariDetails'] = $this->db->query("
+                select
+                    shd.*,
+                    s.Store_Name,
+                    o.Owner_Name
+                   
+                from tbl_zamindari_details shd
+                left join tbl_store s on s.Store_SlNo = shd.store_id
+                left join tbl_owner o on o.Owner_SlNo = shd.owner_id
+                where shd.zamindari_month_id = ?
+            ", $data->id)->result();
+        }
+
+        $res['zamindaribills'] = $this->db->query("
+            select
+                sh.*,
+                m.month_name,
+                y.year,
+                (
+                    select ifnull(sum(zd.net_payable), 0)
+                    from tbl_zamindari_details zd
+                    where zd.zamindari_month_id = sh.id
+                ) as total_amount
+            from tbl_zamindari_month sh
+            join tbl_month m on m.month_id = sh.month_id
+            join tbl_zamindari_year y on y.id= sh.bill_year_id
+            where sh.branch_id = ?
+            $clauses
+            order by sh.id desc
+        ", $this->brunch)->result();
+
+        echo json_encode($res);
+    }
+
+ 
 }

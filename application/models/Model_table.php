@@ -25,12 +25,12 @@ class Model_Table extends CI_Model{
 
     /*---------------------------  Save Update Data  ------------------------------*/
 
-    public function generateSalesInvoice(){
+    public function generateBillInvoice(){
         $branchId = $this->session->userdata('BRANCHid');
         $branchNo = strlen($branchId) < 10 ? '0' . $branchId : $branchId;
         $invoice = date('y') . $branchNo . "00001";
         $year = date('y');
-        $sales = $this->db->query("select * from tbl_salesmaster sm where sm.SaleMaster_InvoiceNo like '$year%' and SaleMaster_branchid = ?", $branchId);
+        $sales = $this->db->query("select * from tbl_bill_sheet_details sm where sm.invoice like '$year%' and branch_id = ?", $branchId);
         if($sales->num_rows() != 0){
             $newSalesId = $sales->num_rows() + 1;
             $zeros = array('0', '00', '000', '0000');
@@ -38,6 +38,17 @@ class Model_Table extends CI_Model{
 		}
 		
 		return $invoice;
+    }
+    public function generateZomindariBillInvoice(){
+        $billCode = "Z000001";
+        $lastBill = $this->db->query("select * from tbl_zamindari_details order by id desc limit 1");
+        if($lastBill->num_rows() != 0){
+            $newBillId = $lastBill->row()->id + 1;
+            $zeros = array('0', '00', '000', '0000', '00000');
+            $billCode = 'Z' . (strlen($newBillId) > count($zeros) ? $newBillId : $zeros[count($zeros) - strlen($newBillId)] . $newBillId);
+        }
+
+        return $billCode;
     }
 
 
@@ -1103,6 +1114,45 @@ class Model_Table extends CI_Model{
         $r = $result . " Taka Only.";
         return strtoupper($r);
 
+    }
+
+    public function lastBillDetails($clauses = "")
+    {
+        $today = date('Y-m-d');
+        $lastDay = date('Y-m-d', strtotime('+15 days'));
+        $bill = $this->db->query("
+                SELECT  
+                    concat(
+                        'ইনভয়েস: ', bd.invoice,
+                        ', ষ্টোর: ', s.Store_Code, ' - ', s.Store_Name,
+                        ', বিল: ', bd.net_payable,
+                        ', পরিশোধের শেষ দিন: ', bd.last_date,
+                        ', দিন বাকি: ', ( select ifnull(datediff(bd.last_date, '$today'), 0) )
+                    ) as bill_text,
+                    bd.*, bs.month_id, m.month_name, s.Store_No, s.Store_Name, s.floor_id, s.meter_no, o.Owner_Name, re.Renter_Name, f.Floor_Name, f.Floor_Ranking,
+                    ( 
+                        select ifnull(datediff(bd.last_date, '$today'), 0)
+                    ) as remaining_day,
+                    ( 
+                        select ifnull(sum(upd.payment), 0) from tbl_utility_payment_details upd
+                        where upd.bill_detail_id = bd.id
+                    ) as bill_paid
+                from tbl_bill_sheet_details bd
+                join tbl_store s on s.Store_SlNo = bd.store_id
+                join tbl_bill_sheet bs on bs.id = bd.bill_id
+                join tbl_month m on m.month_id = bs.month_id
+                left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                left join tbl_floor f on f.Floor_SlNo = s.floor_id
+                where bd.status = 'a'
+                and bd.branch_id = ?
+                and bd.last_date >= '$today'
+                and bd.last_date <= '$lastDay'
+                $clauses
+                order by bd.id desc
+            ", $this->session->userdata('BRANCHid'))->result();
+            
+        return $bill;                
     }
 	
   }

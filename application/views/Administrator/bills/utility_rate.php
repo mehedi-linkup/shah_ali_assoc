@@ -22,7 +22,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-5 control-label" for="Ac_Rate"> Ac Rate (Per unit) </label>
+				<label class="col-sm-5 control-label" for="Ac_Rate"> Ac Rate (Per sft) </label>
 				
 				<div class="col-sm-5">
 					<input name="Ac_Rate" type="number" id="Ac_Rate" value="<?php echo $selected->Ac_Rate ?>" class="form-control" />
@@ -114,7 +114,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-5 control-label" for="Ac_Rate"> Ac Rate (Per unit) </label>
+				<label class="col-sm-5 control-label" for="Ac_Rate"> Ac Rate (Per sft) </label>
 				<div class="col-sm-1">: </div>
 				<div class="col-sm-5">
 					<input name="Ac_Rate" type="number" id="Ac_Rate" value="" class="form-control" />

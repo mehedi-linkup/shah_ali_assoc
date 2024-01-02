@@ -1486,4 +1486,254 @@ class Payment extends CI_Controller
         echo json_encode($dueResult);
     }
 
+    public function zamindariPaymentPage()
+    {
+        $data['title'] = "Zomindari Payment";
+        // $data['paymentId'] = $paymentId;
+        // $data['content'] = $this->load->view('Administrator/utility/zamindariPaymentAndreport', $data, TRUE);
+
+        $data['paymentHis'] = $this->Billing_model->fatch_all_payment();
+        $data['content'] = $this->load->view('Administrator/due_report/zamindariPaymentPage', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function zamindariPaymentHistory() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Customer Payment History";
+        $data['content'] = $this->load->view('Administrator/reports/customer_payment_history', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function getZamindariPayments() {
+        $data = json_decode($this->input->raw_input_stream);
+        // echo json_encode($data);
+        // return; 
+        $clauses = "";
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and zp.ZPayment_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+        if(isset($data->storeId) && $data->storeId != '' && $data->storeId != null){
+            $clauses .= " and zp.ZPayment_storeID = '$data->storeId'";
+        }
+        if(isset($data->ownerId) && $data->ownerId != '' && $data->ownerId != null){
+            $clauses .= " and zp.ZPayment_ownerID = '$data->ownerId'";
+        }
+        if(isset($data->paymentId) && $data->paymentId != '' && $data->paymentId != null){
+            $clauses .= " and zp.ZPayment_id = '$data->paymentId'";
+        }
+
+        $payments = $this->db->query("
+            select
+                zp.*,
+                o.Owner_Code,
+                o.Owner_Name,
+                o.Owner_Mobile,
+                o.is_member,
+                s.Store_Name,
+                s.square_feet,
+                s.Store_No,
+                s.floor_id,
+                m.month_name,
+                (
+                    select zd.last_date from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as last_date,
+                (
+                    select zd.savings_deposit from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as savings_deposit,
+                (
+                    select zd.membership_fee from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as membership_fee,
+                (
+                    select zd.shop_rent from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as shop_rent,
+                (
+                    select zd.tax_surcharge from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as tax_surcharge,
+                (
+                    select zd.service_charge from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as service_charge,
+                (
+                    select zd.net_payable from tbl_zamindari_details zd
+                    join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                    where zd.owner_id = zp.ZPayment_ownerID and zd.store_id = zp.ZPayment_storeID and zm.month_id = zp.Zamindari_monthID and zd.status = 'a' limit 1
+                ) as net_payable
+            from tbl_zamindari_payment zp
+            join tbl_owner o on o.Owner_SlNo = zp.ZPayment_ownerID
+            join tbl_store s on s.Store_SlNo = zp.ZPayment_storeID
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+            join tbl_month m on m.month_id = zp.Zamindari_monthID
+            where zp.ZPayment_status = 'a'
+            and zp.ZPayment_branchid = ? $clauses
+            order by zp.ZPayment_id desc
+        ", $this->session->userdata('BRANCHid'))->result();
+
+        echo json_encode($payments);
+    }
+
+    public function getZamindariDue() {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $branchId = $this->session->userdata('BRANCHid');
+
+        $clauses = "";
+        if(isset($data->month) && count($data->month) > 0) {
+            $clauses = " and (";
+           $lastArr = count($data->month);
+            foreach ($data->month as $key => $item) {
+                if($key < $lastArr - 1) {
+                    $clauses .= " zm.month_id = '$item->month_id' or ";
+                } else {
+                    $clauses .= " zm.month_id = '$item->month_id')";
+                }
+            }
+        }   
+        if(isset($data->ownerId) && $data->ownerId != null){
+            $clauses .= " and zd.owner_ID = '$data->ownerId'";
+        }
+        $dueResult = $this->db->query("
+            select
+                zd.*, m.month_name as original_month_name, m.month_id as original_month_id,
+                (
+                    select ifnull(sum(zp.ZPayment_amount), 0) from tbl_zamindari_payment zp
+                    where zp.ZPayment_ownerID = zd.owner_id
+                    and zp.Zamindari_monthID = zm.month_id
+                ) as zamindari_payment,
+                (   
+                    select 
+                    CASE
+                        WHEN IFNULL(SUM(zp.ZPayment_amount), 0) > 0 THEN 'paid'
+                        ELSE 'unpaid'
+                    END AS payment_status
+                    from tbl_zamindari_payment zp
+                    where zp.ZPayment_ownerID = zd.owner_id 
+                    and zp.Zamindari_monthID = zm.month_id 
+                ) as payment_status
+                from tbl_zamindari_details zd
+                join tbl_zamindari_month zm on zm.id = zd.zamindari_month_id
+                join tbl_month m on m.month_id = zm.month_id
+                join tbl_owner o on o.Owner_SlNo = zd.owner_id
+                where zd.branch_id = '$branchId' and 
+                zd.status = 'a'
+                $clauses
+            ")->result();
+
+        echo json_encode($dueResult);
+    }
+    
+
+    public function addZamindariPayment() {
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $paymentObj = json_decode($this->input->raw_input_stream);
+            // echo json_encode($paymentObj);
+            // return;
+            
+            foreach ($paymentObj->invoices as $key => $value) {
+                $ZPayment = [];
+                if($value->payment_status == 'unpaid') {
+                    $ZPayment["ZPayment_date"] = $paymentObj->ZPayment_date;
+                    $ZPayment["ZPayment_invoice"] = $value->invoice;
+                    $ZPayment["Zamindari_monthID"] = $value->original_month_id;
+                    $ZPayment["ZPayment_storeID"] = $value->store_id;
+                    $ZPayment["ZPayment_ownerID"] = $value->owner_id;
+                    $ZPayment["ZPayment_amount"] = $value->net_payable;
+                    $ZPayment["ZPayment_status"] = 'a';
+                    $ZPayment["ZPayment_Paymentby"] = 'cash';
+                    $ZPayment["ZPayment_notes"] = $paymentObj->ZPayment_notes;
+                    $ZPayment["ZPayment_Addby"] = $this->session->userdata("FullName");
+                    $ZPayment["ZPayment_AddDate"] = date('Y-m-d H:i:s');
+                    $ZPayment["ZPayment_branchid"] = $this->session->userdata("BRANCHid");
+    
+                    $this->db->insert('tbl_zamindari_payment', $ZPayment);
+                    $paymentId = $this->db->insert_id();
+                }
+                // print_r($this->db->error());
+                // return;
+            }
+
+
+            // if($paymentObj->CPayment_TransactionType == 'CR') {
+            //     $currentDue = $paymentObj->CPayment_TransactionType == 'CR' ? $paymentObj->CPayment_previous_due - $paymentObj->CPayment_amount : $paymentObj->CPayment_previous_due + $paymentObj->CPayment_amount;
+            //     //Send sms
+            //     $customerInfo = $this->db->query("select * from tbl_customer where Customer_SlNo = ?", $paymentObj->CPayment_customerID)->row();
+            //     $sendToName = $customerInfo->owner_name != '' ? $customerInfo->owner_name : $customerInfo->Customer_Name;
+            //     $currency = $this->session->userdata('Currency_Name');
+
+            //     $message = "Dear {$sendToName},\nThanks for your payment. Received amount is {$currency} {$paymentObj->CPayment_amount}. Current due is {$currency} {$currentDue}";
+            //     $recipient = $customerInfo->Customer_Mobile;
+            //     $this->sms->sendSms($recipient, $message);
+            // }
+
+            $res = ['success'=>true, 'message'=>'Payment added successfully', 'paymentId'=>$paymentId];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function updateCustomerPayment(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $paymentObj = json_decode($this->input->raw_input_stream);
+            $paymentId = $paymentObj->CPayment_id;
+    
+            $payment = (array)$paymentObj;
+            unset($payment['CPayment_id']);
+            $payment['update_by'] = $this->session->userdata("FullName");
+            $payment['CPayment_UpdateDAte'] = date('Y-m-d H:i:s');
+
+            $this->db->where('CPayment_id', $paymentObj->CPayment_id)->update('tbl_customer_payment', $payment);
+            
+            $res = ['success'=>true, 'message'=>'Payment updated successfully', 'paymentId'=>$paymentId];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    public function deleteCustomerPayment(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->raw_input_stream);
+    
+            $this->db->set(['CPayment_status'=>'d'])->where('CPayment_id', $data->paymentId)->update('tbl_customer_payment');
+            
+            $res = ['success'=>true, 'message'=>'Payment deleted successfully'];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+    function zamindariPaymentInvoicePrint($paymentId = Null)
+    {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindari Payment Invoice";
+        $data['paymentId'] = $paymentId;
+        $data['content'] = $this->load->view('Administrator/utility/zamindariPaymentAndreport', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
 }

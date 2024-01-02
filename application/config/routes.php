@@ -20,6 +20,7 @@ $route['due_view'] = 'Administrator/Page/dueView';
 
 $route['module/(:any)'] = 'Administrator/Page/module/$1';
 $route['brachAccess/(:any)'] = 'Administrator/Login/brach_access/$1';
+$route['lastBillDetails/(:any)'] = 'Administrator/Page/lastBillDetails/$1';
 $route['getBrachAccess'] = 'Administrator/Login/branch_access_main_admin';
 
 $route['get_types'] = 'Administrator/Page/getTypes'; 
@@ -129,6 +130,12 @@ $route['utility_rate_update'] = 'Administrator/Bills/utility_rate_update';
 $route['utility_rate_insert'] = 'Administrator/Bills/utility_rate_insert';
 $route['get_utility_rate'] = 'Administrator/Bills/getUtilityRate';
 
+$route['zamindariRates'] = 'Administrator/Bills/zamindari_rate';
+$route['zamindari_rate_update'] = 'Administrator/Bills/zamindari_rate_update';
+$route['zamindari_rate_insert'] = 'Administrator/Bills/zamindari_rate_insert';
+$route['get_zamindari_rate'] = 'Administrator/Bills/getZamindariRate';
+$route['zamindar_payment_invoice_print/(:any)'] = 'Administrator/Bills/zamindarPaymentInvoicePrint/$1';
+
 $route['totalStock'] = 'Administrator/Services/total_stock';
 $route['totalStockPrint'] = 'Administrator/Reports/total_stock';
 
@@ -165,6 +172,7 @@ $route['owner'] = 'Administrator/Owner';
 $route['add_owner'] = 'Administrator/Owner/addOwner';
 $route['owneredit/(:any)'] = 'Administrator/Owner/owneredit/$1';
 $route['update_owner'] = 'Administrator/Owner/updateOwner';
+$route['update_owner_storeid'] = 'Administrator/Owner/updateOwnerStorId';
 $route['ownerlist'] = 'Administrator/Owner/ownerlist';
 $route['delete_owner'] = 'Administrator/Owner/deleteOwner';
 $route['get_owners'] = 'Administrator/Owner/getOwners';
@@ -189,14 +197,9 @@ $route['renterPaymentReport'] = 'Administrator/Renter/renter_payment_report';
 $route['renterList'] = 'Administrator/Reports/renterList';
 $route['ownerList'] = 'Administrator/Reports/ownerList';
 
-
-
-
 // $route['get_utilities'] = 'Administrator/Utility/getUtilities';
 $route['get_utilitydetails'] = 'Administrator/Payment/getUtilityDetails';
 $route['get_utilitydetails_for_return'] = 'Administrator/Payment/getUtilityDetailsForReturn';
-
-
 
 
 $route['get_payment_sheet'] = 'Administrator/Bills/getBillSheet';
@@ -219,7 +222,6 @@ $route['payment_invoice_print/(:any)'] = 'Administrator/Payment/paymentInvoicePr
 $route['ac_invoice_print/(:any)'] = 'Administrator/Payment/paymentAcInvoicePrint/$1';
 $route['paymentinvoice'] = 'Administrator/Payment/payment_invoice';
 $route['acinvoice'] = 'Administrator/Payment/ac_invoice';
-
 
 $route['purchase/(:any)'] = 'Administrator/Purchase/purchaseEdit/$1';
 $route['add_utility_payment'] = 'Administrator/Payment/addUtilityPayment';
@@ -372,7 +374,6 @@ $route['customerDue'] = 'Administrator/Customer/customer_due';
 $route['searchCustomerDue'] = 'Administrator/Customer/search_customer_due';
 $route['cusDuePrint/(:any)'] = 'Administrator/Reports/cusDuePrint/$1';
 $route['searchCustomerPayments'] = 'Administrator/Customer/search_customer_payments';
-$route['paymentAndReport/(:any)'] = 'Administrator/Customer/paymentAndReport/$1';
 $route['customerDuePaymentPrint'] = 'Administrator/Reports/customer_due_payment';
 
 $route['user'] = 'Administrator/User_management';
@@ -409,7 +410,8 @@ $route['company_profile_Update'] = 'Administrator/Page/company_profile_Update';
 $route['company_profile_insert'] = 'Administrator/Page/company_profile_insert';
 $route['get_company_profile'] = 'Administrator/Page/getCompanyProfile';
 
-$route['newsAndNotice'] = 'Administrator/Page/news_notice';
+$route['news_entry'] = 'Administrator/Page/newsEntry';
+$route['notice_entry'] = 'Administrator/Page/noticeEntry';
 $route['add_news'] = 'Administrator/Page/addNews';
 $route['update_news'] = 'Administrator/Page/updateNews';
 $route['newsEdit'] = 'Administrator/Page/news_edit';
@@ -417,6 +419,12 @@ $route['newsUpdate'] = 'Administrator/Page/news_update';
 $route['newsDelete'] = 'Administrator/Page/news_delete';
 $route['get_news'] = 'Administrator/Page/getNews';
 $route['change_news_status'] = 'Administrator/Page/changeNewsStatus';
+$route['delete_news'] = 'Administrator/Page/deleteNews';
+$route['check_bill'] = 'Administrator/Bills/checkBill';
+$route['upcoming_bill'] = 'Administrator/Bills/upcomingBill';
+$route['get_upcoming_bill'] = 'Administrator/Bills/getUpcomingBills';
+
+
 $route['add_notice'] = 'Administrator/Page/addNotice';
 $route['update_notice'] = 'Administrator/Page/updateNotice';
 $route['noticeEdit'] = 'Administrator/Page/notice_edit';
@@ -424,6 +432,7 @@ $route['noticeUpdate'] = 'Administrator/Page/notice_update';
 $route['noticeDelete'] = 'Administrator/Page/notice_delete';
 $route['get_notice'] = 'Administrator/Page/getNotice';
 $route['change_notice_status'] = 'Administrator/Page/changeNoticeStatus';
+$route['delete_notices'] = 'Administrator/Page/deleteNotices';
 
 $route['employee'] = 'Administrator/employee';
 $route['get_employees'] = 'Administrator/Employee/getEmployees';
@@ -457,14 +466,38 @@ $route['bills/(:any)'] = 'Administrator/Bills/index/$1';
 $route['get_bill_payments'] = 'Administrator/Bills/getBillPayments';
 $route['add_bill_payment'] = 'Administrator/Bills/saveBill';
 $route['update_bill_payment'] = 'Administrator/Bills/updateBill';
+$route['update_bill_date'] = 'Administrator/Bills/updateBillDate';
 
 $route['get_bill_sheet'] = 'Administrator/Bills/getBillSheet';
+$route['get_bill_details'] = 'Administrator/Bills/getBillDetails';
+$route['get_utility_bill'] = 'Administrator/Bills/getUtilityBills';
 $route['bill_sheet/(:any)'] = 'Administrator/Bills/billSheet/$1';
 $route['bill_record'] = 'Administrator/Bills/billRecord';
+$route['acBillRecord'] = 'Administrator/Bills/ac_bill_record';
 $route['store_bill_report'] = 'Administrator/Store/storeBillReport';
 $route['get_store_bills'] = 'Administrator/Store/getStoreBills';
 $route['billInvoice'] = 'Administrator/Bills/bill_invoice';
+$route['billInvoiceMutiple'] = 'Administrator/Bills/bill_invoice_mulitple';
+$route['bill_invoice_print/(:any)'] = 'Administrator/Bills/billInvoicePrint/$1';
+$route['ac_bill_invoice_print/(:any)'] = 'Administrator/Bills/billAcInvoicePrint/$1';
 
+$route['zamidariRent/(:any)'] = 'Administrator/Bills/zamindari/$1';
+$route['check_payment_year'] = 'Administrator/Employee/checkPaymentYear';
+$route['generate_zamindari_bill'] = 'Administrator/Employee/generateZamindariBill';
+$route['get_zamindari_bill'] = 'Administrator/Employee/getZamindariBill';
+$route['zamindari_bill_month/(:any)'] = 'Administrator/Bills/zamindariBillMonth/$1';
+$route['zamindari_bill_record'] = 'Administrator/Bills/zamindariBillRecord';
+$route['zamindariBillInvoice'] = 'Administrator/Bills/zamindari_bill_invoice';
+$route['get_zamindari_bill_details'] = 'Administrator/Bills/getZamindariBillDetails';
+$route['zamindar_bill_invoice_print/(:any)'] = 'Administrator/Bills/zamindarBillInvoicePrint/$1';
+$route['get_zamindari_payments'] = 'Administrator/Payment/getZamindariPayments';
+$route['get_owner_zamindariDue'] = 'Administrator/Payment/getZamindariDue';
+
+$route['zamindariPaymentPage'] = 'Administrator/Payment/zamindariPaymentPage';
+$route['zamindari_payment_history'] = 'Administrator/Payment/zamindariPaymentHistory';
+$route['add_zamindari_payment'] = 'Administrator/Payment/addZamindariPayment';
+$route['update_zamindari_payment'] = 'Administrator/Payment/updateZamindariPayment';
+$route['zamindari_payment_invoice_print/(:any)'] = 'Administrator/Payment/zamindariPaymentInvoicePrint/$1';
 
 
 $route['designation'] = 'Administrator/Employee/designation/';

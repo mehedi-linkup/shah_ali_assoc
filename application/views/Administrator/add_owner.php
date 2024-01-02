@@ -1,8 +1,9 @@
+<link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.6/dist/vue-multiselect.min.css">
 <style>
 	.v-select{
 		margin-bottom: 5px;
 	}
-	.v-select.open .dropdown-toggle{
+	.v-select.open .dropdown-toggle {
 		border-bottom: 1px solid #ccc;
 	}
 	.v-select .dropdown-toggle{
@@ -71,6 +72,7 @@
 		height: 40px;
 	}
 </style>
+
 <div id="customers">
 		<form @submit.prevent="saveOwner">
 		<div class="row" style="margin-top: 10px;margin-bottom:15px;border-bottom: 1px solid #ccc;padding-bottom:15px;">
@@ -85,7 +87,7 @@
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Owner Name:</label>
 					<div class="col-md-7">
-						<input type="text" class="form-control" v-model="owner.Owner_Name" required @input="generateUserName">
+						<input type="text" class="form-control" v-model="owner.Owner_Name" required>
 					</div>
 				</div>
 
@@ -110,10 +112,17 @@
 					</div>
 				</div>
 
-				<div class="form-group clearfix" style="display:none;" :style="{display: owner.Owner_SlNo == '0' ? '' : 'none'}">
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">User Name:</label>
 					<div class="col-md-7">
-						<input type="text" class="form-control" v-model="owner.Owner_UserName" readonly>
+						<input type="text" class="form-control" v-model="owner.Owner_UserName">
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Birth Date:</label>
+					<div class="col-md-7">
+						<input type="date" class="form-control" v-model="owner.Owner_BirthDate" required>
 					</div>
 				</div>
 
@@ -128,12 +137,6 @@
 			</div>	
 
 			<div class="col-md-5">
-				<div class="form-group clearfix">
-					<label class="control-label col-md-4">Birth Date:</label>
-					<div class="col-md-7">
-						<input type="date" class="form-control" v-model="owner.Owner_BirthDate" required>
-					</div>
-				</div>
 
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Nid:</label>
@@ -164,6 +167,20 @@
 				</div>
 
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's Name:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="owner.Nominee_Name">	
+					</div>
+				</div>
+				
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's NID:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="owner.Nominee_NID">
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Previous Due:</label>
 					<div class="col-md-7">
 						<input type="number" class="form-control" v-model="owner.previous_due" required>
@@ -171,19 +188,19 @@
 				</div>
 
 				<!-- <div class="form-group clearfix">
-					<label class="control-label col-md-4">Credit Limit:</label>
+					<label class="control-label col-md-4">Membership Shop:</label>
 					<div class="col-md-7">
-						<input type="number" class="form-control" v-model="owner.Owner_Credit_Limit" required>
+						<select class="form-control" v-if="stores.length == 0"></select>
+						<v-select v-bind:options="stores" v-model="selectedStore" label="display_name" v-if="stores.length > 0"></v-select>
 					</div>
 				</div> -->
 
-				<!-- <div class="form-group clearfix">
-					<label class="control-label col-md-4">Owner Type:</label>
-					<div class="col-md-7">
-						<input type="radio" name="ownerType" value="retail" v-model="owner.Owner_Type"> Retail
-						<input type="radio" name="ownerType" value="wholesale" v-model="owner.Owner_Type"> Wholesale
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Is Member:</label>
+					<div class="col-md-3">
+						<input type="checkbox" v-model="owner.is_member">
 					</div>
-				</div> -->
+				</div>
 				
 				<div class="form-group clearfix">
 					<div class="col-md-7 col-md-offset-4">
@@ -227,6 +244,13 @@
 								<td>{{ row.Owner_Mobile }}</td>
 								<td>{{ row.Owner_OfficePhone }}</td>
 								<td>{{ row.Owner_PreAddress }}</td>
+								<td>{{ row.Nominee_Name }}</td>
+								<td>
+									<label for="store_id">Choose a store:</label>
+									<select name="store_id" v-model="row.store_id" id="store_id" @change="onChangeOwner(row)">
+										<option v-for="store in stores" :value="store.Store_SlNo" :selected="store.Store_SlNo == row.store_id">{{ store.Store_Name }}</option>
+									</select>
+								</td>
 								<td>
 									<?php if($this->session->userdata('accountType') != 'u'){?>
 									<button type="button" class="button edit" @click="editOwner(row)">
@@ -250,10 +274,13 @@
 <script src="<?php echo base_url();?>assets/js/vue/axios.min.js"></script>
 <script src="<?php echo base_url();?>assets/js/vue/vuejs-datatable.js"></script>
 <script src="<?php echo base_url();?>assets/js/vue/vue-select.min.js"></script>
+<script src="https://unpkg.com/vue-multiselect@2.1.6"></script>
 <script src="<?php echo base_url();?>assets/js/moment.min.js"></script>
 
 <script>
 	Vue.component('v-select', VueSelect.VueSelect);
+	Vue.component('multiselect', window.VueMultiselect.default); 
+
 	new Vue({
 		el: '#customers',
 		data(){
@@ -273,12 +300,16 @@
 					Owner_PerAddress: '',
 					Owner_UserName: '',
 					Owner_NID: '',
+					Nominee_Name: '',
+					Nominee_NID: '',
 					area_ID: '',
+					is_member: false,
 					previous_due: 0
 				},
 				owners: [],
 				districts: [],
 				selectedDistrict: null,
+				stores: [],
 				imageUrl: '',
 				selectedFile: null,
 				
@@ -290,11 +321,13 @@
                     { label: 'Contact Number', field: 'Owner_Mobile', align: 'center' },
                     { label: 'Office Phone', field: 'Owner_OfficePhone', align: 'center' },
                     { label: 'Address', field: 'Owner_PreAddress', align: 'center' },
+                    { label: 'Nominee Name', field: 'Nominee_Name', align: 'center' },
                     { label: 'Action', align: 'center', filterable: false }
                 ],
                 page: 1,
                 per_page: 10,
-                filter: ''
+                filter: '',
+				searchKeyword: '',
 			}
 		},
 		filters: {
@@ -305,8 +338,28 @@
 		created(){
 			this.getDistricts();
 			this.getOwners();
+			this.getStores();
+		},
+		computed: {
+			filteredOptions() {
+				return this.options.filter(option =>
+					option.name.toLowerCase().includes(this.searchKeyword.toLowerCase())
+				);
+			},
 		},
 		methods: {
+			customLabel(store) {
+				return store.display_name;
+			},
+			getStores() {
+				axios.get('/get_stores').then(res => {
+					this.stores = res.data;
+					this.stores.unshift({
+						Store_SlNo: "",
+						Store_Name: "Select Store"
+					})
+				})
+			},
 			getDistricts(){
 				axios.get('/get_districts').then(res => {
 					this.districts = res.data;
@@ -326,13 +379,30 @@
 					this.imageUrl = null;
 				}
 			},
-			generateUserName() {
-				const initials = this.getInitials(this.owner.Owner_Name);
-				const uniqueIdentifier = initials != '' ? Math.floor(Math.random() * 1000) : ''; //
-				this.owner.Owner_UserName = `${initials}${uniqueIdentifier}`;
+			async onChangeOwner(row) {
+				console.log(row)
+				let filter = {
+					owner_id: row.Owner_SlNo,
+					store_id: row.store_id
+				}
+				let fd = new FormData();
+				fd.append('data', JSON.stringify(filter));
+
+				await axios.post('/update_owner_storeid', fd).then(res => {
+					let r = res.data;
+					alert(r.message);
+					if(r.success) {
+						this.getOwners();
+					}
+				})
+
 			},
+			// generateUserName() {
+			// 	const initials = this.getInitials(this.owner.Owner_Name);
+			// 	const uniqueIdentifier = initials != '' ? Math.floor(Math.random() * 1000) : ''; //
+			// 	this.owner.Owner_UserName = `${initials}${uniqueIdentifier}`;
+			// },
 			getInitials(name) {
-				// Get initials from the name
 				const words = name.split(' ');
 				const initials = words.map(word => word.charAt(0).toLowerCase()).join('');
 				return initials;
@@ -369,6 +439,8 @@
 					this.owner[key] = owner[key];
 				})
 
+				this.owner.is_member = owner.is_member == 'true' ? true : false;
+
 				this.selectedDistrict = {
 					District_SlNo: owner.area_ID,
 					District_Name: owner.District_Name
@@ -403,6 +475,7 @@
 						this.owner[key] = 0;
 					}
 				})
+				this.owner.is_member = false;
 				this.imageUrl = '';
 				this.selectedFile = null;
 			}

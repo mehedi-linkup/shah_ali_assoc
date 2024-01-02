@@ -2,11 +2,12 @@
 	<div class="col-md-12 col-xs-12">
 		<div id="printable_area">
 			<u>নিউজ</u>
-			<h3>শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</h3>
 
-			<a href="file_location/20231211_0001.pdf" title="20231211_0001.pdf"> <i class="fa fa-file" style="color:#8f0000;"></i> ও বিনোদন ছুটি-৯৬১_20231211_0001.pdf</a>
+			<h3><?php echo $news->news_title ?></h3>
+
+			<a href="<?php echo base_url() . $news->news_file ?>" title="<?php echo $news->news_title ?>"> <i class="fa fa-file" style="color:#8f0000;"></i> <?php echo $news->news_title ?></a>
 			<div>
-				<div class="viewer" style="background-color: rgb(255, 255, 255); width: 720px;"><iframe width="720" height="600" src="//motj.gov.bd//sites/default/files/files/motj.portal.gov.bd/notices/1609d290_ab46_477a_9fe4_cbd14c87572b/ও বিনোদন ছুটি-৯৬১_20231211_0001.pdf"></iframe></div>
+				<div class="viewer" style="background-color: rgb(255, 255, 255); width: 720px;"><iframe width="720" height="600" src="<?php echo base_url() . $news->news_file ?>"></iframe></div>
 			</div>
 		</div>
 	</div>

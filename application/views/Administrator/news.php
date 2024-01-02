@@ -17,14 +17,22 @@
 <div class="row">
 	<div class="col-md-12 col-xs-12">
 		<div class="panel panel-default news-panel">
+			<?php  
+				$startOfWeek = date('Y-m-d', strtotime('monday this week'));
+				$currentDate = date('Y-m-d');
+				$news = $this->db->select('*')->get('tbl_news')->result();
+
+				foreach ($news as $item) {
+					if ($item->add_date >= $startOfWeek && $item->add_date <= $currentDate) {
+						$item->newStatus = 'n';
+					}
+				}
+			?>
 			<h2 style="padding:15px">নিউজ বোর্ড</h2>
 			<div class="panel-body news-content">
-			<?php $notice_code = 234; ?>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>						
+				<?php foreach ($news as $key=>$item) { ?>
+				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: <?php echo $item->add_date ?></span><br><a href="<?php echo base_url() . 'news_view/' . $item->news_code ?>" title="<?php echo $item->news_title ?>"><?php echo $item->news_title ?>"</a> <strong  style="color:red"><?php echo @$item->newStatus == 'n'? '(নতুন)' : ''?></strong>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

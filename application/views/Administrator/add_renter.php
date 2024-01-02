@@ -97,6 +97,14 @@
 				</div>
 
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Birth Date:</label>
+					<div class="col-md-7">
+						<input type="date" class="form-control" v-model="renter.Renter_BirthDate" required>
+					</div>
+				</div>
+
+
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Present Address:</label>
 					<div class="col-md-7">
 						<textarea type="text" class="form-control" v-model="renter.Renter_PreAddress"></textarea>
@@ -107,6 +115,13 @@
 					<label class="control-label col-md-4">Permanent Address:</label>
 					<div class="col-md-7">
 						<textarea type="text" class="form-control" v-model="renter.Renter_PerAddress"></textarea>
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">User Name:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="renter.Renter_UserName">
 					</div>
 				</div>
 
@@ -121,13 +136,7 @@
 			</div>	
 
 			<div class="col-md-5">
-				<div class="form-group clearfix">
-					<label class="control-label col-md-4">Birth Date:</label>
-					<div class="col-md-7">
-						<input type="date" class="form-control" v-model="renter.Renter_BirthDate" required>
-					</div>
-				</div>
-
+			
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Nid:</label>
 					<div class="col-md-7">
@@ -153,6 +162,20 @@
 					<label class="control-label col-md-4">Email:</label>
 					<div class="col-md-7">
 						<input type="email" class="form-control" v-model="renter.Renter_Email">	
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's Name:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="renter.Nominee_Name">	
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's NID:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="renter.Nominee_NID">
 					</div>
 				</div>
 
@@ -215,10 +238,12 @@
 							<tr>
 								<td>{{ row.AddTime | dateOnly('DD-MM-YYYY') }}</td>
 								<td>{{ row.Renter_Code }}</td>
+								<td>{{ row.Renter_UserName }}</td>
 								<td>{{ row.Renter_Name }}</td>
 								<td>{{ row.Renter_Mobile }}</td>
 								<td>{{ row.Renter_OfficePhone }}</td>
-								<td>{{ row.Owner_PreAddress }}</td>
+								<td>{{ row.Renter_PreAddress }}</td>
+								<td>{{ row.Nominee_Name }}</td>
 								<td>
 									<?php if($this->session->userdata('accountType') != 'u'){?>
 									<button type="button" class="button edit" @click="editRenter(row)">
@@ -254,6 +279,7 @@
 					Renter_SlNo: 0,
 					Renter_Code: '<?php echo $customerCode;?>',
 					Renter_Name: '',
+					Renter_UserName: '',
 					Renter_FName: '',
 					Renter_Type: 'retail',
 					Renter_Phone: '',
@@ -264,6 +290,8 @@
 					Renter_PreAddress: '',
 					Renter_PerAddress: '',
 					Renter_NID: '',
+					Nominee_Name: '',
+					Nominee_NID: '',
 					area_ID: '',
 					previous_due: 0
 				},
@@ -276,10 +304,12 @@
 				columns: [
                     { label: 'Added Date', field: 'AddTime', align: 'center', filterable: false },
                     { label: 'Renter Id', field: 'Renter_Code', align: 'center', filterable: false },
+					{ label: 'Renter Username', field: 'Renter_UserName', align: 'center', filterable: false },
                     { label: 'Renter Name', field: 'Renter_Name', align: 'center' },
                     { label: 'Contact Number', field: 'Renter_Mobile', align: 'center' },
                     { label: 'Office Phone', field: 'Renter_OfficePhone', align: 'center' },
-                    { label: 'Address', field: 'Owner_PreAddress', align: 'center' },
+                    { label: 'Address', field: 'Renter_PreAddress', align: 'center' },
+					{ label: 'Nominee Name', field: 'Nominee_Name', align: 'center' },
                     { label: 'Action', align: 'center', filterable: false }
                 ],
                 page: 1,

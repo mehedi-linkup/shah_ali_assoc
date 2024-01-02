@@ -1758,9 +1758,6 @@ class Sales extends CI_Controller {
 
 
 
-
-
-
     
 //     public function product_delete($id = null){
 //       // $id = $this->input->post('deleted');

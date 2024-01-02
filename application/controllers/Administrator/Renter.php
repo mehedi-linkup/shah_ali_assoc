@@ -250,6 +250,27 @@ class Renter extends CI_Controller
                 $this->db->query("update tbl_renter set image_name = ? where Renter_SlNo = ?", [$imageName, $renterId]);
             }
 
+            // Insert user as owner role
+            $checkUsername = $this->db->query("select * from tbl_user where User_Name = ?", $renterObj->Renter_UserName)->num_rows();
+            if($checkUsername > 0){
+                $res = ['success'=>false, 'message'=>'Username already exists'];
+                echo json_encode($res);
+                exit;
+            }
+    
+            $udata = array(
+                "User_Name"                 => $renterObj->Renter_UserName,
+                "FullName"                  => $renterObj->Renter_Name,
+                "UserEmail"                 => $renterObj->Renter_Email,
+                "ref_id"                    => $renterId,
+                "Brunch_ID"                 => $this->session->userdata("BRANCHid"),
+                "userBrunch_id"             => $this->session->userdata("BRANCHid"),
+                "User_Password"             => md5(12345),
+                "UserType"                  => 'r',
+                "AddTime"                   => date('Y-m-d H:i:s')
+            );
+            $this->mt->save_data("tbl_user", $udata);
+
             $res = ['success'=>true, 'message' => $res_message, 'renterCode'=>$this->mt->generateRenterCode()];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
@@ -263,6 +284,9 @@ class Renter extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $renterObj = json_decode($this->input->post('data'));
+
+            // echo json_encode($renterObj);
+            // return;
             
             $renterMobileCount = $this->db->query("select * from tbl_renter where Renter_Mobile = ? and Renter_SlNo != ? and Renter_brunchid = ?", [$renterObj->Renter_Mobile, $renterObj->Renter_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
 
@@ -309,6 +333,21 @@ class Renter extends CI_Controller
 
                 $this->db->query("update tbl_renter set image_name = ? where Renter_SlNo = ?", [$imageName, $renterId]);
             }
+            /* update username in user table */
+            $checkUsername = $this->db->query("select * from tbl_user where User_Name = ? and ref_id != ? and UserType = 'r'", [$renterObj->Renter_UserName, $renterId])->num_rows();
+            if($checkUsername > 0) {
+                $res = ['success'=>false, 'message'=>'Username already exists'];
+                echo json_encode($res);
+                exit;
+            }
+    
+            $udata = array(
+                "User_Name" => $renterObj->Renter_UserName
+            );
+
+            $this->db->where("ref_id", $renterId);
+            $this->db->where("UserType", 'r');
+            $this->db->update("tbl_user", $udata);
 
             $res = ['success'=>true, 'message'=>'Renter updated successfully', 'renterCode'=>$this->mt->generateRenterCode()];
         } catch (Exception $ex){

@@ -1702,7 +1702,7 @@ class Bills extends CI_Controller {
 
 
     /*Delete Sales Record*/
-    public function  deleteSales(){
+    public function deleteSales(){
         $res = ['success'=>false, 'message'=>''];
         try{
             $data = json_decode($this->input->raw_input_stream);
@@ -1893,8 +1893,6 @@ class Bills extends CI_Controller {
             $clausesDetails .= " and f.Floor_SlNo = '$data->floor_id'";
         }
 
-
-
         $sheets = $this->db->query("
             SELECT bs.*,
             m.month_name,
@@ -1911,6 +1909,7 @@ class Bills extends CI_Controller {
         ", $this->session->userdata("BRANCHid"))->result();
 
         if(isset($data->details)){
+            $today = date('Y-m-d');
             foreach($sheets as $payment){
                 $payment->details = $this->db->query("
                     SELECT bd.*,
@@ -1921,8 +1920,14 @@ class Bills extends CI_Controller {
                     o.Owner_Name,
                     re.Renter_Name,
                     f.Floor_Name,
-                    f.Floor_Ranking
-
+                    f.Floor_Ranking,
+                    ( 
+                        select ifnull(datediff(bd.last_date, '$today'), 0)
+                    ) as remaining_day,
+                    ( 
+                        select ifnull(sum(upd.payment), 0) from tbl_utility_payment_details upd
+                        where upd.bill_detail_id = bd.id
+                    ) as bill_paid
                     from tbl_bill_sheet_details bd
                     join tbl_store s on s.Store_SlNo = bd.store_id
                     left join tbl_owner o on o.Owner_SlNo = s.owner_id
@@ -1937,21 +1942,180 @@ class Bills extends CI_Controller {
 
         echo json_encode($sheets);
     }
+
+    public function getBillDetails(){
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+
+        if(isset($data->billDetailId) && $data->billDetailId != ''){
+            $clauses .= " and bd.id = '$data->billDetailId'";
+        }
+
+        if(isset($data->monthId) && $data->monthId != ''){
+            $clauses .= " and bs.month_id = '$data->monthId'";
+        }
+        // if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        //     $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
+        // }
+
+        $billDetails = $this->db->query("
+            SELECT 
+                bd.*,
+                bs.month_id,
+                bs.last_date,
+                bs.added_by,
+                m.month_name,
+                s.Store_SlNo,
+                s.Store_No,
+                s.Store_Name,
+                s.floor_id,
+                s.meter_no,
+                o.Owner_Name,
+                re.Renter_Name,
+                f.Floor_Name,
+                f.Floor_Ranking
+            from tbl_bill_sheet_details bd
+            join tbl_store s on s.Store_SlNo = bd.store_id
+            join tbl_bill_sheet bs on bs.id = bd.bill_id
+            join tbl_month m on m.month_id = bs.month_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+
+            where bd.status = 'a'
+            and bd.branch_id = ?
+            $clauses
+            order by bd.id desc
+        ", $this->sbrunch)->result();
+
+        echo json_encode($billDetails);
+    }
+
+    public function getUtilityBills() {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        if(isset($data->user_id) && $data->user_id != ''){
+            $clauses .= " and bs.saved_by = '$data->user_id'";
+        }
+     
+
+        if(isset($data->month_id) && $data->month_id != ''){
+            $clauses .= " and bs.month_id = '$data->month_id'";
+        }
+
+
+        if(isset($data->floor_id) && $data->floor_id != 0 && $data->floor_id != ''){
+            $billDetailsMultiple = $this->db->query("
+                SELECT bsd.*,
+                    s.Store_SlNo,
+                    s.Store_No,
+                    s.Store_Name,
+                    s.floor_id,
+                    s.meter_no,
+                    s.square_feet,
+                    o.Owner_Name,
+                    re.Renter_Name,
+                    f.Floor_Name,
+                    f.Floor_Ranking,
+                    bs.process_date,
+                    bsd.electricity_unit,
+                    bsd.current_unit,
+                    bsd.generator_unit
+                from tbl_bill_sheet_details bsd
+                join tbl_bill_sheet bs on bs.id = bsd.bill_id
+                join tbl_store s on s.Store_SlNo = bsd.store_id
+                left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                left join tbl_floor f on f.Floor_SlNo = s.floor_id
+                where bsd.status = 'a'
+                and f.Floor_SlNo = '$data->floor_id'
+                 and bs.id = '$data->billid'
+            ")->result();
+            $res['billDetailsMultiple'] = $billDetailsMultiple;
+        }
+
+   
+        if(isset($data->id) && $data->id != 0 && $data->id != ''){
+            $billDetails = $this->db->query("
+                SELECT bsd.*,
+                    s.Store_SlNo,
+                    s.Store_No,
+                    s.Store_Name,
+                    s.floor_id,
+                    s.meter_no,
+                    s.square_feet,
+                    o.Owner_Name,
+                    re.Renter_Name,
+                    f.Floor_Name,
+                    f.Floor_Ranking,
+                    bs.process_date,
+                    bsd.electricity_unit,
+                    bsd.current_unit,
+                    bsd.generator_unit
+                from tbl_bill_sheet_details bsd
+                join tbl_bill_sheet bs on bs.id = bsd.bill_id
+                join tbl_store s on s.Store_SlNo = bsd.store_id
+                left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                left join tbl_floor f on f.Floor_SlNo = s.floor_id
+                where bsd.status = 'a'
+                and bsd.id = '$data->id'
+            ")->result();
+            $res['billDetails'] = $billDetails;
+
+            $clauses .= " and bs.id = " . $billDetails[0]->bill_id;
+
+        }
+
+        $bills = $this->db->query("
+            SELECT bs.*,
+            m.month_name
+
+            from tbl_bill_sheet bs
+            join tbl_month m on m.month_id = bs.month_id
+            where bs.status = 'a'
+            and bs.branch_id = ?
+            $clauses
+            order by bs.id desc
+        ", $this->session->userdata("BRANCHid"))->result();
+
+        $res['bills'] = $bills;
+
+        echo json_encode($res);
+    }
+
+    public function ac_bill_record()
+    {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Ac Record";
+        $data['content'] = $this->load->view('Administrator/bills/ac_bill_record', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+
+
     public function saveBill()
     {
         $res = ["success" => false, 'message' => ''];
         try {
             $data = json_decode($this->input->raw_input_stream);
 
-            // echo json_encode($data);
-            // return;
-
             $billObj = $data->payment;
             $stores = $data->stores;
             
             $bill = (array)$billObj;
             unset($bill['id']);
-            $bill['added_by'] = $this->session->userdata("userId");
+            $bill['added_by'] = $this->session->userdata("FullName");
             $bill['added_at'] = date("Y-m-d H:i:s");
             $bill['branch_id'] = $this->session->userdata("BRANCHid");
             $bill['status'] = 'a';
@@ -1964,6 +2128,7 @@ class Bills extends CI_Controller {
             foreach($stores as $str){
                 $store = [
                   'bill_id'          => $bill_id,
+                  'invoice'          => $this->mt->generateBillInvoice(),
                   'store_id'         => $str->Store_SlNo,
                   'electricity_bill' => $str->electricity_bill,
                   'generator_bill'   => $str->generator_bill,
@@ -1972,8 +2137,11 @@ class Bills extends CI_Controller {
                   'previous_unit'    => $str->previous_unit,
                   'current_unit'     => $str->current_unit,
                   'electricity_unit' => $str->electricity_unit,
+                  'generator_unit'   => $str->generator_unit,
+                  'ac_unit'          => $str->ac_unit,
                   'net_payable'      => $str->net_payable,
-                  'saved_by'         => $this->session->userdata("userId"),
+                  'last_date'        => @$billObj->last_date,
+                  'saved_by'         => $this->session->userdata("FullName"),
                   'saved_at'         => date("Y-m-d H:i:s"),
                   'branch_id'        => $this->session->userdata("BRANCHid"),
                   'status'           => 'a',
@@ -2001,16 +2169,13 @@ class Bills extends CI_Controller {
         try {
             $data = json_decode($this->input->raw_input_stream);
 
-            // echo json_encode($data);
-            // return;
-
             $billObj = $data->payment;
             $stores = $data->stores;
             $bill_id = $billObj->id;
 
             $bill = (array)$billObj;
             unset($bill['id']);
-            $bill['updated_by'] = $this->session->userdata("userId");
+            $bill['updated_by'] = $this->session->userdata("FullName");
             $bill['updated_at'] = date("Y-m-d H:i:s");
 
             $this->db->where('id', $bill_id);
@@ -2029,8 +2194,11 @@ class Bills extends CI_Controller {
                     'previous_unit'    => $str->previous_unit,
                     'current_unit'     => $str->current_unit,
                     'electricity_unit' => $str->electricity_unit,
+                    'generator_unit'   => $str->generator_unit,
+                    'ac_unit'          => $str->ac_unit,
                     'net_payable'      => $str->net_payable,
-                    'updated_by'      => $this->session->userdata("userId"),
+                    'last_date'        => @$billObj->last_date,
+                    'updated_by'      => $this->session->userdata("FullName"),
                     'updated_at'      => date("Y-m-d H:i:s"),
                     'branch_id'        => $this->session->userdata("BRANCHid"),
                     'status'           => 'a',
@@ -2051,6 +2219,42 @@ class Bills extends CI_Controller {
         } catch (\Exception $e) {
             $res = ["success" => false, 'message' => $e->getMessage()];
         }
+    }
+
+    public function updateBillDate()
+    {
+        $res = ["success" => false, 'message' => ''];
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+            $billObj = $data->payment;
+            $stores = $data->stores;
+            $bill_id = $billObj->id;
+            
+            foreach($stores as $str){
+                $store = [
+                    'last_date'        => $str->last_date,
+                    'updated_by'      => $this->session->userdata("FullName"),
+                    'updated_at'      => date("Y-m-d H:i:s"),
+                ];
+
+                $this->db->where('id', $str->id);
+                $this->db->update('tbl_bill_sheet_details', $store);
+            }
+
+            $res = ["success" => true, 'message' => 'Bill Update Success', 'billId' => $bill_id];
+
+            echo json_encode($res);
+
+        } catch (\Exception $e) {
+            $res = ["success" => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function billAcInvoicePrint($billId) {
+        $data['title'] = "AC Bill Invoice";
+        $data['billId'] = $billId;
+        $data['content'] = $this->load->view('Administrator/bills/billAcAndreport', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
     }
 
     public function billSheet($billSheetId) {
@@ -2088,7 +2292,7 @@ class Bills extends CI_Controller {
                 join tbl_store s on s.Store_SlNo = bsd.store_id
                 left join tbl_owner o on o.Owner_SlNo = s.owner_id
                 left join tbl_renter re on re.Renter_SlNo = s.renter_id
-                where bsd.bill_id = ?
+                where bsd.bill_id = ? and bsd.status = 'a'
             ", $data->id)->result();
         }
 
@@ -2103,7 +2307,7 @@ class Bills extends CI_Controller {
                 ) as total_amount
             from tbl_bill_sheet bs
             join tbl_month m on m.month_id = bs.month_id
-            where branch_id = ?
+            where branch_id = ? and status = 'a'
             $clauses
         ", $this->session->userdata("BRANCHid") )->result();
 
@@ -2127,6 +2331,49 @@ class Bills extends CI_Controller {
         }
         $data['title'] = "Bill Invoice";
         $data['content'] = $this->load->view('Administrator/bills/bill_invoice', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function bill_invoice_mulitple() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/bill_invoice_mulitple', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function billInvoicePrint($billId) {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Invoice";
+        $data['billId'] = $billId;
+        $data['content'] = $this->load->view('Administrator/bills/billAndreport', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function zamindarBillInvoicePrint($billId) {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindar Bill Invoice";
+        $data['billId'] = $billId;
+        $data['content'] = $this->load->view('Administrator/bills/zamindarBillAndreport', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function zamindarPaymentInvoicePrint($billId) {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindar Bill Invoice";
+        $data['billId'] = $billId;
+        $data['content'] = $this->load->view('Administrator/bills/zamindarBillAndreport', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
@@ -2211,4 +2458,256 @@ class Bills extends CI_Controller {
         $rate = $this->Billing_model->utility_rate($branchId);
         echo json_encode($rate);
     }
+
+
+     public function zamindari_rate() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindari Rate Entry";
+        $data['selected'] = $this->db->query("
+            select * from tbl_zamindari_rate order by Rate_SlNo desc limit 1
+        ")->row();
+        $data['content'] = $this->load->view('Administrator/bills/zamindari_rate', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+   
+    public function zamindari_rate_insert(){
+        
+        $id = $this->sbrunch;
+        $data['savings_deposit']=  $this->input->post('savings_deposit',true);
+        $data['membership_fee']=  $this->input->post('membership_fee',true);
+        $data['shop_rent']=  $this->input->post('shop_rent',true);
+        $data['tax_surcharge']=  $this->input->post('tax_surcharge',true);
+        $data['service_charge']=  $this->input->post('service_charge',true);
+        $data['savings_deposit_late']=  $this->input->post('savings_deposit_late',true);
+        $data['membership_fee_late']=  $this->input->post('membership_fee_late',true);
+        $data['shop_rent_late']=  $this->input->post('shop_rent_late',true);
+        $data['tax_surcharge_late']=  $this->input->post('tax_surcharge_late',true);
+        $data['service_charge_late']=  $this->input->post('service_charge_late',true);
+        $data['rate_branchid'] = $id;
+
+        $result= $this->db->insert("tbl_zamindari_rate", $data);
+
+        if ($result) {                    
+           $this->Id = $this->db->insert_id();
+           redirect('Administrator/bills/zamindari_rate');
+        } else {
+            echo $this->Err = mysql_error();
+            redirect('Administrator/bills/zamindari_rate');
+        }
+    }
+	
+    public function zamindari_rate_update(){
+        $branchId = $this->session->userdata("BRANCHid"); 
+        $data['savings_deposit']=  $this->input->post('savings_deposit',true);
+        $data['membership_fee']=  $this->input->post('membership_fee',true);
+        $data['shop_rent']=  $this->input->post('shop_rent',true);
+        $data['tax_surcharge']=  $this->input->post('tax_surcharge',true);
+        $data['service_charge']=  $this->input->post('service_charge',true);
+        $data['savings_deposit_late']=  $this->input->post('savings_deposit_late',true);
+        $data['membership_fee_late']=  $this->input->post('membership_fee_late',true);
+        $data['shop_rent_late']=  $this->input->post('shop_rent_late',true);
+        $data['tax_surcharge_late']=  $this->input->post('tax_surcharge_late',true);
+        $data['service_charge_late']=  $this->input->post('service_charge_late',true);
+
+        $xx = $this->db->query("select * from tbl_zamindari_rate where rate_branchid = '$branchId' order by Rate_SlNo desc limit 1")->row();
+        $this->db->where('Rate_SlNo', $xx->Rate_SlNo);
+        $this->db->update('tbl_zamindari_rate', $data);
+
+        $error = $this->db->error();
+
+        if($error['message'] != '') {
+            print_r($this->db->error());
+        } else {
+            redirect('Administrator/bills/zamindari_rate');
+
+        }
+        
+    }
+
+    public function getZamindariRate() {
+        $branchId = $this->session->userdata("BRANCHid"); 
+        $rate = $this->Billing_model->zamindari_rate($branchId);
+        echo json_encode($rate);
+    }
+
+    public function checkBill() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        
+        $data['title'] = "Check Bills";
+        $data['content'] = $this->load->view('Administrator/bills/check_bill', $data, TRUE);
+
+        $this->load->view('Administrator/index', $data);
+        return ;
+    }
+
+    public function upcomingBill() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        
+        $data['title'] = "Upcoming Bills";
+        $data['content'] = $this->load->view('Administrator/bills/upcoming_bill_record', $data, TRUE);
+
+        $this->load->view('Administrator/index', $data);
+        return ;
+    }
+
+    public function getUpcomingBills() {
+        $data = json_decode($this->input->raw_input_stream);
+        $clauses = "";
+        if(isset($data->billDetailId) && $data->billDetailId != ''){
+            $clauses .= " and bd.id = '$data->billDetailId'";
+        }
+
+        if(isset($data->monthId) && $data->monthId != ''){
+            $clauses .= " and bs.month_id = '$data->monthId'";
+        }
+
+        $today = date('Y-m-d');
+       
+        $lastDay = date('Y-m-d', strtotime('+15 days'));
+
+        $billDetails = $this->db->query("
+            SELECT 
+                bd.*,
+                bs.month_id,
+                bs.added_by,
+                m.month_name,
+                s.Store_SlNo,
+                s.Store_No,
+                s.Store_Name,
+                s.floor_id,
+                s.meter_no,
+                o.Owner_Name,
+                re.Renter_Name,
+                f.Floor_Name,
+                f.Floor_Ranking,
+                ( 
+                    select ifnull(datediff(bd.last_date, '$today'), 0)
+                ) as remaining_day,
+                ( 
+                    select ifnull(sum(upd.payment), 0) from tbl_utility_payment_details upd
+                    where upd.bill_detail_id = bd.id
+                ) as bill_paid
+            from tbl_bill_sheet_details bd
+            join tbl_store s on s.Store_SlNo = bd.store_id
+            join tbl_bill_sheet bs on bs.id = bd.bill_id
+            join tbl_month m on m.month_id = bs.month_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+            
+            where bd.status = 'a'
+            and bd.branch_id = ?
+            and bd.last_date >= '$today'
+            and bd.last_date <= '$lastDay'
+            $clauses
+            order by bd.id desc
+        ", $this->sbrunch)->result();
+
+        echo json_encode($billDetails);
+    }
+
+    public function zamindari($generateOrPayment) {
+       
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+       
+        if($generateOrPayment == 'generate') {
+            $data['title'] = "Zamindari Bill Generate";
+            $data['content'] = $this->load->view('Administrator/bills/zamindari_bill_generate', $data, TRUE);
+        }
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function zamindariBillMonth($zamindarBillId) {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindari Bill Months";
+        $data['zamindarBillId'] = $zamindarBillId;
+        $data['content'] = $this->load->view("Administrator/bills/zamindari_bill_month", $data, true);
+        $this->load->view("Administrator/index", $data);
+
+    }
+    
+
+    public function zamindariBillRecord() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Zamindari Bill Record";
+        $data['content'] = $this->load->view('Administrator/bills/zamindari_bill_record', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function zamindari_bill_invoice() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/zamindari_bill_invoice', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function getZamindariBillDetails() {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+
+        if(isset($data->billDetailId) && $data->billDetailId != '') {
+            $clauses .= " and bd.id = '$data->billDetailId'";
+        }
+
+        if(isset($data->monthId) && $data->monthId != ''){
+            $clauses .= " and bs.month_id = '$data->monthId'";
+        }
+        // if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        //     $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
+        // }
+
+        $billDetails = $this->db->query("
+            SELECT 
+                bd.*,
+                bs.month_id,
+                bs.added_by,
+                m.month_name,
+                s.Store_SlNo,
+                s.Store_No,
+                s.Store_Name,
+                s.floor_id,
+                s.meter_no,
+                s.square_feet,
+                o.Owner_Name,
+                o.Owner_Code,
+                f.Floor_Name,
+                f.Floor_Ranking
+            from tbl_zamindari_details bd
+            join tbl_store s on s.Store_SlNo = bd.store_id
+            join tbl_zamindari_month bs on bs.id = bd.zamindari_month_id
+            join tbl_month m on m.month_id = bs.month_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+            where bd.status = 'a'
+            and bd.branch_id = ?
+            $clauses
+            order by bd.id desc
+        ", $this->sbrunch)->result();
+
+        echo json_encode($billDetails);
+    }
+    
+
 }

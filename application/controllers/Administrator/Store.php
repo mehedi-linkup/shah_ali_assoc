@@ -221,6 +221,14 @@ class Store extends CI_Controller
             if($storeCodeCount > 0){
                 $storeObj->Store_Code = $this->mt->generateStoreCode();
             }
+            
+            $storeMeterCount = $this->db->query("select * from tbl_store where meter_no = ? and Store_branchid = ?", [$storeObj->meter_no, $this->session->userdata("BRANCHid")])->num_rows();
+            
+            if($storeMeterCount > 0){
+                $res = ['success'=>false, 'message'=>'Meter number already exists'];
+                echo Json_encode($res);
+                exit;
+            }
 
             $store = (array)$storeObj;
             unset($store['Store_SlNo']);
@@ -255,13 +263,8 @@ class Store extends CI_Controller
                 $res_message = 'Store added successfully';
             }
 
-            $storeMeterCount = $this->db->query("select * from tbl_store where meter_no = ? and Store_branchid = ?", [$storeObj->meter_no, $this->session->userdata("BRANCHid")])->num_rows();
-            if($storeMeterCount > 0){
-                $res = ['success'=>false, 'message'=>'Meter number already exists'];
-                echo Json_encode($res);
-                exit;
-            }
-            
+          
+
 
             if(!empty($_FILES)) {
                 $config['upload_path'] = './uploads/stores/';

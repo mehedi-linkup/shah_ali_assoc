@@ -160,6 +160,19 @@
 					<div class="col-md-1" style="padding:0;margin-left: -15px;"><a href="/owner" target="_blank" class="add-button"><i class="fa fa-plus"></i></a></div>
 				</div>
 
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's Name:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="store.Nominee_Name">	
+					</div>
+				</div>
+				
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Nominee's NID:</label>
+					<div class="col-md-7">
+						<input type="text" class="form-control" v-model="store.Nominee_NID">
+					</div>
+				</div>
 
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Shop Renter:</label>
@@ -221,12 +234,14 @@
 					</div>
 				</div>
 
-                <div class="form-group clearfix">
+                <!-- <div class="form-group clearfix">
 					<label class="control-label col-md-4">Is member:</label>
 					<div class="col-md-7">
 						<input type="checkbox" class="form-control-inline" v-model="store.is_member">
 					</div>
-				</div>
+				</div> -->
+
+				
 
 				<div class="form-group clearfix">
 					<div class="col-md-7 col-md-offset-4">
@@ -320,6 +335,8 @@
 					Store_Web: '',
 					square_feet: '',
                     is_member: false,
+					Nominee_Name: '',
+					Nominee_NID: '',
 					previous_due: 0
 				},
 				stores: [],

@@ -489,17 +489,27 @@ class Page extends CI_Controller {
         echo json_encode($branches);
     }
 
-    public function news_notice()  {
+    public function newsEntry()  {
         $access = $this->mt->userAccess();
         if(!$access){
             redirect(base_url());
         }
-        $data['title'] = "News & Notice";
+        $data['title'] = "Notice";
         $data['newsCode'] = $this->mt->generateNewsCode();
-        $data['noticeCode'] = $this->mt->generateNoticeCode();
         $data['selectedNews'] = $this->db->query("select * from tbl_news order by news_sl desc limit 1")->row();
+        $data['content'] = $this->load->view('Administrator/news_entry', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function noticeEntry()  {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Notice";
+        $data['noticeCode'] = $this->mt->generateNoticeCode();
         $data['selectedNotice'] = $this->db->query("select * from tbl_notice order by notice_sl desc limit 1")->row();
-        $data['content'] = $this->load->view('Administrator/news_notice', $data, TRUE);
+        $data['content'] = $this->load->view('Administrator/notice_entry', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
@@ -690,6 +700,55 @@ class Page extends CI_Controller {
             $status = $status == 'a' ? 'd' : 'a';
             $this->db->set('status', $status)->where('notice_sl', $data->noticeId)->update('tbl_notice');
             $res = ['success'=>true, 'message'=>'Status changed'];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+    
+    public function deleteNews(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->raw_input_stream);
+            $newsId = $data->newsId;
+            $news = $this->db->select('*')->where('news_sl', $newsId)->get('tbl_news')->row();
+            if($news->status != 'a'){
+                $res = ['success'=>false, 'message'=>'News not found'];
+                echo json_encode($res);
+                exit;
+            }
+            if(file_exists($news->news_file) && $news->news_file != null) {
+                unlink($news->news_file);
+            }           
+            $this->db->where('news_sl', $newsId);
+            $this->db->delete('tbl_news');
+            $res = ['success'=>true, 'message'=>'News deleted'];
+        } catch (Exception $ex){
+            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+        }
+
+        echo json_encode($res);
+    }
+
+
+    public function deleteNotices(){
+        $res = ['success'=>false, 'message'=>''];
+        try{
+            $data = json_decode($this->input->raw_input_stream);
+            $noticeId = $data->noticeId;
+            $notice = $this->db->select('*')->where('notice_sl', $noticeId)->get('tbl_notice')->row();
+            if($notice->status != 'a'){
+                $res = ['success'=>false, 'message'=>'Notice not found'];
+                echo json_encode($res);
+                exit;
+            }
+            if(file_exists($notice->notice_file) && $notice->notice_file != null) {
+                unlink($notice->notice_file);
+            }           
+            $this->db->where('notice_sl', $noticeId);
+            $this->db->delete('tbl_notice');
+            $res = ['success'=>true, 'message'=>'Notice deleted'];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
         }
@@ -1305,8 +1364,8 @@ class Page extends CI_Controller {
             // echo $code;
             // return;
             $data['title'] = "Latest Notice";
-            // $notice = $this->db->query("select * from tbl_notice where notice_code = ?", $code)->row();
-            // $data['noticeId'] = $notice->notice_sl;
+            $notice = $this->db->query("select * from tbl_notice where notice_code = ?", $code)->row();
+            $data['notice'] = $notice;
             $data['content'] = $this->load->view('Administrator/notice_view', $data, TRUE);
             $this->load->view('Administrator/index', $data);
         }
@@ -1321,11 +1380,9 @@ class Page extends CI_Controller {
         }
 
         public function news_view($code){
-            // echo $code;
-            // return;
-            $data['title'] = "Latest Notice";
-            // $notice = $this->db->query("select * from tbl_notice where notice_code = ?", $code)->row();
-            // $data['noticeId'] = $notice->notice_sl;
+            $data['title'] = "Latest News";
+            $news = $this->db->query("select * from tbl_news where news_code = ?", $code)->row();
+            $data['news'] = $news;
             $data['content'] = $this->load->view('Administrator/news_view', $data, TRUE);
             $this->load->view('Administrator/index', $data);
         }
@@ -1555,6 +1612,12 @@ class Page extends CI_Controller {
             ")->result();
     
             echo json_encode($months);
+        }
+
+        public function lastBillDetails($id) {
+            $data['bill_detail_id'] = $id;
+            $this->db->set('is_show', '1')->where('id', $id)->update('tbl_bill_sheet_details');
+            $this->load->view('Administrator/last_bill_notification', $data);
         }
 
         public function databaseBackup()

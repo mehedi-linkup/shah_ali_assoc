@@ -1,17 +1,16 @@
 <?php
 $branchID = $this->session->userdata('BRANCHid');
 $PamentID = $this->session->userdata('PamentID');
-$SCP = $this->db->query("SELECT tbl_customer_payment.*, tbl_customer.* FROM tbl_customer_payment LEFT JOIN tbl_customer ON tbl_customer.Customer_SlNo = tbl_customer_payment.CPayment_customerID WHERE tbl_customer_payment.CPayment_id = '$PamentID'");
+$SCP = $this->db->query("SELECT tbl_zamindari_payment.*, tbl_owner.*, tbl_store.* FROM tbl_zamindari_payment LEFT JOIN tbl_owner ON tbl_owner.Owner_SlNo = tbl_zamindari_payment.ZPayment_ownerID LEFT JOIN tbl_store ON tbl_store.Store_SlNo = tbl_zamindari_payment.ZPayment_storeID WHERE tbl_zamindari_payment.ZPayment_id = '$PamentID'");
 $CPROW = $SCP->row();
-$CUSID = $CPROW->CPayment_customerID;
-$paid = $CPROW->CPayment_amount;
-$type = $CPROW->CPayment_TransactionType;
+$StoreID = $CPROW->ZPayment_storeID;
+$OwnerID = $CPROW->ZPayment_ownerID;
+$paid = $CPROW->ZPayment_amount;
 
 
-$Custid = $CPROW->CPayment_customerID;
+$Custid = $CPROW->ZPayment_ownerID;
 
-$prevdueAmont = $CPROW->CPayment_previous_due;
-$totalDue = $type == 'CR' ? $prevdueAmont - $CPROW->CPayment_amount : $prevdueAmont + $CPROW->CPayment_amount;
+$prevdueAmont = $CPROW->ZPayment_previous_due;
 
 ?>
 
@@ -19,25 +18,32 @@ $totalDue = $type == 'CR' ? $prevdueAmont - $CPROW->CPayment_amount : $prevdueAm
 <a  id="printIcon" style="cursor:pointer"> <i class="fa fa-print" style="font-size:24px;color:green"></i> Print</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="<?php echo base_url();?>customerPaymentPage" title="" class="buttonAshiqe">Go Back</a>
     <div id="reportContent">
-        <div class="row" style="margin-bottom: 20px;">
-            <div class="col-xs-12">
-                <h6 style="background:#ddd; text-align: center; font-size: 18px; font-weight: 900; padding: 5px; color: #bd4700;">Customer Payment Invoice</h6>
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                <div _h098asdh>
+                    <span style="font-size:20px;font-weight:bold">মাসিক ভাড়া</span>
+                </div>
             </div>
         </div>
-        <div class="row" style="margin-bottom: 20px;">
+        <div class="row">
+            <div class="col-xs-7">
+                <strong>দোকান / স্পেস নংঃ </strong> <?php echo $CPROW->ZPayment_invoice; ?><br>
+                <strong>সদস্য / আইডি নংঃ </strong> {{ bill?.Owner_Code }}<br>
+                <strong>নামঃ </strong> {{ bill?.Owner_Name }}<br>
+            </div>
             <div class="col-xs-12">
                 <table style="width: 100%;">
                     <tr>
-                        <td style="font-size: 13px; font-weight: 600;"> TR. Id: <?php echo $CPROW->CPayment_invoice; ?></td>
+                        <td style="font-size: 13px; font-weight: 600;"> TR. Id: <?php echo $CPROW->ZPayment_invoice; ?></td>
                     </tr>
                     <tr>
-                        <td style="font-size: 13px; font-weight: 600; ">TR. Date: <?php echo $CPROW->CPayment_date; ?> </td>
+                        <td style="font-size: 13px; font-weight: 600; ">TR. Date: <?php echo $CPROW->ZPayment_date; ?> </td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="font-size: 13px; font-weight: 600; ">Name : <?php echo $CPROW->Customer_Name; ?></td>
+                        <td colspan="2" style="font-size: 13px; font-weight: 600; ">Name : <?php echo $CPROW->Owner_Name; ?></td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="font-size: 13px; font-weight: 600; ">Phone No. : <?php echo $CPROW->Customer_Mobile; ?></td>
+                        <td colspan="2" style="font-size: 13px; font-weight: 600; ">Phone No. : <?php echo $CPROW->Owner_Mobile; ?></td>
                     </tr>
                 </table>
             </div>
@@ -57,14 +63,12 @@ $totalDue = $type == 'CR' ? $prevdueAmont - $CPROW->CPayment_amount : $prevdueAm
                     <tbody>
                         <tr>
                         <td style="text-align: center;">01</td>
-                        <td><?php echo $CPROW->CPayment_notes; ?></td>
-                        <td style="text-align:right;"><?php if($type == 'CR'): echo number_format($CPROW->CPayment_amount, 2); else: echo '00.00'; endif; ?></td>
-                        <td style="text-align:right;"><?php if($type == 'CP'): echo number_format($CPROW->CPayment_amount, 2); else: echo '00.00'; endif; ?></td>
+                        <td><?php echo $CPROW->ZPayment_notes; ?></td>
+                        <td style="text-align:right;"><?php echo number_format($CPROW->ZPayment_amount, 2); ?></td>
                         </tr>
                         <tr>
                             <th colspan="2" style="font-size: 14px; font-weight: 700; text-align: right;">Total:</th>
-                            <th style="font-size: 13px; font-weight: 700;text-align:right;"><?php if($type == 'CR'): echo number_format($CPROW->CPayment_amount, 2); else: echo '00.00'; endif; ?></th>
-                            <th style="font-size: 13px; font-weight: 700;text-align:right;"><?php if($type == 'CP'): echo number_format($CPROW->CPayment_amount, 2); else: echo '00.00'; endif; ?></th>
+                            <th style="font-size: 13px; font-weight: 700;text-align:right;"><?php echo number_format($CPROW->ZPayment_amount, 2); ?></th>
                         </tr>
                     </tbody>
                 </table>
@@ -72,7 +76,7 @@ $totalDue = $type == 'CR' ? $prevdueAmont - $CPROW->CPayment_amount : $prevdueAm
         </div>
         <div class="row" style="margin-bottom: 20px;">
             <div class="col-xs-12">
-                <h6 style=" font-size: 12px; font-weight: 600;">Paid (In Word): <?php echo convertNumberToWord($CPROW->CPayment_amount);?></h6>
+                <h6 style=" font-size: 12px; font-weight: 600;">Paid (In Word): <?php echo convertNumberToWord($CPROW->ZPayment_amount);?></h6>
             </div>
         </div>
         <div class="row" style="margin-bottom: 20px;">
@@ -84,12 +88,9 @@ $totalDue = $type == 'CR' ? $prevdueAmont - $CPROW->CPayment_amount : $prevdueAm
                     </tr>
                     <tr>
                         <td  style="font-size: 13px; font-weight: 600; border-bottom: 2px solid #000; ">Paid Amount : </td>
-                        <td  style="font-size: 13px; font-weight: 600; border-bottom: 2px solid #000; text-align: right; "><?php echo number_format($CPROW->CPayment_amount, 2); ?></td>
+                        <td  style="font-size: 13px; font-weight: 600; border-bottom: 2px solid #000; text-align: right; "><?php echo number_format($CPROW->ZPayment_amount, 2); ?></td>
                     </tr>
-                    <tr>
-                        <td style="font-size: 13px; font-weight: 600; ">Current Due : </td>
-                        <td style="font-size: 13px; font-weight: 600; text-align: right; "><?php echo number_format($totalDue, 2); ?></td>
-                    </tr>
+                   
                 </table>
                 <div style="float:right;text-decoration: overline;">
                     <strong>Autorizied signature</strong>

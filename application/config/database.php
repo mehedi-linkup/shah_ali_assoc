@@ -8,13 +8,13 @@ $db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
 	
-  	// 'username' => 'dewbxcak_admin4',
-  	// 'password' => '(h-BfA?6WM)Z',
-  	// 'database' => 'dewbxcak_mother',
-	
 	'username' => 'root',
 	'password' => '',
 	'database' => 'shah_ali_assoc',
+
+    // 'username' => 'bigektuw_a_dmin1',
+  	// 'password' => 'bPcAG&$#%z0Y',
+  	// 'database' => 'bigektuw_shahaliplaza',
 		
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

@@ -29,7 +29,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 			<!-- Header Logo -->
 			<?php if (!isset($CheckOwner) && !isset($CheckRenter)) : ?>
 				<div class="col-md-12 header" style="height: 130px;">
-					<img src="<?php echo base_url(); ?>assets/images/linkup_logo.png" class="img img-responsive center-block">
+					<img src="<?php echo base_url(); ?>assets/images/big_logo.jpg" class="img img-responsive center-block">
 				</div>
 			<?php endif; ?>
 			<div class="col-md-10 col-md-offset-1">
@@ -1108,17 +1108,60 @@ if ($module == 'dashboard' or $module == '') { ?>
 			<div class="col-md-10">
 				<!-- Header Logo -->
 				<div class="col-md-12 header">
-					<h3> Notice Module </h3>
+					<h3> Notification Module </h3>
 				</div>
-				<?php if (array_search("newsAndNotice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+				<?php if (array_search("check_bill", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>newsAndNotice">
+							<a href="<?php echo base_url(); ?>check_bill">
+								<div class="logo">
+									<i class="menu-icon fa fa-balance-scale"></i>
+								</div>
+								<div class="textModule">
+									Check Bill
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+				<?php if (array_search("upcoming_bill", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>upcoming_bill">
+								<div class="logo">
+									<i class="menu-icon fa fa-calendar-o"></i>
+
+								</div>
+								<div class="textModule">
+									Upcoming Bills
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+				<?php if (array_search("news_entry", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>news_entry">
 								<div class="logo">
 									<i class="menu-icon fa fa-newspaper-o"></i>
 								</div>
 								<div class="textModule">
-									News & Notice
+									News Entry
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+				<?php if (array_search("notice_entry", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>notice_entry">
+								<div class="logo">
+									<i class="menu-icon fa fa-bell-o"></i>
+								</div>
+								<div class="textModule">
+									Notice Entry
 								</div>
 							</a>
 						</div>
@@ -1998,7 +2041,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 			text-decoration: none;
 		}
 		.breakingNews a {
-			color: #f00;
+			color: #ff0000ab;
 		}
 		.breakingNews {
 			display: flex;
@@ -2006,6 +2049,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 		}
 		.breakingNews i {
 			color: #72c02c;
+			margin-right: 5px;
 		}
 		.news-panel {
 			height: 400px; 
@@ -2026,7 +2070,8 @@ if ($module == 'dashboard' or $module == '') { ?>
 
 		#notice-board-ticker ul li {
 			list-style: none;
-			background: url("/assets/extra/img/bullet_tick.png") no-repeat center left;
+			background: url("/assets/extra/img/bullet_tick.png") no-repeat top left;
+			margin-bottom: 5px;
 		}
 		#notice-board-ticker ul a {
 			margin-left: 20px;
@@ -2046,15 +2091,30 @@ if ($module == 'dashboard' or $module == '') { ?>
 <div class="row">
 	<div class="col-md-12 col-xs-12">
 		<div class="breakingNews">
-			<marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();" scrollamount="8">
+			<?php 
+				$this->load->model('Model_table', "mt", TRUE);
+
+				$userData = $this->session->userdata();
+				$userTableData = $this->db->query("select * from tbl_user where User_SlNo = ". $userData['userId'])->row();
+				$clauses = "";
+				if($userTableData->UserType == 'o') {
+					$clauses .= "and s.owner_id = '$userTableData->ref_id'";
+				} else if($userTableData->UserType == 'r') {
+					$clauses .= "and s.renter_id = '$userTableData->ref_id'";
+				}
+
+                $billDetails = $this->mt->lastBillDetails($clauses);
+			?>
+			
+			<marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();" scrollamount="4">
 				<ul class="list-inline">
-					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1383.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
-					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1382.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
-					<li style="font-size:16px; font-weight:bold;"><i class="fa fa-square"></i> <a href="/media-communication/news-1377.html">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব</a></li>
+				<?php foreach ($billDetails as $key => $value) { ?>
+				<li style="font-size:16px;font-weight:bold;"><i class="fa fa-square"></i><a href="javascript:void(0)"><?php echo $value->bill_text ?></a></li>
+				<?php } ?>
 				</ul>
 			</marquee>
 			<!-- <span class="view-all-news"> -->
-				<a class="btn btn-sm btn-warning" href="/media-communication/allscrollnews.html">All Latest News</a>
+				<a class="btn btn-sm btn-warning" href="javascript:void(0)">Recent Bills</a>
 			<!-- </span> -->
 		</div>
 	</div>
@@ -2062,26 +2122,28 @@ if ($module == 'dashboard' or $module == '') { ?>
 	<div class="col-md-7 col-xs-7">
 		<div class="panel panel-default news-panel">
 			<h2 style="padding:15px">নোটিশ বোর্ড</h2>
+			<?php  
+				$startOfWeek = date('Y-m-d', strtotime('monday this week'));
+				$currentDate = date('Y-m-d');
+				$notices = $this->db->select('*')->get('tbl_notice')->result();
+
+				foreach ($notices as $notice) {
+					if ($notice->add_date >= $startOfWeek && $notice->add_date <= $currentDate) {
+						$notice->newStatus = 'n';
+					}
+				}
+			?>
+
 			<div id="notice-board-ticker">
 				<ul>
-				<?php $notice_code = 234; ?>
-					<li>
-						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong>
-					</li>
-					<li>
-						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬২ [জনাব মো: উজ্জল, অফিস সহকারী কাম-কম্পিউটার মুদ্রাক্ষরিক]">শ্রান্তি ও বিনোদন ছুটি-৯৬২ [জনাব মো: উজ্জল, অফিস সহকারী কাম-কম্পিউটার মুদ্রাক্ষরিক]</a><strong style="color:red"> (নতুন)</strong>
-					</li>
-					<li>
-						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="বাংলাদেশ ও ভিয়েতনামের মধ্যে অনুষ্ঠিত 3rd JTC জন্য আলোচ্যসূচি (Agenda) প্রেরণ।">বাংলাদেশ ও ভিয়েতনামের মধ্যে অনুষ্ঠিত 3rd JTC জন্য আলোচ্যসূচি (Agenda) প্রেরণ।</a><strong style="color:red"> (নতুন)</strong>
-					</li>
-					<li>
-						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="Office Order 311 : Ex- Bangladesh Leave [Mr. Khalilur Rahman, Asistant Manager, BJMC]...">Office Order 311 : Ex- Bangladesh Leave [Mr. Khalilur Rahman, Asistant Manager, BJMC]...</a><strong style="color:red"> (নতুন)</strong>
-					</li>
-					<li>
-						<a href="<?php echo base_url() . 'notice_view/' . $notice_code ?>" title="১০ম-২০তম গ্রেড পর্যন্ত কর্মকর্তা/কর্মচারীদের গোপনীয় অনুবেদন ফর্ম এবং '১০ম-২০তম গ্রেডভ...">১০ম-২০তম গ্রেড পর্যন্ত কর্মকর্তা/কর্মচারীদের গোপনীয় অনুবেদন ফর্ম এবং '১০ম-২০তম গ্রেডভ...</a><strong style="color:red"> (নতুন)</strong>
-					</li>
+
+					<?php foreach ($notices as $key=>$notice) { ?>
+						<li>
+							<a href="<?php echo base_url() . 'notice_view/' . $notice->notice_code ?>" title="<?php echo $notice->notice_title ?>"><?php echo $notice->notice_title ?></a><strong style="color:red"><?php echo @$notice->newStatus == 'n'? '(নতুন)' : ''?></strong>
+						</li>
+					<?php } ?>
 				</ul>	
-				<a style="position: absolute;bottom: 0;" class="btn right" href="<?php echo base_url(); ?>notice_view" title="সকল নোটিশ">সকল</a>
+				<a style="position:absolute;bottom:0;" class="btn right" href="<?php echo base_url(); ?>notice_view" title="সকল নোটিশ">সকল</a>
 			</div>
 		</div>
 	</div>
@@ -2089,13 +2151,18 @@ if ($module == 'dashboard' or $module == '') { ?>
 	<div class="col-md-5 col-xs-5">
 		<div class="panel panel-default news-panel">
 			<div class="panel-body news-content">
-				<?php $news_code = 234; ?>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>
-				<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: 2023-11-01</span><br><a href="<?php echo base_url() . 'news_view/' . $news_code ?>" title="শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]">শ্রান্তি ও বিনোদন ছুটি-৯৬১ [জনাব এস, এম, ফরিদ উদ্দিন, সিনিয়র সহকারী সচিব]</a><strong style="color:red"> (নতুন)</strong></p>						
+				<?php  
+					$news = $this->db->select('*')->get('tbl_news')->result();
+
+					foreach ($news as $item) {
+						if ($item->add_date >= $startOfWeek && $item->add_date <= $currentDate) {
+							$item->newStatus = 'n';
+						}
+					}
+					?>
+				<?php foreach ($news as $key => $value) { ?>
+					<p style="margin-bottom: 15px;"><span style="color:green;font-style:italic;">Date: <?php echo $value->add_date ?></span><br><a href="<?php echo base_url() . 'news_view/' . $value->news_code ?>" title="<?php echo $value->news_title ?>"><?php echo $value->news_title ?></a><strong style="color:red"> (নতুন)</strong></p>
+				<?php } ?>						
 			</div>
 			<div style="position: absolute;bottom: 0;"><a class="btn btn-primary" style="float:right" href="<?php echo base_url(); ?>news_view" title="সকল নোটিশ">সকল</a></div>
 		</div>

@@ -23,7 +23,7 @@
 			color: #fff;
 		}
 		.background {
-			background-image: url('/assets/extra/img/photos/unsplash2.png');
+			background-image: url('/assets/extra/img/photos/unsplash-2.jpg');
 			background-size: cover;
 			background-attachment: fixed;
 			background-color: rgb(0 0 0 / 50%);

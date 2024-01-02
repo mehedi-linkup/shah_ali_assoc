@@ -69,7 +69,7 @@ if ($module == 'dashboard' or $module == '') {
 		<li class="">
 			<a href="<?php echo base_url(); ?>module/NoticeModule">
 				<i class="menu-icon fa fa-bell-o" aria-hidden="true"></i>
-				<span class="menu-text"><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notice Module' ?></span>
+				<span class="menu-text"><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notification Module' ?></span>
 			</a>
 			<b class="arrow"></b>
 		</li>
@@ -371,7 +371,7 @@ if ($module == 'dashboard' or $module == '') {
 		</li>
 		<li>
 			<a href="<?php echo base_url(); ?>module/BillModule" class="module_title">
-				<span> Bill Module </span>
+				<span> Generate Module </span>
 			</a>
 		</li>
 
@@ -386,6 +386,17 @@ if ($module == 'dashboard' or $module == '') {
 			</li>
 		<?php endif; ?>
 
+		<?php if (array_search("billInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>billInvoiceMutiple">
+					<i class="menu-icon fa fa-th-list" aria-hidden="true"></i>
+
+					<span class="menu-text"> Bill Invoice Muliple </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
 		<?php if (array_search("bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
 				<a href="<?php echo base_url(); ?>bill_record">
@@ -395,10 +406,38 @@ if ($module == 'dashboard' or $module == '') {
 				<b class="arrow"></b>
 			</li>
 		<?php endif; ?>
+		<?php if (array_search("acBillRecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>acBillRecord">
+					<i class="menu-icon fa fa-th-list"></i>
+					<span class="menu-text"> AC Record </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+		
+		<?php if (array_search("zamidariRent/generate", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>zamidariRent/generate">
+					<i class="menu-icon fa fa-spinner" aria-hidden="true"></i>
+
+					<span class="menu-text"> Zamindari Rent</span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (array_search("zamindari_bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>zamindari_bill_record">
+					<i class="menu-icon fa fa-th-list"></i>
+					<span class="menu-text"> Zamindari Bill Record </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
 
 		
-
-
 		<!-- <?php if (array_search("currentStock", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
 				<a href="<?php echo base_url(); ?>currentStock">
@@ -423,6 +462,7 @@ if ($module == 'dashboard' or $module == '') {
 			array_search("service", $access) > -1
 			|| array_search("servicelist", $access) > -1
 			|| array_search("utilityRates", $access) > -1
+			|| array_search("zamindariRates", $access) > -1
 			|| isset($CheckSuperAdmin)
 			|| isset($CheckAdmin)
 		) : ?>
@@ -443,6 +483,17 @@ if ($module == 'dashboard' or $module == '') {
 							<a href="<?php echo base_url(); ?>utilityRates">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Rates Entry
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("zamindariRates", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>zamindariRates">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Zamindari Rates Entry
 							</a>
 
 							<b class="arrow"></b>
@@ -620,6 +671,15 @@ if ($module == 'dashboard' or $module == '') {
 							<b class="arrow"></b>
 						</li>
 					<?php endif; ?>
+					<?php if (array_search("billInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>billInvoiceMutiple">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Mutiple Bill Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
 
 					<?php if (array_search("store_bill_report", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 						<li class="">
@@ -709,6 +769,16 @@ if ($module == 'dashboard' or $module == '') {
 				<a href="<?php echo base_url(); ?>acPaymentRecord">
 					<i class="menu-icon fa fa-th-list"></i>
 					<span class="menu-text"> AC Record </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (array_search("zamindariPaymentPage", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>zamindariPaymentPage">
+					<i class="menu-icon fa fa-inbox"></i>
+					<span class="menu-text"> Zomindari Payment </span>
 				</a>
 				<b class="arrow"></b>
 			</li>
@@ -928,15 +998,45 @@ if ($module == 'dashboard' or $module == '') {
 
 		<li>
 			<a href="<?php echo base_url(); ?>module/NoticeModule" class="module_title">
-				<span><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notice Module' ?></span>
+				<span><?php echo isset($CheckOwner) || isset($CheckRenter) ? 'Notice' : 'Notification Module' ?></span>
 			</a>
 		</li>
 
-		<?php if (array_search("newsAndNotice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+		<?php if (array_search("check_bill", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
-				<a href="<?php echo base_url(); ?>newsAndNotice">
+				<a href="<?php echo base_url(); ?>check_bill">
+					<i class="menu-icon fa fa-balance-scale"></i>
+					<span class="menu-text">  Check Bill </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (array_search("upcoming_bill", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>upcoming_bill">
+					<i class="menu-icon fa fa-calendar-o"></i>
+					<span class="menu-text"> Upcoming Bills </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (array_search("news_entry", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>news_entry">
 					<i class="menu-icon fa fa-newspaper-o"></i>
-					<span class="menu-text"> News & Notice </span>
+					<span class="menu-text"> News Entry </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
+		<?php if (array_search("notice_entry", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>notice_entry">
+					<i class="menu-icon fa fa-bell-o"></i>
+					<span class="menu-text"> Notice Entry </span>
 				</a>
 				<b class="arrow"></b>
 			</li>

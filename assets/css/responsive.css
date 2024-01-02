@@ -1,3 +1,17 @@
+.badge {
+    position: absolute;
+    top: 5px;
+    right: 3px;
+    border: 1px solid rgb(4, 77, 150);
+    background-color: dodgerblue;
+    border-radius: 50%;
+}
+.text-white {
+    color: #fff !important;
+}
+.bg-blue {
+    background-color: dodgerblue !important;
+}
 @media only screen and (max-width: 600px) {
     .clock_li{
         display: none !important;

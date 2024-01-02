@@ -355,10 +355,11 @@ class Billing_model extends CI_Model {
 	}
 	
   	public function fatch_all_payment(){
-		$this->db->select('tbl_customer_payment.*, tbl_customer.Customer_Name')->from('tbl_customer_payment');
-		$this->db->join('tbl_customer', 'tbl_customer_payment.CPayment_customerID=tbl_customer.Customer_SlNo');
-		$result = $this->db->where('tbl_customer_payment.CPayment_status','a')->where('tbl_customer_payment.CPayment_brunchid', $this->BRANCHid)
-			->order_by('tbl_customer_payment.CPayment_invoice', 'desc')->get()->result();
+		$this->db->select('tbl_zamindari_payment.*, tbl_store.Store_Name, tbl_owner.Owner_Name')->from('tbl_zamindari_payment');
+		$this->db->join('tbl_store', 'tbl_zamindari_payment.ZPayment_storeID = tbl_store.Store_SlNo');
+		$this->db->join('tbl_owner', 'tbl_zamindari_payment.ZPayment_ownerID = tbl_owner.Owner_SlNo');
+		$result = $this->db->where('tbl_zamindari_payment.ZPayment_status','a')->where('tbl_zamindari_payment.ZPayment_branchid', $this->BRANCHid)
+			->order_by('tbl_zamindari_payment.ZPayment_invoice', 'desc')->get()->result();
 		return $result;
 	}
 
@@ -493,6 +494,11 @@ class Billing_model extends CI_Model {
 				   
   	public function utility_rate($id){
 		$rates = $this->db->query("select * from tbl_utility_rate where rate_branchid = '$id' order by Rate_SlNo desc limit 1")->row();
+
+		return $rates;
+	}
+  	public function zamindari_rate($id){
+		$rates = $this->db->query("select * from tbl_zamindari_rate where rate_branchid = '$id' order by Rate_SlNo desc limit 1")->row();
 
 		return $rates;
 	}
