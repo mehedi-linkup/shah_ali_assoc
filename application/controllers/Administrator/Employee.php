@@ -1031,7 +1031,15 @@ class Employee extends CI_Controller
 
             $yearMonths = $this->db->query("select * from tbl_month where SUBSTRING(month_name, -4) = ?", $data->year)->result();
 
-            $billMonths = array_map(function($item) use ($billYearId, $data) {
+            $rates = $this->db->query("select * from tbl_zamindari_rate order by Rate_SlNo desc limit 1")->row();
+
+            if(!isset($rates)) {
+                $res = ['success' => false, 'message' => "select rates"];
+                echo json_encode($res);
+                return;
+            }
+
+            $billMonths = array_map(function($item) use ($billYearId, $data, $rates) {
                 $date = DateTime::createFromFormat('F Y', $item->month_name);
                 $date->modify('+15 days');
                 $date->modify('last day of this month');
@@ -1040,7 +1048,7 @@ class Employee extends CI_Controller
                 // $oldBillMonth = $this->db->query("select * from tbl_zamindari_month where month_id = ? and bill_year_id = ?", [$item->month_id, $billYearId]);
                 // $oldBillMonthId = @$oldBillMonth->row()->id;
                 $bill = [
-                    'bill_year_id' => $billYearId, 
+                    'bill_year_id' => $billYearId,
                     'month_id' => $item->month_id,
                     'process_date' => $data->process_date,
                     'last_date' => $resultDate,
@@ -1056,8 +1064,6 @@ class Employee extends CI_Controller
 
                 $this->db->insert('tbl_zamindari_month', $bill);
                 $billMonthId = $this->db->insert_id();
-
-                $rates = $this->db->query("select * from tbl_zamindari_rate order by Rate_SlNo desc limit 1")->row();
                              
                 $owners = $this->db->query("select * from tbl_owner where status = 'a' and Owner_brunchid = '$this->brunch'")->result();
 

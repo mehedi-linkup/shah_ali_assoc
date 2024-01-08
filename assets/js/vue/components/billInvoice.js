@@ -24,7 +24,7 @@ const billInvoice = Vue.component('billInvoice', {
                         <strong>তারিখঃ </strong> {{ startDate }} হইতে {{ endDate }} পর্যন্ত <br>
                     </div>
                     <div class="col-xs-5 text-right">
-                        <strong>বিল নংঃ </strong> {{ convertToBanglaNumber(cart[0].invoice) }}<br>
+                        <strong>বিল নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.invoice) }}<br>
                         <strong>বিল তৈরির তারিখঃ </strong> {{ dateFormat(cart[0]?.process_date) }}<br>
                         <strong>বিল প্রদানের তারিখঃ </strong> ______________<br>
                         <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
@@ -204,7 +204,6 @@ const billInvoice = Vue.component('billInvoice', {
 
             this.startDate  = this.convertToBengaliNumerals(formattedSDateDDMMYYYY);
             this.endDate = this.convertToBengaliNumerals(formattedEDateDDMMYYYY);
-            console.log(this.startDate);
         },
         dateFormat(inputDate) {
             let date = new Date(inputDate);

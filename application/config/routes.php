@@ -472,12 +472,14 @@ $route['get_bill_sheet'] = 'Administrator/Bills/getBillSheet';
 $route['get_bill_details'] = 'Administrator/Bills/getBillDetails';
 $route['get_utility_bill'] = 'Administrator/Bills/getUtilityBills';
 $route['bill_sheet/(:any)'] = 'Administrator/Bills/billSheet/$1';
-$route['bill_record'] = 'Administrator/Bills/billRecord';
+$route['billRecord'] = 'Administrator/Bills/billRecord';
 $route['acBillRecord'] = 'Administrator/Bills/ac_bill_record';
 $route['store_bill_report'] = 'Administrator/Store/storeBillReport';
 $route['get_store_bills'] = 'Administrator/Store/getStoreBills';
 $route['billInvoice'] = 'Administrator/Bills/bill_invoice';
 $route['billInvoiceMutiple'] = 'Administrator/Bills/bill_invoice_mulitple';
+$route['acBillInvoice'] = 'Administrator/Bills/ac_bill_invoice';
+$route['acBillInvoiceMutiple'] = 'Administrator/Bills/ac_bill_invoice_mulitple';
 $route['bill_invoice_print/(:any)'] = 'Administrator/Bills/billInvoicePrint/$1';
 $route['ac_bill_invoice_print/(:any)'] = 'Administrator/Bills/billAcInvoicePrint/$1';
 

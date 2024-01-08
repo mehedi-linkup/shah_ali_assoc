@@ -380,7 +380,10 @@ class Owner extends CI_Controller
             }
     
             $udata = array(
-                "User_Name" => $ownerObj->Owner_UserName
+                "User_Name"     => $ownerObj->Owner_UserName,
+                "FullName"      => $ownerObj->Owner_Name,
+                "UserEmail"     => $ownerObj->Owner_Email,
+                "ref_id"        => $ownerId
             );
 
             $this->db->where("ref_id", $ownerId);
@@ -419,15 +422,16 @@ class Owner extends CI_Controller
         $this->load->view('Administrator/edit/customer_edit', $data);
     }
 
-    public function deleteCustomer()
+    public function deleteOwner()
     {
         $res = ['success'=>false, 'message'=>''];
         try{
             $data = json_decode($this->input->raw_input_stream);
 
-            $this->db->query("update tbl_customer set status = 'd' where Customer_SlNo = ?", $data->customerId);
+            $this->db->query("update tbl_owner set status = 'd' where Owner_SlNo = ?", $data->ownerId);
+            $this->db->query("update tbl_user set status = 'd' where UserType = 'o' and ref_id = ?", $data->ownerId);
 
-            $res = ['success'=>true, 'message'=>'Customer deleted'];
+            $res = ['success'=>true, 'message'=>'Owner deleted'];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
         }

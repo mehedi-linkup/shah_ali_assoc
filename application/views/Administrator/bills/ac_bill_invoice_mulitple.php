@@ -59,7 +59,7 @@
 <script src="<?php echo base_url(); ?>assets/js/vue/vue.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/vue/axios.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/vue/vue-select.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/js/vue/components/mutiplebillInvoice.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/components/mutipleAcBillInvoice.js"></script>
 
 <script>
     Vue.component('v-select', VueSelect.VueSelect);

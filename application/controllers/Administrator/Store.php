@@ -216,6 +216,9 @@ class Store extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $storeObj = json_decode($this->input->post('data'));
+
+            // echo json_encode($storeObj);
+            // return;
            
             $storeCodeCount = $this->db->query("select * from tbl_store where Store_Code = ?", $storeObj->Store_Code)->num_rows();
             if($storeCodeCount > 0){
@@ -232,9 +235,9 @@ class Store extends CI_Controller
 
             $store = (array)$storeObj;
             unset($store['Store_SlNo']);
-            unset($store['is_member']);
+            unset($store['is_generable']);
 
-            $store["is_member"] = $storeObj->is_member == true ? '1' : '0';
+            $store["is_generable"] = $storeObj->is_generable == true ? 'true' : 'false';
             $store["Store_branchid"] = $this->session->userdata("BRANCHid");
 
             $storeId = null;
@@ -304,7 +307,7 @@ class Store extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $storeObj = json_decode($this->input->post('data'));
-           
+ 
             $storeMobileCount = $this->db->query("select * from tbl_store where Store_Mobile = ? and Store_SlNo != ? and Store_branchid = ?", [$storeObj->Store_Mobile, $storeObj->Store_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
 
             if($storeMobileCount > 0){
@@ -326,9 +329,8 @@ class Store extends CI_Controller
             $storeId = $storeObj->Store_SlNo;
 
             unset($store["Store_SlNo"]);
-            unset($store["is_member"]);
-
-            $store["is_member"] = $storeObj->is_member == true ? '1' : '0';
+            unset($store["is_generable"]);
+            $store["is_generable"] = $storeObj->is_generable == true ? 'true' : 'false';
             $store["Store_branchid"] = $this->session->userdata("BRANCHid");
             $store["UpdateBy"] = $this->session->userdata("FullName");
             $store["UpdateTime"] = date("Y-m-d H:i:s");

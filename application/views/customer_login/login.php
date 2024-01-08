@@ -35,6 +35,13 @@
 		#typed {
 			color: #fff;
 		}
+		@media (min-width:992px) {
+			.card-body {
+				padding-left: 5rem !important; 
+				padding-right: 5rem !important; 
+				padding-bottom: 5rem !important;
+			}
+		}
 	</style>
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/extra/css/modern.css">
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-120946860-7"></script>
@@ -65,7 +72,7 @@
 							</p>
 						</div>
 
-						<div class="card">
+						<div class="card" style="background-color: #ffffff80;">
 							<div class="card-body">
 								<div class="m-sm-4">
 									<div class="text-center pt-2 pb-4">
@@ -78,22 +85,31 @@
 									<p style="color:red;"><?php if(isset($message)){ echo $message; } ?></p>
 									<form method="post" action="<?php echo base_url();?>Login/procedureCustomer">
 										<div class="mb-3">
+											<?php echo form_error('user_type'); ?>
+											<select name="user_type" id="user_type" class="form-select" aria-label="Default select example">
+												<option value="m" selected>Admin</option>
+												<option value="u">User</option>
+												<option value="o">Owner</option>
+												<option value="r">Renter</option>
+											</select>
+										</div>
+										<div class="mb-3">
 											<?php echo form_error('user_name'); ?>
 											<input class="form-control" type="text"  name="user_name" placeholder="User Name"/>
 										</div>
 										<div class="mb-3">
 											<?php echo form_error('password'); ?>
 											<input class="form-control" type="password" name="password" placeholder="Password" />
-											<small>
+											<!-- <small>
 												<a href='/pages-reset-password'>Forgot password?</a>
-											</small>
+											</small> -->
 										</div>
 										<div>
-											<div class="form-check align-items-center">
+											<!-- <div class="form-check align-items-center">
 												<input id="customControlInline" type="checkbox" class="form-check-input" value="remember-me" name="remember-me"
 													checked>
-												<label class="form-check-label text-small" for="customControlInline">Remember me next time</label>
-											</div>
+												<label class="form-check-label text-small" for="customControlInline">Remember me</label>
+											</div> -->
 										</div>
 										<div class="text-center mt-3">
 											<!-- <a class='btn btn-primary w-100' href='/dashboard-default'>Sign in</a> -->

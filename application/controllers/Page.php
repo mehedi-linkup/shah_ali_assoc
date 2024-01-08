@@ -6,7 +6,8 @@ class Page extends CI_Controller {
         $this->brunch = $this->session->userdata('BRANCHid');
         $access = $this->session->userdata('userId');
         if($access == '' ){
-            redirect("Login/userindex");
+            // redirect("Login/userindex");
+            redirect("Login/");
         } 
         $this->load->model("Model_myclass", "mmc", TRUE);
         $this->load->model('Model_table', "mt", TRUE);

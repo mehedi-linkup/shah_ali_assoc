@@ -25,6 +25,7 @@
                                 <th style="text-align: left;">AC Bill</th>
                                 <th style="text-align: left;">Others</th>
                                 <th style="text-align: right;">Net Payable</th>
+                                <th style="text-align: right;">Last Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -39,6 +40,7 @@
                                 <td style="text-align:left;">{{ billDetail.ac_bill | decimal }}</td>
                                 <td style="text-align:left;">{{ billDetail.others_bill | decimal }}</td>
                                 <td style="text-align:right;">{{ billDetail.net_payable | decimal }}</td>
+                                <td style="text-align:right;">{{ billDetail.last_date }}</td>
                             </tr>
                         </tbody>
                         <tfoot>
@@ -50,6 +52,7 @@
                                 <td style="text-align:left;font-weight:700">{{ total.totalAc | decimal }}</td>
                                 <td style="text-align:left;font-weight:700">{{ total.totalUtility | decimal }}</td>
                                 <td style="text-align:right;font-weight:700">{{ total.totalPayable | decimal }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -103,7 +106,7 @@
             async getBillSheet() {
                 await axios.post('/get_bill_sheet', { id: this.billSheetId }).then(res => {
                     this.billSheet = res.data.billSheets[0];
-                    this.billDetails = res.data.billDetails;
+                    this.billDetails = res.data.billDetails.filter(item => item.net_payable > 0);
                 })
             },
 

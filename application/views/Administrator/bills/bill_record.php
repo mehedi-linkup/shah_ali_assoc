@@ -64,20 +64,20 @@
 					<label>Search Type</label>
 					<select class="form-control" v-model="searchType" @change="onChangeSearchType">
 						<option value="">All</option>
-						<option value="month">By Month</option>
+						<option value="month">By Month summary</option>
 					</select>
 				</div>
 
 				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == '' && months.length > 0 ? '' : 'none'}">
-					<label>Month</label>
+					<label>Month </label>
 					<v-select v-bind:options="months" v-model="selectedMonth" label="month_name"></v-select>
 				</div>
 
-				<div class="form-group" style="display:none;" v-bind:style="{display: searchType != '' ? '' : 'none'}">
+				<div class="form-group">
 					<input type="date" class="form-control" v-model="dateFrom">
 				</div>
 
-				<div class="form-group" style="display:none;" v-bind:style="{display: searchType != '' ? '' : 'none'}">
+				<div class="form-group">
 					<input type="date" class="form-control" v-model="dateTo">
 				</div>
 
@@ -111,37 +111,44 @@
 							<th>Generator Bill</th>
 							<th>AC Bill</th>
 							<th>Other Bill</th>
-							<th>Ney Payable</th>
+							<th>Net Payable</th>
+							<th>Last Date</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="bill in billSheetDetails">
-							<td>{{ bill.invoice }}</td>
-							<td>{{ bill.Store_No }}</td>
-							<td>{{ bill.Store_Name }}</td>
-                            <td>{{ bill?.Floor_Name }}</td>
-							<td>{{ bill?.electricity_unit }}</td>
-							<td>{{ bill?.electricity_bill }}</td>
-							<td>{{ bill?.generator_bill }}</td>
-							<td>{{ bill?.ac_bill }}</td>
-							<td>{{ bill?.others_bill }}</td>
-							<td>{{ bill?.net_payable }}</td>
-							
-							<td style="text-align:center;">
-								<a href="" title="bill Invoice" v-bind:href="`/bill_invoice_print/${bill.id}`" target="_blank"><i class="fa fa-file"></i></a>
-							</td>
-						</tr>
+						<template v-for="bill in billSheetDetails">
+							<tr>
+								<td colspan="12" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ bill.floor_name }}</td>
+							</tr>
+							<tr v-for="(bill, i) in bill.stores">
+								<td>{{ bill.invoice }}</td>
+								<td>{{ bill.Store_No }}</td>
+								<td>{{ bill.Store_Name }}</td>
+								<td>{{ bill?.Floor_Name }}</td>
+								<td>{{ bill?.electricity_unit }}</td>
+								<td>{{ bill?.electricity_bill }}</td>
+								<td>{{ bill?.generator_bill }}</td>
+								<td>{{ bill?.ac_bill }}</td>
+								<td>{{ bill?.others_bill }}</td>
+								<td>{{ bill?.net_payable }}</td>
+								<td>{{ bill?.last_date }}</td>
+								<td style="text-align:center;">
+									<a href="" title="bill Invoice" v-bind:href="`/bill_invoice_print/${bill.id}`" target="_blank"><i class="fa fa-file"></i></a>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 					<tfoot>
 						<tr style="font-weight:bold;">
 							<td colspan="5" style="text-align:right;">Total</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.electricity_unit)}, 0) }}</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.electricity_bill)}, 0) }}</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.generator_bill)}, 0) }}</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.ac_bill)}, 0) }}</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.others_bill)}, 0) }}</td>
-							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + parseFloat(curr.net_payable)}, 0) }}</td>
+							<td style="text-align:right;">{{ billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.electricity_unit}, 0) }, 0) }}</td>
+							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.electricity_bill}, 0) }, 0) ).toFixed(2) }}</td>
+							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.generator_bill}, 0) }, 0) ).toFixed(2) }}</td>
+							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.ac_bill}, 0) }, 0) ).toFixed(2) }}</td>
+							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.others_bill}, 0) }, 0) ).toFixed(2) }}</td>
+							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.net_payable}, 0) }, 0) ).toFixed(2) }}</td>
+							<td></td>
 						</tr>
 					</tfoot>
 				</table>
@@ -221,11 +228,8 @@
                 })
             },
 			getSearchResult(){
-				if(this.searchType != 'month'){
-					// this.selectedMonth = null;
-				}
+				console.log(this.searchType);
 				if(this.searchTypesForDetails.includes(this.searchType)){
-                    console.log("logged");
                     this.getBillDetails();
 				} else {
 					this.getBillRecord();
@@ -266,40 +270,21 @@
 					dateTo: this.dateTo
 				}
 
-                axios.post('/get_bill_details').then(res => {
-                    this.billSheetDetails = res.data;
+                axios.post('/get_bill_details', filter).then(res => {
+                    // this.billSheetDetails = res.data.filter(item => item.net_payable > 0);
+					let stores =  res.data.filter(item => item.net_payable > 0);
+					stores = _.chain(stores).groupBy('floor_id')
+							.map(store => {
+									return {
+										floor_id: store[0].floor_id,
+										floor_name: store[0].Floor_Name,
+										floor_ranking: store[0].Floor_Ranking,
+										stores: store
+									}
+								}).value()
+					stores = _.orderBy(stores, ['floor_ranking'], ['asc'])
+					this.billSheetDetails = stores;
                 })
-				// axios.post('/get_saledetails', filter)
-				// .then(res => {
-				// 	let sales = res.data;
-
-				// 	if(this.selectedProduct == null) {
-				// 		sales = _.chain(sales)
-				// 			.groupBy('ProductCategory_ID')
-				// 			.map(sale => {
-				// 				return {
-				// 					category_name: sale[0].ProductCategory_Name,
-				// 					products: _.chain(sale)
-				// 						.groupBy('Product_IDNo')
-				// 						.map(product => {
-				// 							return {
-				// 								product_code: product[0].Product_Code,
-				// 								product_name: product[0].Product_Name,
-				// 								quantity: _.sumBy(product, item => Number(item.SaleDetails_TotalQuantity))
-				// 							}
-				// 						})
-				// 						.value()
-				// 				}
-				// 			})
-				// 			.value();
-				// 	}
-				// 	this.sales = sales;
-				// })
-				// .catch(error => {
-				// 	if(error.response){
-				// 		alert(`${error.response.status}, ${error.response.statusText}`);
-				// 	}
-				// })
 			},
 			viewBillSheet(id) {
                 window.open(`/bill_sheet/${id}`, '_blank');
@@ -340,16 +325,16 @@
 					<div class="container">
 						<div class="row">
 							<div class="col-xs-12 text-center">
-								<h3>Sales Record</h3>
+								<h3>Bill Record</h3>
 							</div>
 						</div>
 						<div class="row">
-							<div class="col-xs-6">
+							<!--<div class="col-xs-6">
 								${userText} ${customerText} ${employeeText} ${productText} ${categoryText}
 							</div>
 							<div class="col-xs-6 text-right">
 								${dateText}
-							</div>
+							</div>-->
 						</div>
 						<div class="row">
 							<div class="col-xs-12">
@@ -385,12 +370,12 @@
 				`;
 				reportWindow.document.body.innerHTML += reportContent;
 
-				if(this.searchType == '' || this.searchType == 'user'){
-					let rows = reportWindow.document.querySelectorAll('.record-table tr');
-					rows.forEach(row => {
-						row.lastChild.remove();
-					})
-				}
+				// if(this.searchType == '' || this.searchType == 'user'){
+				// 	let rows = reportWindow.document.querySelectorAll('.record-table tr');
+				// 	rows.forEach(row => {
+				// 		row.lastChild.remove();
+				// 	})
+				// }
 
 
 				reportWindow.focus();

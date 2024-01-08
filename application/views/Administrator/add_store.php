@@ -221,7 +221,7 @@
 				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Dimension:</label>
 					<div class="col-md-7">
-						<input type="number" class="form-control" v-model="store.square_feet" placeholder="Square Feet" required>
+						<input type="number" class="form-control" step="0.000001" v-model="store.square_feet" placeholder="Square Feet" required>
 					</div>
 				</div>
 
@@ -234,12 +234,12 @@
 					</div>
 				</div>
 
-                <!-- <div class="form-group clearfix">
-					<label class="control-label col-md-4">Is member:</label>
+                <div class="form-group clearfix">
+					<label class="control-label col-md-4">Is generable:</label>
 					<div class="col-md-7">
-						<input type="checkbox" class="form-control-inline" v-model="store.is_member">
+						<input type="checkbox" class="form-control-inline" v-model="store.is_generable">
 					</div>
-				</div> -->
+				</div>
 
 				
 
@@ -334,7 +334,7 @@
 					Store_OfficePhone: '',
 					Store_Web: '',
 					square_feet: '',
-                    is_member: false,
+                    is_generable: false,
 					Nominee_Name: '',
 					Nominee_NID: '',
 					previous_due: 0
@@ -441,10 +441,10 @@
 					alert('Select owner');
 					return;
 				}
-                if(this.selectedRenter == null){
-					alert('Select renter');
-					return;
-				}
+                // if(this.selectedRenter == null){
+				// 	alert('Select renter');
+				// 	return;
+				// }
 
                 this.store.Store_Type = this.selectedType.ProductType_SlNo ;
                 this.store.grade_id = this.selectedGrade.Grade_SlNo;
@@ -490,7 +490,7 @@
 				keys.forEach(key => {
 					this.store[key] = store[key];
 				})
-                this.store.is_member = store.is_member == '1' ? true : false; 
+				this.store.is_generable = store.is_generable == 'true' ? true : false;
 				this.selectedType = {
 					ProductType_SlNo: store.Store_Type,
 					ProductType_Name: store.ProductType_Name
@@ -541,7 +541,7 @@
 						this.store[key] = 0;
 					}
 				})
-                this.store.is_member = false;
+                this.store.is_generable = false;
 				this.imageUrl = '';
 				this.selectedFile = null;
                 this.selectedType = null;

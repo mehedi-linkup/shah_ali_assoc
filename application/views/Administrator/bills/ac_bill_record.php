@@ -66,6 +66,7 @@
 					<select class="form-control" v-model="searchType" @change="onChangeSearchType">
 						<option value="">All</option>
 						<option value="month">By Month</option>
+						<option value="owner">By Owner</option>
 						<option value="renter">By Renter</option>
 						<option value="store">By Store</option>
 						<option value="floor">By Floor</option>
@@ -77,6 +78,10 @@
 					<v-select v-bind:options="months" v-model="selectedMonth" label="month_name"></v-select>
 				</div>
 
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'owner' && owners.length > 0 ? '' : 'none'}">
+					<label>Owner</label>
+					<v-select v-bind:options="owners" v-model="selectedOwner" label="display_name"></v-select>
+				</div>
 				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'renter' && renters.length > 0 ? '' : 'none'}">
 					<label>Renter</label>
 					<v-select v-bind:options="renters" v-model="selectedRenter" label="display_name"></v-select>
@@ -121,6 +126,7 @@
                             <th>Invoice</th>
                             <th>Month Name</th>
                             <th>Store Name</th>
+                            <th>Owner Name</th>
                             <th>Renter Name</th>
                             <th>Floor Name</th>
                             <th>AC Bill</th>
@@ -130,23 +136,29 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(payment, ind) in billPayments">
-                            <td>{{ ind + 1 }}</td>
-                            <td style="text-align:left;">{{ payment.invoice }}</td>
-                            <td style="text-align:left;">{{ payment.month_name }}</td>
-                            <td style="text-align:left;">{{ payment.Store_Name }}</td>
-                            <td style="text-align:left;">{{ payment.Renter_Name }}</td>
-                            <td style="text-align:left;">{{ payment.Floor_Name }}</td>
-                            <td style="text-align:left;">{{ payment.ac_bill }}</td>
-                            <td style="text-align:center;">{{ payment.last_date }}</td>
-                            <td style="text-align:left;">{{ payment.added_by }}</td>
-                            <td style="text-align:center;">
-                                <a href="" title="Bill Invoice" v-bind:href="`/ac_bill_invoice_print/${payment.id}`" target="_blank"><i class="fa fa-file"></i></a>
-                            </td>
-                        </tr>
+						<template v-for="bill in billPayments">
+							<tr>
+								<td colspan="12" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ bill.floor_name }}</td>
+							</tr>
+							<tr v-for="(bill, ind) in bill.stores">
+								<td>{{ ind + 1 }}</td>
+								<td style="text-align:left;">{{ bill.invoice }}</td>
+								<td style="text-align:left;">{{ bill.month_name }}</td>
+								<td style="text-align:left;">{{ bill.Store_Name }}</td>
+								<td style="text-align:left;">{{ bill.Owner_Name }}</td>
+								<td style="text-align:left;">{{ bill.Renter_Name }}</td>
+								<td style="text-align:left;">{{ bill.Floor_Name }}</td>
+								<td style="text-align:left;">{{ bill.ac_bill }}</td>
+								<td style="text-align:center;">{{ bill.last_date }}</td>
+								<td style="text-align:left;">{{ bill.added_by }}</td>
+								<td style="text-align:center;">
+									<a href="" title="Bill Invoice" v-bind:href="`/ac_bill_invoice_print/${bill.id}`" target="_blank"><i class="fa fa-file"></i></a>
+								</td>
+							</tr>
+						</template>
 						<tr>
-							<td colspan="6"></td>
-							<td style="text-align:left;">{{ parseFloat(billPayments.reduce((prev, cur)=> { return +prev + +cur.ac_bill  }, 0) ).toFixed(2) }}</td>
+							<td colspan="7"></td>
+							<td style="text-align:left;">{{ parseFloat(billPayments.reduce((prev, cur)=> { return +prev + +cur.stores.reduce((p, c)=> { return +p + +c.ac_bill  }, 0) }, 0) ).toFixed(2) }}</td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -162,6 +174,7 @@
 <script src="<?php echo base_url();?>assets/js/vue/axios.min.js"></script>
 <script src="<?php echo base_url();?>assets/js/vue/vue-select.min.js"></script>
 <script src="<?php echo base_url();?>assets/js/moment.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/lodash.min.js"></script>
 
 <script>
     Vue.component('v-select', VueSelect.VueSelect);
@@ -180,6 +193,8 @@
                 selectedFloor: null,
                 renters: [],
                 selectedRenter: null,
+                owners: [],
+                selectedOwner: null,
                 billPayments: [],
                 dateFrom: moment().format('YYYY-MM-DD'),
                 dateTo: moment().format('YYYY-MM-DD'),
@@ -224,6 +239,15 @@
 					})
 				})
 			},
+            getOwners(){
+				axios.get('/get_owners').then(res => {
+					this.owners = res.data;
+					this.owners.unshift({
+						Owner_SlNo: '',
+						display_name: 'All'
+					})
+				})
+			},
 			getFloors(){
 				axios.get('/get_floors').then(res => {
 					this.floors = res.data;
@@ -257,18 +281,34 @@
 				if(this.searchType != 'floor'){
 					this.selectedFloor = null;
 				}
+				if(this.searchType != 'owner'){
+					this.selectedOwner = null;
+				}
 
                 let filter = {
                     storeId: this.selectedStore == null || this.selectedStore.Store_SlNo == '' ? '' : this.selectedStore.Store_SlNo,
 					renterId: this.selectedRenter == null || this.selectedRenter.Renter_SlNo == '' ? '' : this.selectedRenter.Renter_SlNo,
-                    floorId: this.selectedFloor == null || this.selectedFloor.Floor_SlNo == '' ? '' : this.selectedFloor.Floor_SlNo,
+                    ownerId: this.selectedOwner?.Owner_SlNo,
+					floorId: this.selectedFloor == null || this.selectedFloor.Floor_SlNo == '' ? '' : this.selectedFloor.Floor_SlNo,
 					month: this.selectedMonth == null || this.selectedMonth.month_id == '' ? '' : this.selectedMonth.month_id,
                     dateFrom: this.dateFrom,
 					dateTo: this.dateTo,
 					details: true
                 };
                 axios.post('/get_bill_details', filter).then(res => {
-                    this.billPayments = res.data;
+                    // this.billPayments = res.data;
+					let stores =  res.data.filter(item => item.net_payable > 0);
+					stores = _.chain(stores).groupBy('floor_id')
+							.map(store => {
+									return {
+										floor_id: store[0].floor_id,
+										floor_name: store[0].Floor_Name,
+										floor_ranking: store[0].Floor_Ranking,
+										stores: store
+									}
+								}).value()
+					stores = _.orderBy(stores, ['floor_ranking'], ['asc'])
+					this.billPayments = stores;
                 })
             },
             viewBillPayment(id) {
@@ -283,6 +323,9 @@
 				else if(this.searchType == 'renter'){
 					this.getRenters();
 				}
+				else if(this.searchType == 'owner'){
+					this.getOwners();
+				}
 				else if(this.searchType == 'store'){
 					this.getStores();
 				}
@@ -296,7 +339,7 @@
 					<div class="container">
 						<div class="row">
 							<div class="col-xs-12 text-center">
-								<h3>Bill Sheet Record</h3>
+								<h3>Ac Sheet Record</h3>
 							</div>
 						</div>
 						<div class="row">
@@ -335,10 +378,10 @@
             
 				printWindow.document.body.innerHTML += reportContent;
 
-                let rows = printWindow.document.querySelectorAll('.record-table tr');
-                rows.forEach(row => {
-                    row.lastChild.remove();
-                });
+                // let rows = printWindow.document.querySelectorAll('.record-table tr');
+                // rows.forEach(row => {
+                //     row.lastChild.remove();
+                // });
 
 				printWindow.focus();
 				await new Promise(resolve => setTimeout(resolve, 1000));

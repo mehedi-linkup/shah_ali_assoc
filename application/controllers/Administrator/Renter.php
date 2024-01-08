@@ -342,7 +342,10 @@ class Renter extends CI_Controller
             }
     
             $udata = array(
-                "User_Name" => $renterObj->Renter_UserName
+                "User_Name" => $renterObj->Renter_UserName,
+                "FullName"                  => $renterObj->Renter_Name,
+                "UserEmail"                 => $renterObj->Renter_Email,
+                "ref_id"                    => $renterId
             );
 
             $this->db->where("ref_id", $renterId);
@@ -371,10 +374,9 @@ class Renter extends CI_Controller
         $res = ['success'=>false, 'message'=>''];
         try{
             $data = json_decode($this->input->raw_input_stream);
-
-            $this->db->query("update tbl_renter set status = 'd' where Customer_SlNo = ?", $data->customerId);
-
-            $res = ['success'=>true, 'message'=>'Customer deleted'];
+            $this->db->query("update tbl_renter set status = 'd' where Renter_SlNo = ?", $data->renterId);
+            $this->db->query("update tbl_user set status = 'd' where UserType = 'r' and ref_id = ?", $data->renterId);
+            $res = ['success'=>true, 'message'=>'Renter deleted'];
         } catch (Exception $ex){
             $res = ['success'=>false, 'message'=>$ex->getMessage()];
         }

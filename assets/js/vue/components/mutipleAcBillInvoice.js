@@ -1,4 +1,4 @@
-const acbillInvoice = Vue.component('acbill-invoice', {
+const billInvoice = Vue.component('bill-mutiple-invoice', {
     template: `
         <div>
             <div class="row">
@@ -8,103 +8,106 @@ const acbillInvoice = Vue.component('acbill-invoice', {
             </div>
             
             <div id="invoiceContent">
-                <div class="row">
-                    <div class="col-xs-12 text-center">
-                        <div _h098asdh>
-                            <span style="font-size:20px;font-weight:bold">সেন্ট্রাল এসি বিল</span><br>
-                            <span> {{ startDate }} হইতে {{ endDate }}</span>
+                <div v-for="row in cart" class="continer-brack pagebreak">
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            <div _h098asdh>
+                                <span style="font-size:20px;font-weight:bold">সেন্ট্রাল এসি বিল</span><br>
+                                <span> {{ startDate }} হইতে {{ endDate }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-7">
-                        <strong>মিটার নংঃ  </strong> {{ convertToBanglaNumber(cart[0]?.meter_no) }}<br>
-                        <strong>নামঃ </strong> {{ cart[0]?.Store_Name }}<br>
-                        <strong>দোকান নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.Store_No) }}<br>
-                        <strong>আয়তনঃ </strong> {{ convertToBanglaNumber(cart[0]?.square_feet) }}<br>
+                    <div class="row">
+                        <div class="col-xs-7">
+                            <strong>মিটার নংঃ  </strong> {{ convertToBanglaNumber(cart[0]?.meter_no) }}<br>
+                            <strong>নামঃ </strong> {{ cart[0]?.Store_Name }}<br>
+                            <strong>দোকান নংঃ </strong> {{ convertToBanglaNumber(cart[0]?.Store_No) }}<br>
+                            <strong>আয়তনঃ </strong> {{ convertToBanglaNumber(cart[0]?.square_feet) }}<br>
+                        </div>
+                        <div class="col-xs-5 text-right">
+                            <strong>বিল তৈরির তারিখঃ </strong> {{ (dateFormat(cart[0]?.process_date)) }}<br>
+                            <strong>বিল প্রদানের তারিখঃ </strong>___________<br>
+                            <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
+                        </div>
                     </div>
-                    <div class="col-xs-5 text-right">
-                        <strong>বিল তৈরির তারিখঃ </strong> {{ (dateFormat(cart[0]?.process_date)) }}<br>
-                        <strong>বিল প্রদানের তারিখঃ </strong>___________<br>
-                        <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div _d9283dsc style="border:transparent"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div _d9283dsc style="border:transparent"></div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <table _a584de>
+                                <thead>
+                                    <tr style="border-bottom: 1px solid !important">
+                                        <td>বিল আই.ডি</td>
+                                        <td>খাতের নাম</td>
+                                        <td>বিলের পরিমাণ</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ convertToBanglaNumber(cart[0]?.invoice) }}</td>
+                                        <td>এ সি চার্জ</td>
+                                        <td>{{ convertToBanglaNumber(cart[0]?.ac_bill) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <table _a584de>
-                            <thead>
-                                <tr style="border-bottom: 1px solid !important">
-                                    <td>বিল আই.ডি</td>
-                                    <td>খাতের নাম</td>
-                                    <td>বিলের পরিমাণ</td>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <br>
+                    <div class="row">
+                        <div class="col-xs-6"></div>
+                        <div class="col-xs-6">
+                            <table _t92sadbc2>
                                 <tr>
-                                    <td>{{ convertToBanglaNumber(cart[0]?.invoice) }}</td>
-                                    <td>এ সি চার্জ</td>
-                                    <td>{{ convertToBanglaNumber(cart[0]?.ac_bill) }}</td>
+                                    <td><strong>মোট বিল</strong></td>
+                                    <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.ac_bill) }}</td>
                                 </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <div class="col-xs-6"></div>
-                    <div class="col-xs-6">
-                        <table _t92sadbc2>
-                            <tr>
-                                <td><strong>মোট বিল</strong></td>
-                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.ac_bill) }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>পূর্বের বকেয়া</strong></td>
-                                <td style="text-align:right"></td>
-                            </tr>
-                            <tr>
-                                <td><strong>সর্বমোট :</strong></td>
-                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill).toFixed(2)) }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>বিলম্ব ফি:</strong></td>
-                                <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.late_fee) }}</td>
-                            </tr>
-                            <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
-                            <tr>
-                                <td><strong>বিলম্ব ফি সহ সর্বমোট :</strong></td>
-                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill + +cart[0]?.previous_due + +cart[0]?.late_fee).toFixed(2)) }}</td>
-                            </tr>
-                        </table>
+                                <tr>
+                                    <td><strong>পূর্বের বকেয়া</strong></td>
+                                    <td style="text-align:right"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>সর্বমোট :</strong></td>
+                                    <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill).toFixed(2)) }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>বিলম্ব ফি:</strong></td>
+                                    <td style="text-align:right">{{ convertToBanglaNumber(cart[0]?.late_fee) }}</td>
+                                </tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
+                                <tr>
+                                    <td><strong>বিলম্ব ফি সহ সর্বমোট :</strong></td>
+                                    <td style="text-align:right">{{ convertToBanglaNumber(parseFloat(+cart[0]?.ac_bill + +cart[0]?.previous_due + +cart[0]?.late_fee).toFixed(2)) }}</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     `,
-    props: ['bill_id'],
+    props: ['floor_id','bill_id'],
     data(){
         return {
-            payment:{
+            bills:{
                 invoice: null,
                 month_id: null,
                 month_name: null,
-                process_date: null,
+                bill_date: null,
                 saved_at: null,
-                added_by: null,
-                total_payment: null,
+                saved_by: null,
+                total_bill: null,
                 saved_by: null
             },
             cart: [],
             style: null,
             companyProfile: null,
+            utilityRate: null,
             currentBranch: null,
-            startDate: '',
-            endDate: '',
+            startDate: "",
+            endDate: ""
         }
     },
     filters: {
@@ -114,15 +117,15 @@ const acbillInvoice = Vue.component('acbill-invoice', {
     },
     created(){
         this.setStyle();
-        this.getpayment();
+        this.getbill();
         this.getCurrentBranch();
+        this.getUtilityRate();
     },
-   
     methods:{
-        getpayment(){
-            axios.post('/get_utility_bill', {id: this.bill_id}).then(res=>{
-                this.payment = res.data.bills[0];
-                this.cart = res.data.billDetails;
+        getbill(){
+            axios.post('/get_utility_bill', {floor_id: this.floor_id, billid: this.bill_id}).then(res=>{
+                this.bill = res.data.bills[0];
+                this.cart = res.data.billDetailsMultiple;
                 this.calculateDates();
             })
         },
@@ -131,44 +134,14 @@ const acbillInvoice = Vue.component('acbill-invoice', {
                 this.currentBranch = res.data;
             })
         },
-        setStyle(){
-            this.style = document.createElement('style');
-            this.style.innerHTML = `
-                div[_h098asdh]{
-                    /*background-color:#e0e0e0;*/
-                    /* font-weight: bold; */
-                    font-size:15px;
-                    margin-bottom:15px;
-                    padding: 5px;
-                }
-                div[_d9283dsc]{
-                    padding-bottom:25px;
-                    border-bottom: 1px solid #ccc;
-                    margin-bottom: 15px;
-                }
-                table[_a584de]{
-                    width: 100%;
-                    text-align:center;
-                }
-                table[_a584de] thead{
-                    font-weight:bold;
-                }
-                table[_a584de] td{
-                    padding: 3px;
-                 
-                }
-                
-                table[_t92sadbc2]{
-                    width: 100%;
-                }
-                table[_t92sadbc2] td{
-                    padding: 2px;
-                }
-            `;
-            document.head.appendChild(this.style);
+
+        getUtilityRate() {
+            axios.get('/get_utility_rate').then(res => {
+                this.utilityRate = res.data;
+            })
         },
         calculateDates() {
-            const [monthName, year] = this.payment.month_name.split(' ');
+            const [monthName, year] = this.bill.month_name.split(' ');
             const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth();
             const startDate = new Date(year, monthIndex, 1);
             const endDate = new Date(year, monthIndex + 1, 0);
@@ -191,6 +164,7 @@ const acbillInvoice = Vue.component('acbill-invoice', {
 
             this.startDate  = this.convertToBengaliNumerals(formattedSDateDDMMYYYY);
             this.endDate = this.convertToBengaliNumerals(formattedEDateDDMMYYYY);
+            console.log(this.startDate);
         },
         dateFormat(inputDate) {
             let date = new Date(inputDate);
@@ -227,7 +201,6 @@ const acbillInvoice = Vue.component('acbill-invoice', {
           
             return convertedString;
         },
-       
         convertToBanglaNumber(number) {
             const bengaliNumerals = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
             const [integerPart, decimalPart] = String(number).split('.');
@@ -235,6 +208,44 @@ const acbillInvoice = Vue.component('acbill-invoice', {
             const convertedDecimalPart = decimalPart ? `.${decimalPart.split('').map(digit => bengaliNumerals[parseInt(digit)]).join('')}` : '';
             const convertedNumber = `${convertedIntegerPart}${convertedDecimalPart}`;
             return convertedNumber;
+        }, 
+        setStyle(){
+            this.style = document.createElement('style');
+            this.style.innerHTML = `
+                div[_h098asdh]{
+                    /*background-color:#e0e0e0;*/
+                    // font-weight: bold;
+                    font-size:15px;
+                    margin-bottom:15px;
+                    padding: 5px;
+                    // border-top: 1px dotted #454545;
+                    // border-bottom: 1px dotted #454545;
+                }
+                div[_d9283dsc]{
+                    padding-bottom:25px;
+                    border-bottom: 1px solid #ccc;
+                    margin-bottom: 15px;
+                }
+                table[_a584de]{
+                    width: 100%;
+                    text-align:center;
+                }
+                table[_a584de] thead{
+                    font-weight:bold;
+                }
+                table[_a584de] td{
+                    padding: 3px;
+                    border: 1px solid #ccc;
+                }
+                table[_t92sadbc2]{
+                    width: 100%;
+                }
+                table[_t92sadbc2] td{
+                    padding: 2px;
+                }
+              
+            `;
+            document.head.appendChild(this.style);
         },
         convertNumberToWords(amountToWord) {
             var words = new Array();
@@ -333,6 +344,13 @@ const acbillInvoice = Vue.component('acbill-invoice', {
                             body, table{
                                 font-size: 13px;
                             }
+                            @media print {
+                                .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+                            }
+                            .continer-brack{
+                                page-break-inside:avoid !important; 
+                                page-break-after:auto !important;
+                            }
                         </style>
                     </head>
                     <body>
@@ -393,7 +411,6 @@ const acbillInvoice = Vue.component('acbill-invoice', {
                                 </div>
                             </div>
                         </div>
-                        
                     </body>
                     </html>
 				`);

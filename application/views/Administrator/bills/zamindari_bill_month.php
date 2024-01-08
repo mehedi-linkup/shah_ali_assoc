@@ -17,6 +17,7 @@
                                 <th>Service Charge</th>
                                 <th>Tax Surchange</th>
                                 <th>Shop Rent</th>
+                                <th>Member Fee</th>
 								<th>Last Date</th>
                                 <th>Total</th>
                             </tr>
@@ -31,6 +32,7 @@
                                 <td style="text-align:center;">{{ salaryDetail.service_charge }}</td>
                                 <td style="text-align:center;">{{ salaryDetail.tax_surcharge }}</td>
                                 <td style="text-align:center;">{{ salaryDetail.shop_rent }}</td>
+                                <td style="text-align:center;">{{ salaryDetail.membership_fee }}</td>
                                 <td style="text-align:center;">{{ salaryDetail.last_date }}</td>
                                 <td style="text-align:right;">{{ salaryDetail.net_payable | decimal }}</td>
                             </tr>

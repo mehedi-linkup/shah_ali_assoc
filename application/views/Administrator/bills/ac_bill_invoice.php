@@ -41,7 +41,7 @@
     </div>
     <div class="col-md-8 col-md-offset-2">
         <br>
-        <bill-invoice v-bind:bill_id="selectedInvoice.id" v-if="showInvoice"></bill-invoice>
+        <acbill-invoice v-bind:bill_id="selectedInvoice.id" v-if="showInvoice"></acbill-invoice>
     </div>
 </div>
 
@@ -50,7 +50,7 @@
 <script src="<?php echo base_url(); ?>assets/js/vue/vue.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/vue/axios.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/vue/vue-select.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/js/vue/components/billInvoice.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/components/acbillInvoice.js"></script>
 
 <script>
     Vue.component('v-select', VueSelect.VueSelect);

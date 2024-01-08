@@ -211,7 +211,6 @@
 					this.filteredStores = filteredStores;
 				} else {
 					this.filteredStores = this.stores
-					console.log(this.filteredStores)
 				}
 			},
 			onChangeMonth() {

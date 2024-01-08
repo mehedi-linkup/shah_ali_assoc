@@ -386,7 +386,7 @@ if ($module == 'dashboard' or $module == '') {
 			</li>
 		<?php endif; ?>
 
-		<?php if (array_search("billInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+		<!-- <?php if (array_search("billInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
 				<a href="<?php echo base_url(); ?>billInvoiceMutiple">
 					<i class="menu-icon fa fa-th-list" aria-hidden="true"></i>
@@ -395,11 +395,11 @@ if ($module == 'dashboard' or $module == '') {
 				</a>
 				<b class="arrow"></b>
 			</li>
-		<?php endif; ?>
+		<?php endif; ?> -->
 
-		<?php if (array_search("bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+		<?php if (array_search("billRecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
-				<a href="<?php echo base_url(); ?>bill_record">
+				<a href="<?php echo base_url(); ?>billRecord">
 					<i class="menu-icon fa fa-th-list"></i>
 					<span class="menu-text"> Bill Record </span>
 				</a>
@@ -676,6 +676,24 @@ if ($module == 'dashboard' or $module == '') {
 							<a href="<?php echo base_url(); ?>billInvoiceMutiple">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Mutiple Bill Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+					<?php if (array_search("acBillInvoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>acBillInvoice">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Ac Bill Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+					<?php if (array_search("acBillInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>acBillInvoiceMutiple">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Mutiple AC Invoice
 							</a>
 							<b class="arrow"></b>
 						</li>
@@ -1766,7 +1784,7 @@ if ($module == 'dashboard' or $module == '') {
 
 		<?php if (
 			array_search("billInvoice", $access) > -1
-			|| array_search("bill_record", $access) > -1
+			|| array_search("billRecord", $access) > -1
 			|| array_search("renterDue", $access) > -1
 			|| array_search("renterPaymentReport", $access) > -1
 			|| array_search("supplierList", $access) > -1
@@ -1796,9 +1814,9 @@ if ($module == 'dashboard' or $module == '') {
 						</li>
 					<?php endif; ?>
 
-					<?php if (array_search("bill_record", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<?php if (array_search("billRecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 						<li class="">
-							<a href="<?php echo base_url(); ?>bill_record">
+							<a href="<?php echo base_url(); ?>billRecord">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Bill Record
 							</a>

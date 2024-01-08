@@ -1955,9 +1955,23 @@ class Bills extends CI_Controller {
         if(isset($data->monthId) && $data->monthId != ''){
             $clauses .= " and bs.month_id = '$data->monthId'";
         }
-        // if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
-        //     $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
-        // }
+        
+        if(isset($data->floorId) && $data->floorId != ''){
+            $clauses .= " and s.floor_id = '$data->floorId'";
+        }
+        if(isset($data->storeId) && $data->storeId != ''){
+            $clauses .= " and bd.store_id = '$data->storeId'";
+        }
+        if(isset($data->ownerId) && $data->ownerId != ''){
+            $clauses .= " and s.owner_id = '$data->ownerId'";
+        }
+        if(isset($data->renterId) && $data->renterId != ''){
+            $clauses .= " and s.renter_id = '$data->renterId'";
+        }
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
 
         $billDetails = $this->db->query("
             SELECT 
@@ -2341,6 +2355,27 @@ class Bills extends CI_Controller {
         }
         $data['title'] = "Bill Invoice";
         $data['content'] = $this->load->view('Administrator/bills/bill_invoice_mulitple', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+    public function ac_bill_invoice() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Ac Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/ac_bill_invoice', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
+
+    public function ac_bill_invoice_mulitple() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "AC Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/ac_bill_invoice_mulitple', $data, true);
         $this->load->view('Administrator/index', $data);
     }
 
