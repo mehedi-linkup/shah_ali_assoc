@@ -490,6 +490,7 @@ $route['get_zamindari_bill'] = 'Administrator/Employee/getZamindariBill';
 $route['zamindari_bill_month/(:any)'] = 'Administrator/Bills/zamindariBillMonth/$1';
 $route['zamindari_bill_record'] = 'Administrator/Bills/zamindariBillRecord';
 $route['zamindariBillInvoice'] = 'Administrator/Bills/zamindari_bill_invoice';
+$route['zamindariBillInvoiceMutiple'] = 'Administrator/Bills/zamindari_bill_invoice_mulitple';
 $route['get_zamindari_bill_details'] = 'Administrator/Bills/getZamindariBillDetails';
 $route['zamindar_bill_invoice_print/(:any)'] = 'Administrator/Bills/zamindarBillInvoicePrint/$1';
 $route['get_zamindari_payments'] = 'Administrator/Payment/getZamindariPayments';

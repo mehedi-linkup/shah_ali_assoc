@@ -689,11 +689,22 @@ if ($module == 'dashboard' or $module == '') {
 							<b class="arrow"></b>
 						</li>
 					<?php endif; ?>
+
 					<?php if (array_search("acBillInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 						<li class="">
 							<a href="<?php echo base_url(); ?>acBillInvoiceMutiple">
 								<i class="menu-icon fa fa-caret-right"></i>
 								Mutiple AC Invoice
+							</a>
+							<b class="arrow"></b>
+						</li>
+					<?php endif; ?>
+
+					<?php if (array_search("zamindariBillInvoiceMutiple", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+						<li class="">
+							<a href="<?php echo base_url(); ?>zamindariBillInvoiceMutiple">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Mutiple Zamindari Invoice
 							</a>
 							<b class="arrow"></b>
 						</li>

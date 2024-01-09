@@ -2697,6 +2697,16 @@ class Bills extends CI_Controller {
         $this->load->view('Administrator/index', $data);
     }
 
+    public function zamindari_bill_invoice_mulitple() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Bill Invoice";
+        $data['content'] = $this->load->view('Administrator/bills/zamindari_bill_invoice_mulitple', $data, true);
+        $this->load->view('Administrator/index', $data);
+    }
+
     public function getZamindariBillDetails() {
         $data = json_decode($this->input->raw_input_stream);
 
@@ -2709,6 +2719,11 @@ class Bills extends CI_Controller {
         if(isset($data->monthId) && $data->monthId != ''){
             $clauses .= " and bs.month_id = '$data->monthId'";
         }
+
+        if(isset($data->floorId) && $data->floorId != ''){
+            $clauses .= " and s.floor_id = '$data->floorId'";
+        }
+
         // if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
         //     $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
         // }
