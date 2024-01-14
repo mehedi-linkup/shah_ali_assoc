@@ -292,6 +292,7 @@
 					let electricityStores;
 					let sftRate;
 					await axios.post('/get_electricity_bill_payments/', { 
+							status: 'a',
 							month_id: month_id,
 							details: true 
 						}).then(res => {
@@ -347,7 +348,7 @@
 			},
 
 			getMonths() {
-				axios.get('/get_electricity_bill_payments').then(res => {
+				axios.post('/get_electricity_bill_payments', { status: 'a' }).then(res => {
 					this.months = res.data;
 				})
 			},

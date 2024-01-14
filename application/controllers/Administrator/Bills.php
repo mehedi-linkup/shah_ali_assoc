@@ -1880,7 +1880,12 @@ class Bills extends CI_Controller {
         $data = json_decode($this->input->raw_input_stream);
         $monthId = $data->month_id;
 
-        $query = $this->db->query("SELECT month_id FROM tbl_electricity_sheet WHERE month_id = ? and branch_id = ? and status = 'a'",[$monthId, $this->session->userdata("BRANCHid")]);
+        $clauses = "";
+        if(isset($data->status) and $data->status != "") {
+            $clauses .= " and status = '$data->status'";
+        }
+       
+        $query = $this->db->query("SELECT month_id FROM tbl_electricity_sheet WHERE month_id = ? and branch_id = ? and status != 'd' $clauses",[$monthId, $this->session->userdata("BRANCHid")]);
         if($query->num_rows() > 0 ) {
             echo json_encode(['success' => true]);
             exit();
@@ -1894,6 +1899,7 @@ class Bills extends CI_Controller {
     {
         $data = json_decode($this->input->raw_input_stream);
 
+       
         $clauses = "";
 
         if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
@@ -1903,6 +1909,13 @@ class Bills extends CI_Controller {
         if(isset($data->month_id) && $data->month_id != ''){
             $clauses .= " and bs.month_id = '$data->month_id'";
         }
+
+        if(isset($data->status) and $data->status != "") {
+            $clauses .= " and bs.status = '$data->status'";
+        }
+
+        // echo json_encode($clauses);
+        // return;
 
         $clausesDetails = "";
         if(isset($data->floor_id) && $data->floor_id != ''){
@@ -1915,7 +1928,7 @@ class Bills extends CI_Controller {
 
             from tbl_electricity_sheet bs
             join tbl_month m on m.month_id = bs.month_id
-            where bs.status = 'a'
+            where bs.status != 'd'
             and bs.branch_id = ?
             $clauses
             order by bs.month_id desc
@@ -2428,6 +2441,7 @@ class Bills extends CI_Controller {
             $total_unit = 0;
             $total_sft = 0;
             $total_bill = 0;
+            $boolStatus = true;
 
             foreach($stores as $str){
                 $store = [
@@ -2446,6 +2460,9 @@ class Bills extends CI_Controller {
 
                 $total_unit += $str->electricity_unit;
                 $total_sft += $str->square_feet;
+                if($boolStatus == true) {
+                    $boolStatus = $str->electricity_unit != 0 ? true : false ;
+                }
             }
 
             $rate = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
@@ -2454,6 +2471,7 @@ class Bills extends CI_Controller {
             $acSoftRate = ( ($billObj->electricity_entry - $total_bill) +  $rate->Ac_service ) / $total_sft;
 
             $xx = [
+                'status' => $boolStatus == true ? 'a' : 'p',
                 'total_unit' => $total_unit,
                 'total_bill' => $total_bill,
                 'ac_sft_rate' => $acSoftRate
@@ -2491,6 +2509,7 @@ class Bills extends CI_Controller {
             $total_unit = 0;
             $total_sft = 0;
             $total_bill = 0;
+            $boolStatus = true;
 
             foreach($stores as $str){
                 $store = [
@@ -2510,6 +2529,9 @@ class Bills extends CI_Controller {
 
                 $total_unit += $str->electricity_unit;
                 $total_sft += $str->square_feet;
+                if($boolStatus == true) {
+                    $boolStatus = $str->electricity_unit != 0 ? true : false ;
+                }
             }
 
             $rate = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
@@ -2518,6 +2540,7 @@ class Bills extends CI_Controller {
             $acSoftRate = ( ($billObj->electricity_entry - $total_bill) +  $rate->Ac_service ) / $total_sft;
 
             $xx = [
+                'status' => $boolStatus == true ? 'a' : 'p',
                 'total_unit' => $total_unit,
                 'total_bill' => $total_bill,
                 'ac_sft_rate' => $acSoftRate

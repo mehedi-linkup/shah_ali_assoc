@@ -87,6 +87,12 @@
 	</div>
 	<br>
 	<div class="row" v-if="stores.length > 0">
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right">Floor</label>
+			<div class="col-sm-2">
+				<v-select v-bind:options="floors" label="Floor_Name" v-model="selectedFloor" @input="onChangeFloor"></v-select>
+			</div>
+		</div>
 		<div style="margin-top: -15px; margin-bottom: 2px;">
 			<label class="col-sm-2 control-label">Process Date</label>
 			<div class="col-sm-2" style="margin-left: -90px;">
@@ -119,7 +125,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<template v-for="store in stores">
+						<template v-for="store in filteredStores">
 							<tr>
 								<td colspan="14" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ store.floor_name }}</td>
 							</tr>
@@ -176,14 +182,28 @@
 				utilityRate: null,
 				payment: false,
 				generated: false,
+				floors: [],
+				selectedFloor: {
+					Floor_SlNo: '',
+					Floor_Name: 'All'
+				},
 				filteredStores: []
 			}
 		},
 		created() {
 			this.getMonths();
+			this.getFloors();
 			this.getUtilityRate();
 		},
 		methods: {
+			async onChangeFloor() {
+				if(this.selectedFloor.Floor_SlNo != '') {
+					let filteredStores = this.stores.filter(item => item.floor_id == this.selectedFloor.Floor_SlNo)
+					this.filteredStores = filteredStores;
+				} else {
+					this.filteredStores = this.stores
+				}
+			},
 			onChangeMonth() {
 				this.stores = [],
 				this.selectedFloor = {
@@ -191,7 +211,7 @@
 					Floor_Name: 'All'
 				}
 			},
-			calculateNetPayable(store){
+			calculateNetPayable(store) {
 
 				setTimeout(() => {
 					if(+store.current_unit < +store.previous_unit) {
@@ -307,6 +327,16 @@
 					this.months = res.data;
 				})
 			},
+
+			getFloors() {
+				axios.get('/get_floors').then(res => {
+					this.floors = res.data;
+					this.floors.unshift({
+						Floor_SlNo: '',
+						Floor_Name: 'All'
+					})
+				})
+			},
 		
 			getUtilityRate() {
 				axios.get('/get_utility_rate').then(res => {
@@ -332,13 +362,13 @@
 					})
 					.value();
 
-				let alertShown = false;
-				stores.forEach(function(element) {
-					if (element.electricity_unit <= 0 && !alertShown) {
-						alert("Store can't have zero unit");
-						alertShown = true;
-					}
-				});
+				// let alertShown = false;
+				// stores.forEach(function(element) {
+				// 	if (element.electricity_unit <= 0 && !alertShown) {
+				// 		alert("Store can't have zero unit");
+				// 		alertShown = true;
+				// 	}
+				// });
 				
 
 				let data = {
