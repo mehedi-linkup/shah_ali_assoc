@@ -1066,8 +1066,8 @@ class Employee extends CI_Controller
                 $billMonthId = $this->db->insert_id();
                              
                 $owners = $this->db->query("select * from tbl_owner where status = 'a' and Owner_brunchid = '$this->brunch'")->result();
-
-                $billDetails = array_map(function($variable) use ($billMonthId, $data, $rates, $resultDate) {
+                $total_payable = 0;  
+                $billDetails = array_map(function($variable) use ($billMonthId, $data, $rates, $resultDate, $total_payable) {
                     // $oldBillDetails = $this->db->query("select * from tbl_zamindari_details where zamindari_month_id = ? and owner_id = ?", [$oldBillMonthId, $variable->Owner_SlNo]);
                     $ownerBill = [
                         'zamindari_month_id' => $billMonthId,
@@ -1087,13 +1087,11 @@ class Employee extends CI_Controller
                         'status'             => 'a',
                     ];
 
-                    // array_push($ownerBillArr, $ownerBill);
                     $this->db->insert('tbl_zamindari_details', $ownerBill);
-                    
-                    // if($oldBillDetails->num_rows() != 0) {
-                    //     $this->db->query("delete from tbl_zamindari_details where zamindari_month_id = ? and owner_id = ?", [$oldBillMonthId, $variable->Owner_SlNo]);
-                    // }
+                    $total_payable += $ownerBill['net_payable'];
                 }, $owners);
+
+                $this->db->where('id', $billMonthId)->update('tbl_zamindari_month', [ 'total_amount'=> $total_payable ]);
                 
             }, $yearMonths);
 

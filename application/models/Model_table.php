@@ -245,6 +245,15 @@ class Model_Table extends CI_Model{
                 and bs.month_id = m.month_id
             ) as generated_bill,
 
+            (
+                select ifnull(sum(zd.net_payable), 0)
+                from tbl_zamindari_details zd
+                join tbl_zamindari_month sh on sh.id = zd.zamindari_month_id
+                where sh.branch_id = " . $this->session->userdata('BRANCHid') . "
+                and sh.status = 'a'
+                and sh.month_id = m.month_id
+            ) as zamindari_generated_bill,
+
             /* Received */
             (
                 select ifnull(sum(up.total_payment), 0) from tbl_utility_payment up
@@ -254,6 +263,14 @@ class Model_Table extends CI_Model{
                 and up.month_id = m.month_id
             ) as received_bill,
 
+            (
+                select ifnull(sum(zp.ZPayment_amount), 0) from tbl_zamindari_payment zp
+                where zp.ZPayment_branchid= " . $this->session->userdata('BRANCHid') . "
+                and zp.ZPayment_status = 'a'
+                " . ($date == null ? "" : " and zp.ZPayment_date < '$date'") . "
+                and zp.Zamindari_monthID = m.month_id
+            ) as zamindari_received_bill,
+
             /* Due */
             (
                 select ifnull(sum(up.total_due), 0) from tbl_utility_payment up
@@ -261,7 +278,9 @@ class Model_Table extends CI_Model{
                 and up.status = 'a'
                 " . ($date == null ? "" : " and up.payment_date < '$date'") . "
                 and up.month_id = m.month_id
-            ) as due_bill
+            ) as due_bill,
+
+            (select zamindari_generated_bill - zamindari_received_bill ) as zamindari_due
 
             from tbl_month m
             group by m.month_id
@@ -281,6 +300,12 @@ class Model_Table extends CI_Model{
                 and up.status = 'a'
                 " . ($date == null ? "" : " and up.payment_date < '$date'") . "
             ) as received_payment,
+            (   
+                select ifnull(sum(zp.ZPayment_amount), 0) from tbl_zamindari_payment zp
+                where zp.ZPayment_branchid = " . $this->session->userdata('BRANCHid') . "
+                and zp.ZPayment_status = 'a'
+                " . ($date == null ? "" : " and zp.ZPayment_date < '$date'") . "
+            ) as received_zamindari_payment,
             (
                 select ifnull(sum(ct.In_Amount), 0) from tbl_cashtransaction ct
                 where ct.Tr_Type = 'In Cash'
@@ -367,7 +392,7 @@ class Model_Table extends CI_Model{
             ) as buy_asset,
             /* total */
             (
-                select received_payment + received_cash + bank_withdraw + loan_received + loan_initial_balance + invest_received + sale_asset
+                select received_payment + received_zamindari_payment + received_cash + bank_withdraw + loan_received + loan_initial_balance + invest_received + sale_asset
             ) as total_in,
             (
                 select paid_cash + bank_deposit + employee_payment + loan_payment + invest_payment + buy_asset

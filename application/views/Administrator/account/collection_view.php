@@ -48,37 +48,70 @@
     $totalGeneratedBill = array_reduce($collection_summary, function ($prev, $cur) {
         return $prev + $cur->generated_bill;
     }, 0);
+    $totalZamindariGeneratedBill = array_reduce($collection_summary, function ($prev, $cur) {
+        return $prev + $cur->zamindari_generated_bill;
+    }, 0);
+
     $totalReceivedBill = array_reduce($collection_summary, function ($prev, $cur) {
         return $prev + $cur->received_bill;
     }, 0);
+    $totalZamindariReceivedBill = array_reduce($collection_summary, function ($prev, $cur) {
+        return $prev + $cur->zamindari_received_bill;
+    }, 0);
     $totalDueBill = array_reduce($collection_summary, function ($prev, $cur) {
         return $prev + $cur->due_bill;
+    }, 0);
+    $totalZamindariDueBill = array_reduce($collection_summary, function ($prev, $cur) {
+        return $prev + $cur->zamindari_due;
     }, 0);
 
 ?>
 <div id="cashView">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
             <div class="balance-section">
                 <i class="fa fa-money fa-3x"></i>
                 <h3>Generated Bill</h3>
                 <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalGeneratedBill, 2);?></h1>
             </div>
         </div>
-
-        <div class="col-md-4">
+        
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
             <div class="balance-section">
                 <i class="fa fa-bank fa-3x"></i>
                 <h3>Received Bill</h3>
                 <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalReceivedBill, 2);?></h1>
             </div>
         </div>
-
-        <div class="col-md-4">
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
             <div class="balance-section">
                 <i class="fa fa-dollar fa-3x"></i>
                 <h3>Total Due</h3>
                 <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalDueBill, 2);?></h1>
+            </div>
+        </div>
+
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
+            <div class="balance-section">
+                <i class="fa fa-money fa-3x"></i>
+                <h3>Zamindari Generated Bill</h3>
+                <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalZamindariGeneratedBill, 2);?></h1>
+            </div>
+        </div>
+
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
+            <div class="balance-section">
+                <i class="fa fa-bank fa-3x"></i>
+                <h3>Zamindari Received Bill</h3>
+                <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalZamindariReceivedBill, 2);?></h1>
+            </div>
+        </div>
+
+        <div class="col-md-4" style="padding-top:12px;padding-bottom:12px">
+            <div class="balance-section">
+                <i class="fa fa-dollar fa-3x"></i>
+                <h3>Total Zamindari Due</h3>
+                <h1><?php echo $this->session->userdata('Currency_Name');?> <?php echo number_format($totalZamindariDueBill, 2);?></h1>
             </div>
         </div>
     </div>
@@ -87,14 +120,20 @@
         <?php foreach($collection_summary as $account){?>
         <div class="col-md-3 col-xs-6">
             <div class="account-section">
-                <div class="col1">
+                <!-- <div class="col1">
                     <i class="fa fa-dollar fa-3x"></i>
-                </div>
+                </div> -->
                 <div class="col2">
                     <h3><span style="font-weight: 700;color:green;text-align:center;font-size:18px;text-transform:uppercase;"><?php echo $account->month_name; ?></span> </h3>
                     <h6><span style="font-weight: 700;color:#d50695">Generated:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->generated_bill;?></h6> 
                     <h6><span style="font-weight: 700;color:#d50695">Received:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->received_bill;?></h6> 
                     <h6><span style="font-weight: 700;color:#d50695">Due:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->due_bill; ?></h6>
+
+                    <p>
+                        <span style="color:#d50695">Zamindari Generate:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->zamindari_generated_bill;?><br>
+                        <span style="color:#d50695">Zamindari Receive:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->zamindari_received_bill;?><br>
+                        <span style="color:#d50695">Zamindari Due:</span> <?php echo $this->session->userdata('Currency_Name');?> <?php echo $account->zamindari_due; ?>
+                    </p>
                 </div>
             </div>
         </div>

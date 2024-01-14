@@ -27,6 +27,17 @@ class Bills extends CI_Controller {
         }
         $this->load->view('Administrator/index', $data);
     }
+
+    public function electricity() {
+        $access = $this->mt->userAccess();
+        if(!$access){
+            redirect(base_url());
+        }
+        $data['title'] = "Calculate Electricity";
+        $data['content'] = $this->load->view('Administrator/bills/calculate_electricity', $data, TRUE);
+        $this->load->view('Administrator/index', $data);
+    }
+
     
     //Designation
     function selectCustomer()  {
@@ -1751,12 +1762,6 @@ class Bills extends CI_Controller {
         echo json_encode($res);
     }
 
-
-
-
-
-
-    
 //     public function product_delete($id = null){
 //       // $id = $this->input->post('deleted');
 //        // $id = $this->input->post('SaleDetails_SlNo');
@@ -1870,6 +1875,80 @@ class Bills extends CI_Controller {
         echo json_encode($res);
     }
 
+    public function checkElectricityPaymentMonth()
+    {
+        $data = json_decode($this->input->raw_input_stream);
+        $monthId = $data->month_id;
+
+        $query = $this->db->query("SELECT month_id FROM tbl_electricity_sheet WHERE month_id = ? and branch_id = ? and status = 'a'",[$monthId, $this->session->userdata("BRANCHid")]);
+        if($query->num_rows() > 0 ) {
+            echo json_encode(['success' => true]);
+            exit();
+        }
+        echo json_encode(['success' => false]);
+        exit();
+
+    }
+
+    public function getElectricityBillPayments()
+    {
+        $data = json_decode($this->input->raw_input_stream);
+
+        $clauses = "";
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        if(isset($data->month_id) && $data->month_id != ''){
+            $clauses .= " and bs.month_id = '$data->month_id'";
+        }
+
+        $clausesDetails = "";
+        if(isset($data->floor_id) && $data->floor_id != ''){
+            $clausesDetails .= " and f.Floor_SlNo = '$data->floor_id'";
+        }
+
+        $sheets = $this->db->query("
+            SELECT bs.*,
+            m.month_name
+
+            from tbl_electricity_sheet bs
+            join tbl_month m on m.month_id = bs.month_id
+            where bs.status = 'a'
+            and bs.branch_id = ?
+            $clauses
+            order by bs.month_id desc
+        ", $this->session->userdata("BRANCHid"))->result();
+
+        if(isset($data->details)){
+            foreach($sheets as $payment){
+                $payment->details = $this->db->query("
+                    SELECT bd.*,
+                    s.Store_SlNo,
+                    s.Store_No,
+                    s.Store_Name,
+                    s.floor_id,
+                    s.square_feet,
+                    o.Owner_Name,
+                    re.Renter_Name,
+                    f.Floor_Name,
+                    f.Floor_Ranking
+                    from tbl_electricity_sheet_details bd
+                    join tbl_store s on s.Store_SlNo = bd.store_id
+                    left join tbl_owner o on o.Owner_SlNo = s.owner_id
+                    left join tbl_renter re on re.Renter_SlNo = s.renter_id
+                    left join tbl_floor f on f.Floor_SlNo = s.floor_id
+                    where bd.status = 'a'
+                    and bd.electricity_sheet_id = '$payment->id'
+                    $clausesDetails
+                ")->result();
+            }
+        }
+
+        echo json_encode($sheets);
+    }
+
     public function getBillPayments()
     {
         $data = json_decode($this->input->raw_input_stream);
@@ -1916,6 +1995,7 @@ class Bills extends CI_Controller {
                     s.Store_SlNo,
                     s.Store_No,
                     s.Store_Name,
+                    s.square_feet as ac_square_feet,
                     s.floor_id,
                     o.Owner_Name,
                     re.Renter_Name,
@@ -2006,6 +2086,70 @@ class Bills extends CI_Controller {
         echo json_encode($billDetails);
     }
 
+    
+    public function getElectricityBillDetails(){
+        $data = json_decode($this->input->raw_input_stream);
+        
+        $clauses = "";
+
+        if(isset($data->billDetailId) && $data->billDetailId != ''){
+            $clauses .= " and bd.id = '$data->billDetailId'";
+        }
+
+        if(isset($data->monthId) && $data->monthId != ''){
+            $clauses .= " and bs.month_id = '$data->monthId'";
+        }
+        
+        if(isset($data->floorId) && $data->floorId != ''){
+            $clauses .= " and s.floor_id = '$data->floorId'";
+        }
+        if(isset($data->storeId) && $data->storeId != ''){
+            $clauses .= " and bd.store_id = '$data->storeId'";
+        }
+        if(isset($data->ownerId) && $data->ownerId != ''){
+            $clauses .= " and s.owner_id = '$data->ownerId'";
+        }
+        if(isset($data->renterId) && $data->renterId != ''){
+            $clauses .= " and s.renter_id = '$data->renterId'";
+        }
+
+        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+            $clauses .= " and bs.process_date between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        $billDetails = $this->db->query("
+            SELECT 
+                bd.*,
+                bs.month_id,
+                bs.added_by,
+                m.month_name,
+                s.Store_SlNo,
+                s.Store_No,
+                s.Store_Name,
+                s.floor_id,
+                s.meter_no,
+                o.Owner_Name,
+                re.Renter_Name,
+                f.Floor_Name,
+                f.Floor_Ranking
+            from tbl_electricity_sheet_details bd
+            join tbl_store s on s.Store_SlNo = bd.store_id
+            join tbl_electricity_sheet bs on bs.id = bd.electricity_sheet_id
+            join tbl_month m on m.month_id = bs.month_id
+            left join tbl_owner o on o.Owner_SlNo = s.owner_id
+            left join tbl_renter re on re.Renter_SlNo = s.renter_id
+            left join tbl_floor f on f.Floor_SlNo = s.floor_id
+
+            where bd.status = 'a'
+            and bd.branch_id = ?
+            $clauses
+            order by bd.id desc
+        ", $this->sbrunch)->result();
+
+        echo json_encode($billDetails);
+    }
+
+
     public function getUtilityBills() {
         $data = json_decode($this->input->raw_input_stream);
 
@@ -2040,7 +2184,6 @@ class Bills extends CI_Controller {
                     f.Floor_Ranking,
                     bs.process_date,
                     bsd.electricity_unit,
-                    bsd.current_unit,
                     bsd.generator_unit
                 from tbl_bill_sheet_details bsd
                 join tbl_bill_sheet bs on bs.id = bsd.bill_id
@@ -2071,7 +2214,6 @@ class Bills extends CI_Controller {
                     f.Floor_Ranking,
                     bs.process_date,
                     bsd.electricity_unit,
-                    bsd.current_unit,
                     bsd.generator_unit
                 from tbl_bill_sheet_details bsd
                 join tbl_bill_sheet bs on bs.id = bsd.bill_id
@@ -2124,6 +2266,9 @@ class Bills extends CI_Controller {
         try {
             $data = json_decode($this->input->raw_input_stream);
 
+            // echo json_encode($data);
+            // return;
+
             $billObj = $data->payment;
             $stores = $data->stores;
             
@@ -2148,11 +2293,8 @@ class Bills extends CI_Controller {
                   'generator_bill'   => $str->generator_bill,
                   'ac_bill'          => $str->ac_bill,
                   'others_bill'      => $str->others_bill,
-                  'previous_unit'    => $str->previous_unit,
-                  'current_unit'     => $str->current_unit,
                   'electricity_unit' => $str->electricity_unit,
                   'generator_unit'   => $str->generator_unit,
-                  'ac_unit'          => $str->ac_unit,
                   'net_payable'      => $str->net_payable,
                   'last_date'        => @$billObj->last_date,
                   'saved_by'         => $this->session->userdata("FullName"),
@@ -2205,11 +2347,8 @@ class Bills extends CI_Controller {
                     'generator_bill'   => $str->generator_bill,
                     'ac_bill'          => $str->ac_bill,
                     'others_bill'      => $str->others_bill,
-                    'previous_unit'    => $str->previous_unit,
-                    'current_unit'     => $str->current_unit,
                     'electricity_unit' => $str->electricity_unit,
                     'generator_unit'   => $str->generator_unit,
-                    'ac_unit'          => $str->ac_unit,
                     'net_payable'      => $str->net_payable,
                     'last_date'        => @$billObj->last_date,
                     'updated_by'      => $this->session->userdata("FullName"),
@@ -2257,6 +2396,136 @@ class Bills extends CI_Controller {
 
             $res = ["success" => true, 'message' => 'Bill Update Success', 'billId' => $bill_id];
 
+            echo json_encode($res);
+
+        } catch (\Exception $e) {
+            $res = ["success" => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function addElectricityBill()
+    {
+        $res = ["success" => false, 'message' => ''];
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+
+            // echo json_encode($data);
+            // return;
+
+            $billObj = $data->payment;
+            $stores = $data->stores;
+            
+            $bill = (array)$billObj;
+            unset($bill['id']);
+            $bill['added_by'] = $this->session->userdata("FullName");
+            $bill['added_at'] = date("Y-m-d H:i:s");
+            $bill['branch_id'] = $this->session->userdata("BRANCHid");
+            $bill['status'] = 'a';
+
+            $this->db->insert('tbl_electricity_sheet', $bill);
+            $bill_id = $this->db->insert_id();
+           
+            $total_unit = 0;
+            $total_sft = 0;
+            $total_bill = 0;
+
+            foreach($stores as $str){
+                $store = [
+                  'electricity_sheet_id' => $bill_id,
+                  'store_id'         => $str->Store_SlNo,
+                  'previous_unit'    => $str->previous_unit,
+                  'current_unit'     => $str->current_unit,
+                  'electricity_unit' => $str->electricity_unit,
+                  'saved_by'         => $this->session->userdata("FullName"),
+                  'saved_at'         => date("Y-m-d H:i:s"),
+                  'branch_id'        => $this->session->userdata("BRANCHid"),
+                  'status'           => 'a',
+                ];
+
+                $this->db->insert('tbl_electricity_sheet_details', $store);
+
+                $total_unit += $str->electricity_unit;
+                $total_sft += $str->square_feet;
+            }
+
+            $rate = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
+
+            $total_bill = +$total_unit * +$rate->Electricity_Rate;
+            $acSoftRate = ( ($billObj->electricity_entry - $total_bill) +  $rate->Ac_service ) / $total_sft;
+
+            $xx = [
+                'total_unit' => $total_unit,
+                'total_bill' => $total_bill,
+                'ac_sft_rate' => $acSoftRate
+            ];
+
+            $this->db->where('id', $bill_id)->update('tbl_electricity_sheet', $xx);
+
+            $res = ["success" => true, 'message' => 'Electricity Generate Success', 'billId'=>$bill_id];
+
+            echo json_encode($res);
+
+        } catch (\Exception $e) {
+            $res = ["success" => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function updateElectricityBill()
+    {
+        $res = ["success" => false, 'message' => ''];
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+
+            $billObj = $data->payment;
+            $stores = $data->stores;
+            $electricity_bill_id = $billObj->id;
+
+            $bill = (array)$billObj;
+            unset($bill['id']);
+            $bill['updated_by'] = $this->session->userdata("FullName");
+            $bill['updated_at'] = date("Y-m-d H:i:s");
+
+            $this->db->where('id', $electricity_bill_id);
+            $this->db->update('tbl_electricity_sheet', $bill);
+
+            $total_unit = 0;
+            $total_sft = 0;
+            $total_bill = 0;
+
+            foreach($stores as $str){
+                $store = [
+                    'electricity_sheet_id' => $electricity_bill_id,
+                    'store_id'         => $str->Store_SlNo,
+                    'previous_unit'    => $str->previous_unit,
+                    'current_unit'     => $str->current_unit,
+                    'electricity_unit' => $str->electricity_unit,
+                    'updated_by'      => $this->session->userdata("FullName"),
+                    'updated_at'      => date("Y-m-d H:i:s"),
+                    'branch_id'        => $this->session->userdata("BRANCHid"),
+                    'status'           => 'a',
+                ];
+
+                $this->db->where('id', $str->id);
+                $this->db->update('tbl_electricity_sheet_details', $store);
+
+                $total_unit += $str->electricity_unit;
+                $total_sft += $str->square_feet;
+            }
+
+            $rate = $this->db->query("select * from tbl_utility_rate order by Rate_SlNo desc limit 1")->row();
+
+            $total_bill = +$total_unit * +$rate->Electricity_Rate;
+            $acSoftRate = ( ($billObj->electricity_entry - $total_bill) +  $rate->Ac_service ) / $total_sft;
+
+            $xx = [
+                'total_unit' => $total_unit,
+                'total_bill' => $total_bill,
+                'ac_sft_rate' => $acSoftRate
+            ];
+
+            $this->db->where('id', $electricity_bill_id)->update('tbl_electricity_sheet', $xx);
+
+            $res = ["success" => true, 'message' => 'Bill Update Success', 'billId' => $electricity_bill_id];
             echo json_encode($res);
 
         } catch (\Exception $e) {
@@ -2443,6 +2712,7 @@ class Bills extends CI_Controller {
         $data['Electricity_late']=  $this->input->post('Electricity_late',true);
         $data['Generator_late']=  $this->input->post('Generator_late',true);    
         $data['Ac_late']=  $this->input->post('Ac_late',true);    
+        $data['Ac_service']=  $this->input->post('Ac_service',true);    
         $data['rate_branchid'] = $id;
 
         $result= $this->db->insert("tbl_utility_rate", $data);
@@ -2472,6 +2742,7 @@ class Bills extends CI_Controller {
         $data['Electricity_late']=  $this->input->post('Electricity_late',true);
         $data['Generator_late']=  $this->input->post('Generator_late',true);    
         $data['Ac_late']=  $this->input->post('Ac_late',true);    
+        $data['Ac_service']=  $this->input->post('Ac_service',true);    
 
         $xx = $this->db->query("select * from tbl_utility_rate where rate_branchid = '$branchId' order by Rate_SlNo desc limit 1")->row();
         $this->db->where('Rate_SlNo', $xx->Rate_SlNo);

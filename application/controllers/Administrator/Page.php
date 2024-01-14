@@ -1606,9 +1606,15 @@ class Page extends CI_Controller {
     }
 
         public function getMonths(){
+            // $months = $this->db->query(
+            //     "SELECT * from tbl_month
+            //     order by month_id desc
+            // ")->result();
             $months = $this->db->query(
-                "SELECT * from tbl_month
-                order by month_id desc
+                "SELECT *,
+                ( ROW_NUMBER() OVER (ORDER BY STR_TO_DATE(CONCAT('1 ', month_name), '%d %M %Y')) ) as orders
+                FROM tbl_month
+                ORDER BY orders desc;
             ")->result();
     
             echo json_encode($months);

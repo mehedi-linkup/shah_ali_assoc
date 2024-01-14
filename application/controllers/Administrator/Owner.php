@@ -55,7 +55,7 @@ class Owner extends CI_Controller
             select
                 c.*,
                 d.District_Name,
-                concat_ws(' - ', c.Owner_Code, c.Owner_Name, c.Owner_Mobile) as display_name
+                concat_ws(' - ', c.Owner_UserName, c.Owner_Name, c.Owner_Mobile) as display_name
             from tbl_owner c
             left join tbl_district d on d.District_SlNo = c.area_ID
             left join tbl_store s on s.Store_SlNo = c.store_id

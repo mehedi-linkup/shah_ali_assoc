@@ -52,7 +52,7 @@ const billInvoice = Vue.component('billInvoice', {
                                 <tr>
                                     <td>১</td>
                                     <td>বিদ্যুৎ বিল</td>
-                                    <td>{{ convertToBanglaNumber(cart[0]?.current_unit) }}</td>
+                                    <td>{{ convertToBanglaNumber(electricityBill?.current_unit) }}</td>
                                     <td>{{ convertToBanglaNumber(cart[0]?.electricity_unit) }}</td>
                                     <td>{{ convertToBanglaNumber(utilityRate?.Electricity_Rate) }}</td>
                                     <td>{{ convertToBanglaNumber(cart[0]?.electricity_bill) }}</td>
@@ -91,7 +91,7 @@ const billInvoice = Vue.component('billInvoice', {
                                 </tr>
                                 <tr>
                                     <td colspan="5" align="center">মোট বিলঃ</td>
-                                    <td>{{ convertToBanglaNumber(cart[0]?.bill) }} </td>
+                                    <td>{{ convertToBanglaNumber(cart[0]?.net_payable) }} </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -120,7 +120,7 @@ const billInvoice = Vue.component('billInvoice', {
                             <tr><td colspan="2" style="border-bottom: 1px solid #ccc"></td></tr>
                             <tr>
                                 <td><strong>বিলম্ব ফি সহ সর্বমোট:</strong></td>
-                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat( +cart[0]?.previous_due + +cart[0]?.bill + +cart[0]?.late_fee).toFixed(2) ) }}</td>
+                                <td style="text-align:right">{{ convertToBanglaNumber(parseFloat( +cart[0]?.previous_due + +cart[0]?.net_payable + +cart[0]?.late_fee).toFixed(2) ) }}</td>
                             </tr>
                         </table>
                     </div>
@@ -142,6 +142,7 @@ const billInvoice = Vue.component('billInvoice', {
                 saved_by: null
             },
             cart: [],
+            electricityBill: '',
             style: null,
             companyProfile: null,
             utilityRate: null,
@@ -167,6 +168,14 @@ const billInvoice = Vue.component('billInvoice', {
                 this.bill = res.data.bills[0];
                 this.cart = res.data.billDetails;
                 this.calculateDates();
+                this.getElectricity();
+            })
+        },
+        getElectricity() {
+            axios.post('/get_electricity_bill_details', {monthId: this.bill.month_id, storeId: this.cart[0].Store_SlNo}).then(res=>{
+                let r = res.data[0];
+                this.electricityBill = r;
+              
             })
         },
         getCurrentBranch() {

@@ -63,8 +63,12 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td>Total Payments</td>
+								<td>Total Bill Collection</td>
 								<td style="text-align:right;">{{ totalPayments | decimal }}</td>
+							</tr>
+							<tr>
+								<td>Total Zamindari Bill Collection</td>
+								<td style="text-align:right;">{{ totalZamindariPayments | decimal }}</td>
 							</tr>
 							<tr>
 								<td>Cash Received</td>
@@ -178,6 +182,7 @@
 					dateTo: moment().format('YYYY-MM-DD')
 				},
 				payments: [],
+				zamindariPayments: [],
 				cashReceived: [],
 				cashPaid: [],
 				bankDeposits: [],
@@ -202,6 +207,11 @@
 			totalPayments() {
 				return this.payments.reduce((prev, curr) => {
 					return prev + parseFloat(curr.total_payment)
+				}, 0).toFixed(2);
+			},
+			totalZamindariPayments() {
+				return this.zamindariPayments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.ZPayment_amount)
 				}, 0).toFixed(2);
 			},
 			totalCashReceived() {
@@ -252,6 +262,7 @@
 			},
 			totalCashIn() {
 				return parseFloat(this.totalPayments) +
+					parseFloat(this.totalZamindariPayments) + 
 					parseFloat(this.totalCashReceived) +
 					parseFloat(this.totalLoanReceived) +
 					parseFloat(this.totalInvestReceived) +
@@ -274,6 +285,7 @@
 			async getStatements() {
 				this.showReport = false;
 				await this.getPayments();
+				await this.getZamindariPayments();
 				await this.getCashReceived();
 				await this.getCashPaid();
 				await this.getBankDeposits();
@@ -292,6 +304,13 @@
 				await axios.post('/get_utility_payment', this.filter)
 					.then(res => {
 						this.payments = res.data.payments;
+					})
+			},
+
+			async getZamindariPayments() {
+				await axios.post('/get_zamindari_payments', this.filter)
+					.then(res => {
+						this.zamindariPayments = res.data;
 					})
 			},
 

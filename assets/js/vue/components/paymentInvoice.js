@@ -24,7 +24,7 @@ const paymentInvoice = Vue.component('payment-invoice', {
                         <strong>তারিখঃ </strong> {{ startDate }} হইতে {{ endDate }} পর্যন্ত <br>
                     </div>
                     <div class="col-xs-5 text-right">
-                        <strong>বিল নংঃ </strong> {{ convertToBanglaNumber(payment.invoice) }}<br>
+                        <strong>বিল নংঃ </strong> {{ convertToBanglaNumber(cart[0].bill_invoice) }}<br>
                         <strong>বিল তৈরির তারিখঃ </strong> {{ dateFormat(cart[0]?.process_date) }}<br>
                         <strong>বিল প্রদানের তারিখঃ </strong> {{ dateFormat(payment.payment_date) }}<br>
                         <strong>বিচ্ছিন্ন করণের তারিখঃ </strong> {{ addMonthsToDate(cart[0]?.process_date, 2) }}
@@ -52,7 +52,7 @@ const paymentInvoice = Vue.component('payment-invoice', {
                                 <tr>
                                     <td>১</td>
                                     <td>বিদ্যুৎ বিল</td>
-                                    <td>{{ convertToBanglaNumber(cart[0]?.current_unit) }}</td>
+                                    <td>{{ convertToBanglaNumber(electricityBill?.current_unit) }}</td>
                                     <td>{{ convertToBanglaNumber(cart[0]?.electricity_unit) }}</td>
                                     <td>{{ convertToBanglaNumber(utilityRate?.Electricity_Rate) }}</td>
                                     <td>{{ convertToBanglaNumber(cart[0]?.electricity_bill) }}</td>
@@ -142,6 +142,7 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 saved_by: null
             },
             cart: [],
+            electricityBill: '',
             style: null,
             companyProfile: null,
             utilityRate: null,
@@ -167,6 +168,14 @@ const paymentInvoice = Vue.component('payment-invoice', {
                 this.payment = res.data.payments[0];
                 this.cart = res.data.paymentDetails;
                 this.calculateDates();
+                this.getElectricity();
+            })
+        },
+        getElectricity() {
+            axios.post('/get_electricity_bill_details', {monthId: this.payment.month_id, storeId: this.cart[0].Store_SlNo}).then(res=>{
+                let r = res.data[0];
+                this.electricityBill = r;
+              
             })
         },
         getCurrentBranch() {

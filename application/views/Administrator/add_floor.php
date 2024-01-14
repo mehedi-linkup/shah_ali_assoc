@@ -28,6 +28,13 @@
 				</div>
 
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Ac Rate%:</label>
+					<div class="col-md-7">
+						<input type="number" step="0.000001" class="form-control" v-model="floor.ac_rate" placeholder="">
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Description Address:</label>
 					<div class="col-md-7">
 						<textarea type="text" class="form-control" v-model="floor.Floor_Description" placeholder="description here..."></textarea>
@@ -57,6 +64,7 @@
 								<td>{{ row.Floor_Name }}</td>
 								<td>{{ row.Floor_Ranking }}</td>
 								<td>{{ row.Floor_Store }}</td>
+								<td>{{ row.ac_rate }}</td>
 								<td>{{ row.Floor_Description }}</td>
 								<td>
 									<?php if($this->session->userdata('accountType') != 'u'){?>
@@ -93,6 +101,7 @@
 					Floor_SlNo: 0,
 					Floor_Name: '',
 					Floor_Ranking: '',
+					ac_rate: '',
 					Floor_Store: '',
 					Floor_Description: ''
 				},
@@ -101,6 +110,7 @@
                     { label: 'Floor Name', field: 'Floor_Name', align: 'center' },
                     { label: 'Ranking', field: 'Floor_Ranking', align: 'center' },
                     { label: 'Total Store', field: 'Floor_Store', align: 'center' },
+                    { label: 'AC Rate', field: 'ac_rate', align: 'center' },
                     { label: 'Description', field: 'Floor_Description', align: 'center' },
                     { label: 'Action', align: 'center', filterable: false }
                 ],
@@ -124,6 +134,12 @@
 				})
 			},
 			saveFloor(){
+				if(this.floor.ac_rate == 0 || this.floor.ac_rate == '') {
+					alert("Floor rate empty");
+					return;
+				}
+				
+				
 				let url = '/add_floor';
 				if(this.floor.Floor_SlNo != 0){
 					url = '/update_floor';

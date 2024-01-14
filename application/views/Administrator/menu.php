@@ -375,6 +375,17 @@ if ($module == 'dashboard' or $module == '') {
 			</a>
 		</li>
 
+		<?php if (array_search("electricity", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+			<li class="">
+				<a href="<?php echo base_url(); ?>electricity">
+					<i class="menu-icon fa fa-bolt" aria-hidden="true"></i>
+
+					<span class="menu-text"> Electricity Bill </span>
+				</a>
+				<b class="arrow"></b>
+			</li>
+		<?php endif; ?>
+
 		<?php if (array_search("bills/generate", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
 				<a href="<?php echo base_url(); ?>bills/generate">

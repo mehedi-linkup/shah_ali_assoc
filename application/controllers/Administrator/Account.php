@@ -1178,6 +1178,11 @@ class Account extends CI_Controller {
         $data['title'] = "Collection View";
 
         $data['collection_summary'] = $this->mt->getCollectionSummary();
+        // echo "<pre>";
+        // print_r($data);
+        // echo "</pre>";
+
+        // return;
 
         $data['month_account_summary'] = $this->mt->getBankTransactionSummary();
 
@@ -1264,6 +1269,21 @@ class Account extends CI_Controller {
             where upd.status = 'a'
             and upd.branch_id = '$this->brunch'
             and up.payment_date between '$data->fromDate' and '$data->toDate'
+            
+            UNION
+
+            select 
+                zp.ZPayment_id as id,
+                zp.ZPayment_date as date,
+                concat('Zamindari payment - ', zp.ZPayment_invoice, ' - ', s.Store_Name, ' (', s.Store_No, ')', ' - Owner: ', o.Owner_Name) as description,
+                zp.ZPayment_amount as in_amount,
+                0.00 as out_amount
+            from tbl_zamindari_payment zp
+            join tbl_store s on s.Store_SlNo = zp.ZPayment_storeID
+            join tbl_owner o on o.Owner_SlNo = zp.ZPayment_ownerID
+            where zp.ZPayment_status = 'a'
+            and zp.ZPayment_branchid = '$this->brunch'
+            and zp.ZPayment_date between '$data->fromDate' and '$data->toDate'
             
             UNION
             

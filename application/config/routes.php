@@ -468,6 +468,15 @@ $route['add_bill_payment'] = 'Administrator/Bills/saveBill';
 $route['update_bill_payment'] = 'Administrator/Bills/updateBill';
 $route['update_bill_date'] = 'Administrator/Bills/updateBillDate';
 
+
+$route['get_electricity_bill_payments'] = 'Administrator/Bills/getElectricityBillPayments';
+$route['electricity'] = 'Administrator/Bills/electricity';
+$route['add_electricity_bill'] = 'Administrator/Bills/addElectricityBill';
+$route['update_electricity_bill'] = 'Administrator/Bills/updateElectricityBill';
+$route['check_electricity_payment_month'] = 'Administrator/Bills/checkElectricityPaymentMonth';
+$route['get_electricity_bill_details'] = 'Administrator/Bills/getElectricityBillDetails';
+
+
 $route['get_bill_sheet'] = 'Administrator/Bills/getBillSheet';
 $route['get_bill_details'] = 'Administrator/Bills/getBillDetails';
 $route['get_utility_bill'] = 'Administrator/Bills/getUtilityBills';

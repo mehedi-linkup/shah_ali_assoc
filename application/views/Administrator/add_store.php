@@ -155,7 +155,7 @@
 					<label class="control-label col-md-4">Shop Owner:</label>
 					<div class="col-md-7">
 						<select class="form-control" v-if="owners.length == 0"></select>
-						<v-select v-bind:options="owners" v-model="selectedOwner" label="Owner_Name" v-if="owners.length > 0"></v-select>
+						<v-select v-bind:options="owners" v-model="selectedOwner" label="display_name" v-if="owners.length > 0"></v-select>
 					</div>
 					<div class="col-md-1" style="padding:0;margin-left: -15px;"><a href="/owner" target="_blank" class="add-button"><i class="fa fa-plus"></i></a></div>
 				</div>
@@ -178,7 +178,7 @@
 					<label class="control-label col-md-4">Shop Renter:</label>
 					<div class="col-md-7">
 						<select class="form-control" v-if="renters.length == 0"></select>
-						<v-select v-bind:options="renters" v-model="selectedRenter" label="Renter_Name" v-if="renters.length > 0"></v-select>
+						<v-select v-bind:options="renters" v-model="selectedRenter" label="display_name" v-if="renters.length > 0"></v-select>
 					</div>
 					<div class="col-md-1" style="padding:0;margin-left: -15px;"><a href="/renter" target="_blank" class="add-button"><i class="fa fa-plus"></i></a></div>
 				</div>

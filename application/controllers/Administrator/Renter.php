@@ -51,7 +51,7 @@ class Renter extends CI_Controller
             select
                 r.*,
                 d.District_Name,
-                concat_ws(' - ', r.Renter_Code, r.Renter_Name, r.owner_name, r.Renter_Mobile) as display_name
+                concat_ws(' - ', r.Renter_UserName, r.Renter_Name, r.owner_name, r.Renter_Mobile) as display_name
             from tbl_renter r
             left join tbl_district d on d.District_SlNo = r.area_ID
             where r.status = 'a'

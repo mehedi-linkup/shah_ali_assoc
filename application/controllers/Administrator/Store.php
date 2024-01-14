@@ -52,12 +52,13 @@ class Store extends CI_Controller
         if(isset($data->storeType) && $data->storeType != null){
             $storeTypeClause = " and Store_Type  = '$data->storeType'";
         }
-        $owners = $this->db->query("
+        $stores = $this->db->query("
             select
                 s.*,
                 t.ProductType_Name,
                 f.Floor_Name,
                 f.Floor_Ranking,
+                f.ac_rate,
                 g.Grade_Name,
                 o.Owner_Name,
                 r.Renter_Name,
@@ -73,7 +74,7 @@ class Store extends CI_Controller
             $storeTypeClause $clauses
             order by s.Store_SlNo desc
         ", $this->session->userdata('BRANCHid'))->result();
-        echo json_encode($owners);
+        echo json_encode($stores);
     }
 
     public function getOwnerDue(){
@@ -243,32 +244,28 @@ class Store extends CI_Controller
             $storeId = null;
             $res_message = "";
 
-            $duplicateMobileQuery = $this->db->query("select * from tbl_store where Store_Mobile = ? and Store_branchid = ?", [$storeObj->Store_Mobile, $this->session->userdata("BRANCHid")]);
+            // $duplicateMobileQuery = $this->db->query("select * from tbl_store where Store_Mobile = ? and Store_branchid = ?", [$storeObj->Store_Mobile, $this->session->userdata("BRANCHid")]);
 
-            if($duplicateMobileQuery->num_rows() > 0) {
-                $duplicateStore = $duplicateMobileQuery->row();
+            // if($duplicateMobileQuery->num_rows() > 0) {
+            //     $duplicateStore = $duplicateMobileQuery->row();
 
-                unset($store['Store_Code']);
-                $store["UpdateBy"]   = $this->session->userdata("FullName");
-                $store["UpdateTime"] = date("Y-m-d H:i:s");
-                $store["status"]     = 'a';
-                $this->db->where('Store_SlNo', $duplicateStore->Store_SlNo)->update('tbl_store', $store);
+            //     unset($store['Store_Code']);
+            //     $store["UpdateBy"]   = $this->session->userdata("FullName");
+            //     $store["UpdateTime"] = date("Y-m-d H:i:s");
+            //     $store["status"]     = 'a';
+            //     $this->db->where('Store_SlNo', $duplicateStore->Store_SlNo)->update('tbl_store', $store);
                 
-                $storeId = $duplicateStore->Store_SlNo;
-                $storeObj->Store_Code = $duplicateStore->Store_Code;
-                $res_message = 'Store updated successfully';
-            } else {
+            //     $storeId = $duplicateStore->Store_SlNo;
+            //     $storeObj->Store_Code = $duplicateStore->Store_Code;
+            //     $res_message = 'Store updated successfully';
+            // } else {
                 $store["AddBy"] = $this->session->userdata("FullName");
                 $store["AddTime"] = date("Y-m-d H:i:s");
     
                 $this->db->insert('tbl_store', $store);
                 $storeId = $this->db->insert_id();
                 $res_message = 'Store added successfully';
-            }
-
-          
-
-
+            // }
             if(!empty($_FILES)) {
                 $config['upload_path'] = './uploads/stores/';
                 $config['allowed_types'] = 'gif|jpg|png';
@@ -308,13 +305,13 @@ class Store extends CI_Controller
         try{
             $storeObj = json_decode($this->input->post('data'));
  
-            $storeMobileCount = $this->db->query("select * from tbl_store where Store_Mobile = ? and Store_SlNo != ? and Store_branchid = ?", [$storeObj->Store_Mobile, $storeObj->Store_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
+            // $storeMobileCount = $this->db->query("select * from tbl_store where Store_Mobile = ? and Store_SlNo != ? and Store_branchid = ?", [$storeObj->Store_Mobile, $storeObj->Store_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
 
-            if($storeMobileCount > 0){
-                $res = ['success'=>false, 'message'=>'Mobile number already exists'];
-                echo Json_encode($res);
-                exit;
-            }
+            // if($storeMobileCount > 0){
+            //     $res = ['success'=>false, 'message'=>'Mobile number already exists'];
+            //     echo Json_encode($res);
+            //     exit;
+            // }
             
             $storeMeterCount = $this->db->query("select * from tbl_store where meter_no = ? and Store_SlNo != ? and Store_branchid = ?", [$storeObj->meter_no, $storeObj->Store_SlNo, $this->session->userdata("BRANCHid")])->num_rows();
 

@@ -105,6 +105,7 @@
 							<th>Invoice No.</th>
 							<th>Store No</th>
 							<th>Store Name</th>
+							<th>Month Name</th>
 							<th>Floor Name</th>
 							<th>Electricity Unit</th>
 							<th>Electricity Bill</th>
@@ -119,12 +120,13 @@
 					<tbody>
 						<template v-for="bill in billSheetDetails">
 							<tr>
-								<td colspan="12" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ bill.floor_name }}</td>
+								<td colspan="13" style="text-align:center;text-transform:uppercase;background-color:#ffa825">{{ bill.floor_name }}</td>
 							</tr>
 							<tr v-for="(bill, i) in bill.stores">
 								<td>{{ bill.invoice }}</td>
 								<td>{{ bill.Store_No }}</td>
 								<td>{{ bill.Store_Name }}</td>
+								<td>{{ bill.month_name }}</td>
 								<td>{{ bill?.Floor_Name }}</td>
 								<td>{{ bill?.electricity_unit }}</td>
 								<td>{{ bill?.electricity_bill }}</td>
@@ -148,6 +150,7 @@
 							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.ac_bill}, 0) }, 0) ).toFixed(2) }}</td>
 							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.others_bill}, 0) }, 0) ).toFixed(2) }}</td>
 							<td style="text-align:right;">{{ parseFloat(billSheetDetails.reduce((prev, curr)=>{return prev + +curr.stores.reduce((p, c)=>{return p + +c.net_payable}, 0) }, 0) ).toFixed(2) }}</td>
+							<td></td>
 							<td></td>
 						</tr>
 					</tfoot>
@@ -205,7 +208,6 @@
 				dateFrom: moment().format('YYYY-MM-DD'),
 				dateTo: moment().format('YYYY-MM-DD'),
                 processingDate: moment().format('YYYY-MM-DD'),
-
                 months: [],
                 selectedMonth: null,
                 billSheets: [],

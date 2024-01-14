@@ -125,7 +125,7 @@
             $payment_text = $this->db->query("
                 select 
                     concat(
-                        'Invoice: ', up.invoice,
+                        'Invoice: ', bsd.invoice,
                         ', Store: ', s.Store_Code, ' - ', s.Store_Name,
                         ', Renter: ', r.Renter_Code, ' - ', r.Renter_Name,
                         ', Paid: ', up.total_payment,
@@ -133,6 +133,7 @@
                     ) as payment_text
                 from tbl_utility_payment up
                 join tbl_utility_payment_details upd
+                left join tbl_bill_sheet_details bsd on bsd.id = upd.bill_detail_id
                 join tbl_store s on s.Store_SlNo = upd.store_id
                 join tbl_renter r on r.Renter_SlNo = s.renter_id
                 where up.status = 'a'

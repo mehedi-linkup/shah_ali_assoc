@@ -34,7 +34,7 @@
                                 <td style="text-align:left;">{{ billDetail.Store_No }}</td>
                                 <td style="text-align:left;">{{ billDetail.Store_Name }}</td>
                                 <td style="text-align:left;">{{ billDetail.Renter_Name }}</td>
-                                <td style="text-align:left;">{{ billDetail.current_unit }}</td>
+                                <td style="text-align:left;">{{ billDetail.electricity_unit }}</td>
                                 <td style="text-align:left;">{{ billDetail.electricity_bill | decimal }}</td>
                                 <td style="text-align:left;">{{ billDetail.generator_bill | decimal }}</td>
                                 <td style="text-align:left;">{{ billDetail.ac_bill | decimal }}</td>

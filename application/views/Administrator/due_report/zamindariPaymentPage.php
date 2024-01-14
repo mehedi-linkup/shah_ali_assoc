@@ -392,10 +392,12 @@
 					if(r.success){
 						this.resetForm();
 						this.getZamindariPayments();
-						let invoiceConfirm = confirm('Do you want to view invoice?');
-						if(invoiceConfirm == true){
-							window.open('/paymentAndReport/'+r.paymentId, '_blank');
-						}
+						// let invoiceConfirm = confirm('Do you want to view invoice?');
+						// if(invoiceConfirm == true){
+						// 	window.open('/zamindari_payment_invoice_print/'+r.paymentId, '_blank');
+						// 	new Promise(r => setTimeout(r, 1000));
+							window.location = '/zamindariPaymentPage';
+						// }
 					}
 				})
 			},

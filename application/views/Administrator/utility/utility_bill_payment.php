@@ -726,7 +726,7 @@
 					if (r.success) {
 						let conf = confirm( r.message + ', Do you want to view invoice?');
 						if (conf) {
-							window.open('/utility_invoice_print/' + r.utilityId, '_blank');
+							window.open('/payment_invoice_print/' + r.utilityId, '_blank');
 							await new Promise(r => setTimeout(r, 1000));
 							window.location = '/utility/payment';
 						} else {

@@ -63,8 +63,8 @@ class Payment extends CI_Controller
                     f.Floor_Ranking,
                     bs.process_date,
                     bsd.electricity_unit,
-                    bsd.current_unit,
-                    bsd.generator_unit
+                    bsd.generator_unit,
+                    bsd.invoice as bill_invoice
                 from tbl_utility_payment_details upd
                 join tbl_bill_sheet_details bsd on bsd.id = upd.bill_detail_id
                 join tbl_bill_sheet bs on bs.id = bsd.bill_id

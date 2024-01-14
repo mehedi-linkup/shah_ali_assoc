@@ -135,8 +135,18 @@
 										<td class="sub-value">{{ totalPayments }}</td>
 									</tr>
 									<tr v-for="sale in payments">
-										<td>{{ '----'}}</td>
+										<td>{{ sale.invoice }}</td>
 										<td>{{ sale.total_payment | decimal }}</td>
+									</tr>
+								</template>
+								<template v-if="zamindariPayments.length > 0">
+									<tr>
+										<td class="sub-heading">Zamindari Payment</td>
+										<td class="sub-value">{{ totalZamindariPayments }}</td>
+									</tr>
+									<tr v-for="sale in zamindariPayments">
+										<td>{{ sale.ZPayment_invoice }}</td>
+										<td>{{ sale.ZPayment_amount | decimal }}</td>
 									</tr>
 								</template>
 								<template v-if="asset_sales.length > 0">
@@ -378,6 +388,7 @@
 					cashBalance: 0.00
 				},
 				payments: [],
+				zamindariPayments: [],
 				asset_sales: [],
 				asset_purchases: [],
 				cashReceived: [],
@@ -411,6 +422,11 @@
 			totalPayments() {
 				return this.payments.reduce((prev, curr) => {
 					return prev + parseFloat(curr.total_payment)
+				}, 0).toFixed(2);
+			},
+			totalZamindariPayments() {
+				return this.zamindariPayments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.ZPayment_amount)
 				}, 0).toFixed(2);
 			},
 			totalAssetSales() {
@@ -477,6 +493,7 @@
 				return parseFloat(this.openingBalance.cashBalance.cash_balance) +
 					parseFloat(this.totalBankOpeningBalance) +  
 					parseFloat(this.totalPayments) + 
+					parseFloat(this.totalZamindariPayments) + 
 					parseFloat(this.totalLoanReceived) + 
 					parseFloat(this.totalInvestReceived) + 
 					parseFloat(this.totalAssetSales) + 
@@ -504,6 +521,7 @@
 				this.getOpeningBalance();
 				this.getClosingBalance();
 				this.getPayments();
+				this.getZamindariPayments();
 				this.getAssetSales();
 				this.getAssetPurchases();
 				this.getCashReceived();
@@ -542,6 +560,12 @@
 						// this.sales = sales;
 
 						this.payments = res.data.payments;
+					})
+			},
+			getZamindariPayments() {
+				axios.post('/get_zamindari_payments', this.filter)
+					.then(res => {
+						this.zamindariPayments = res.data;
 					})
 			},
 			getAssetSales(){

@@ -48,7 +48,7 @@
 		padding: 0px 10px;
 	}
 	td, td input{
-		font-size: 11px !important;
+		font-size: 13px !important;
 	}
 	.btn-danger, .btn-danger.focus, .btn-danger:focus {
 		background-color: #29b0fc!important;
@@ -108,14 +108,14 @@
 							<th>Store No.</th>
 							<th>Store Name</th>
 							<!-- <th>Floor</th> -->
-							<th>Renter</th>
-							<th>Prev. Unit</th>
-							<th>Cur. Unit</th>
+							<th>Owner</th>
+							<!-- <th>Prev. Unit</th>
+							<th>Cur. Unit</th> -->
 							<th>Elec. Unit</th>
 							<th>Elec. Bill</th>
 							<th>Gen. Unit</th>
 							<th>Gen. Bill</th>
-							<th>Ac Unit</th>
+							<th>Ac Sft</th>
 							<th>Ac Bill</th>
 							<th>Others</th>
 							<th>Net Payable</th>
@@ -132,28 +132,27 @@
 								<td>{{ store.Store_No }}</td>
 								<td>{{ store.Store_Name }}</td>
 								<!-- <td>{{ store.Floor_Name }}</td> -->
-								<td>{{ store.Renter_Name }}</td>
-								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.previous_unit" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td>{{ store.Owner_Name }}</td>
+								<!-- <td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.previous_unit" v-on:input="calculateNetPayable(store)"></td>
+								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.current_unit" v-on:input="calculateNetPayable(store)"></td> -->
 								<td style="text-align: center;">{{ store.electricity_unit }}</td>
 								<td style="text-align: center;">{{ store.electricity_bill }}</td>
 								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.generator_unit" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.generator_bill"></td>
-								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.ac_unit" v-on:input="calculateNetPayable(store)"></td>
-								<td><input style="width:65px;height:20px;text-align:center;" type="number" v-model="store.ac_bill"></td>
-								<td><input style="width:70px;height:20px;text-align:center;" type="number" v-model="store.others_bill" v-on:input="calculateNetPayable(store)" readonly></td>
+								<td style="text-align: center;">{{ store.generator_bill }}</td>
+								<td style="text-align: center;"> {{ store.ac_square_feet }} </td>
+								<td style="text-align: center;"> {{ store.ac_bill }} </td>
+								<td style="text-align: center;">{{ store.others_bill }} </td>
 								<td style="text-align: center;">{{store.net_payable}}</td>
-								<!-- <td><input style="width: 80px;height: 20px; text-align:center;" type="number" v-model="store.payment" v-on:input="checkPayment(store)"></td> -->
 							</tr>
 						</template>
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="13" style="text-align: center;font-weight: 700">Total</td>
+							<td colspan="11" style="text-align: center;font-weight: 700">Total</td>
 							<td style="font-weight: 700">{{ parseFloat(filteredStores.reduce((prev, curr)=>{ return +prev + +curr.stores.reduce((p, c) => { return +p + +c.net_payable }, 0) }, 0) ).toFixed(2) }}</td>
 						</tr>
 						<tr>
-							<td colspan="14">
+							<td colspan="12">
 								<button type="button" @click="SaveBillPayment" name="btnSubmit" title="Save" class="btn btn-sm btn-danger pull-right">
 									Save
 									<i class="ace-icon fa fa-arrow-right icon-on-right bigger-110"></i>
@@ -221,22 +220,22 @@
 				}
 			},
 			calculateNetPayable(store){
-				store.generator_bill = store.generator_unit * this.utilityRate.Generator_Rate;
+				// store.generator_bill = store.generator_unit * this.utilityRate.Generator_Rate;
 
-				setTimeout(() => {
-					if(+store.current_unit < +store.previous_unit) {
-						store.current_unit = store.previous_unit
-						store.electricity_unit = 0;
-						store.electricity_bill = 0;
-						store.net_payable = parseFloat(store.generator_bill + store.ac_bill + store.others_bill).toFixed(2)
-					}
-				}, 2000);
+				// setTimeout(() => {
+				// 	if(+store.current_unit < +store.previous_unit) {
+				// 		store.current_unit = store.previous_unit
+				// 		store.electricity_unit = 0;
+				// 		store.electricity_bill = 0;
+				// 		store.net_payable = parseFloat(store.generator_bill + store.ac_bill + store.others_bill).toFixed(2)
+				// 	}
+				// }, 2000);
 
-				store.electricity_unit = store.current_unit - store.previous_unit;
-				store.electricity_bill = parseFloat(store.electricity_unit * this.utilityRate.Electricity_Rate).toFixed(2);
+				// store.electricity_unit = store.current_unit - store.previous_unit;
+				// store.electricity_bill = parseFloat(store.electricity_unit * this.utilityRate.Electricity_Rate).toFixed(2);
 				store.generator_bill = parseFloat(store.generator_unit * this.utilityRate.Generator_Rate).toFixed(2);
-				store.ac_bill = parseFloat(store.ac_unit * this.utilityRate.Ac_Rate).toFixed(2);
-				store.others_bill = parseFloat(+this.utilityRate.Mosque_Rate + +this.utilityRate.Service_Rate + +this.utilityRate.Wasa_Rate).toFixed(2);
+				// store.ac_bill = parseFloat(store.ac_unit * this.utilityRate.Ac_Rate).toFixed(2);
+				// store.others_bill = parseFloat(+this.utilityRate.Mosque_Rate + +this.utilityRate.Service_Rate + +this.utilityRate.Wasa_Rate).toFixed(2);
 
 				let payable = ( parseFloat(store.electricity_bill) + parseFloat(store.generator_bill) + parseFloat(store.ac_bill) + parseFloat(store.others_bill) ).toFixed(2);
 
@@ -271,7 +270,7 @@
 						this.billPayment.process_date = payment.process_date;
 						this.billPayment.last_date = payment.last_date;
 						this.billPayment.month_id = payment.month_id;
-
+						
 						let stores = _.chain(payment.details).groupBy('floor_id')
 							.map(store => {
 									return {
@@ -289,20 +288,37 @@
 						// this.stores = payment.details;
 					})
 				} else {
+
+					let electricityStores;
+					let sftRate;
+					await axios.post('/get_electricity_bill_payments/', { 
+							month_id: month_id,
+							details: true 
+						}).then(res => {
+						sftRate = res.data[0].ac_sft_rate;
+						electricityStores = res.data[0]? res.data[0].details : [];
+					})
+
 					await axios.get('/get_stores').then(res => {
 						let stores = res.data;
 
 						stores.map(store => {
-							store.previous_unit = 0;
-							store.current_unit = 0;
-							store.electricity_unit = 0;
-							store.electricity_bill = 0;
+							let electricityUnit = electricityStores.find((element => element.Store_SlNo == store.Store_SlNo)).electricity_unit;
+							// let acBill = (sftRate * store.square_feet) + ( ((sftRate * store.square_feet) / 100) * store.ac_rate )
+							let newSftRate = +sftRate + ( (+sftRate * +store.ac_rate) / 100 )
+							// store.previous_unit = 0;
+							// store.current_unit = 0;
+							store.electricity_unit = electricityUnit;
+							store.electricity_bill = electricityUnit * this.utilityRate.Electricity_Rate;
 							store.generator_unit = 0;
 							store.generator_bill = 0;
-							store.ac_unit = 0;
-							store.ac_bill = 0;
-							store.others_bill = 0;
+							store.ac_square_feet = store.square_feet;
+							store.ac_bill = parseFloat(newSftRate * +store.square_feet).toFixed(2);
+							store.others_bill = parseFloat(+this.utilityRate.Mosque_Rate + +this.utilityRate.Service_Rate + +this.utilityRate.Wasa_Rate).toFixed(2);
+							// store.others_bill = 0;
+							// store.net_payable = ( parseFloat(store.electricity_bill) + parseFloat(store.generator_bill) + parseFloat(store.ac_bill) + parseFloat(store.others_bill) ).toFixed(2);
 							store.net_payable = 0;
+
 							return store;
 						});
 						stores = _.chain(stores).groupBy('floor_id')
@@ -331,7 +347,7 @@
 			},
 
 			getMonths() {
-				axios.get('/get_months').then(res => {
+				axios.get('/get_electricity_bill_payments').then(res => {
 					this.months = res.data;
 				})
 			},

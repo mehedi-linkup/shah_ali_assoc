@@ -86,6 +86,17 @@
 				</div>
 			</div>
 
+			<div class="form-group">
+				<div class="col-sm-12"><hr></div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Ac_service"> Ac Service (Monthly) </label>
+				<div class="col-sm-5">
+					<input name="Ac_service" type="number" id="Ac_service" value="<?php echo $selected->Ac_service ?>" class="form-control" />
+				</div>
+			</div>
+
 
 			<div class="form-group" style="margin-top:15px;">
 				<label class="col-sm-4 control-label" for=""> </label>
@@ -176,6 +187,17 @@
 				<label class="col-sm-5 control-label" for="Ac_late"> Ac lates (TK) </label>
 				<div class="col-sm-5">
 					<input name="Ac_late" type="number" id="Ac_late" value="" class="form-control" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-sm-12"><hr></div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-5 control-label" for="Ac_service"> Ac Service (Monthly) </label>
+				<div class="col-sm-5">
+					<input name="Ac_service" type="number" id="Ac_service" value="" class="form-control" />
 				</div>
 			</div>
 

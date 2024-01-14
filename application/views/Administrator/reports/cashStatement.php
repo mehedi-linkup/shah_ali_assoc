@@ -108,12 +108,12 @@
 				<table class="table table-bordered table-condensed">
 					<thead>
 						<tr style="background: #dee4dc;">
-							<th colspan="4">Payment</th>
+							<th colspan="4">Bill Collection</th>
 						</tr>
 						<tr>
 							<th>Invoice</th>
 							<th>Date</th>
-							<th>----</th>
+							<th>Month</th>
 							<th>Received</th>
 						</tr>
 					</thead>
@@ -121,7 +121,7 @@
 						<tr v-for="payment in payments">
 							<td>{{ payment.invoice }}</td>
 							<td>{{ payment.payment_date }}</td>
-							<td> ---- </td>
+							<td> {{ payment.month_name }} </td>
 							<td style="text-align:right;">{{ payment.total_payment | decimal }}</td>
 						</tr>
 					</tbody>
@@ -131,6 +131,38 @@
 							<td style="text-align:right;">
 								<span v-if="payments.length == 0">0.00</span>
 								<span style="display:none;" v-bind:style="{display: payments.length > 0 ? '' : 'none'}">{{ totalPayments | decimal }}</span>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+
+				<!-- Zamindari payment -->
+				<table class="table table-bordered table-condensed">
+					<thead>
+						<tr style="background: #dee4dc;">
+							<th colspan="4">Zamindari Bill Collection</th>
+						</tr>
+						<tr>
+							<th>Invoice</th>
+							<th>Date</th>
+							<th>Owner</th>
+							<th>Received</th>
+						</tr>
+					</thead>
+					<tbody style="display:none;" v-bind:style="{display: zamindariPayments.length > 0 ? '' : 'none'}">
+						<tr v-for="payment in zamindariPayments">
+							<td>{{ payment.ZPayment_invoice }}</td>
+							<td>{{ payment.ZPayment_date }}</td>
+							<td>{{ payment.Owner_Name }}</td>
+							<td style="text-align:right;">{{ payment.ZPayment_amount | decimal }}</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr style="font-weight:bold;">
+							<td colspan="3" style="text-align:right;">Total</td>
+							<td style="text-align:right;">
+								<span v-if="zamindariPayments.length == 0">0.00</span>
+								<span style="display:none;" v-bind:style="{display: payments.length > 0 ? '' : 'none'}">{{ totalZamindariPayments | decimal }}</span>
 							</td>
 						</tr>
 					</tfoot>
@@ -566,6 +598,7 @@
 					dateTo: moment().format('YYYY-MM-DD')
 				},
 				payments: [],
+				zamindariPayments: [],
 				cashReceived: [],
 				cashPaid: [],
 				bankDeposits: [],
@@ -589,6 +622,11 @@
 			totalPayments() {
 				return this.payments.reduce((prev, curr) => {
 					return prev + parseFloat(curr.total_payment)
+				}, 0).toFixed(2);
+			},
+			totalZamindariPayments() {
+				return this.zamindariPayments.reduce((prev, curr) => {
+					return prev + parseFloat(curr.ZPayment_amount)
 				}, 0).toFixed(2);
 			},
 			totalCashReceived() {
@@ -656,6 +694,7 @@
 			},
 			totalCashIn(){
 				return parseFloat(this.totalPayments) + 
+					parseFloat(this.totalZamindariPayments) + 
 					parseFloat(this.totalCashReceived) + 
 					parseFloat(this.totalLoanReceived) + 
 					parseFloat(this.totalInvestReceived) + 
@@ -681,6 +720,7 @@
 		methods: {
 			getStatements() {
 				this.getPayments();
+				this.getZamindariPayments();
 				this.getCashReceived();
 				this.getCashPaid();
 				this.getBankDeposits();
@@ -698,6 +738,14 @@
 				axios.post('/get_utility_payment', this.filter)
 					.then(res => {
 						this.payments = res.data.payments;
+					})
+			},
+
+			getZamindariPayments() {
+				axios.post('/get_zamindari_payments', this.filter)
+					.then(res => {
+						// console.log(res.data)
+						this.zamindariPayments = res.data;
 					})
 			},
 

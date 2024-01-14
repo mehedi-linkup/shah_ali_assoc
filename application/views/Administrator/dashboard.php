@@ -469,6 +469,21 @@ if ($module == 'dashboard' or $module == '') { ?>
 					<h3>Bill Module </h3>
 				</div>
 
+				<?php if (array_search("electricity", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
+					<div class="col-md-2 col-xs-6 ">
+						<div class="col-md-12 section20">
+							<a href="<?php echo base_url(); ?>electricity">
+								<div class="logo">
+									<i class="menu-icon fa fa-bolt"></i>
+								</div>
+								<div class="textModule" style="margin-top: 0px;">
+									Electricity Bill Generate
+								</div>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
 				<?php if (array_search("bills/generate", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
@@ -484,62 +499,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 					</div>
 				<?php endif; ?>
 
-				<!-- <?php if (array_search("sales/product", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2 col-xs-6 ">
-						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>sales/product">
-								<div class="logo">
-									<i class="menu-icon fa fa-usd"></i>
-								</div>
-								<div class="textModule">
-									Sales Entry
-								</div>
-							</a>
-						</div>
-					</div>
-				<?php endif; ?> -->
-				<!-- <?php if (array_search("sales/service", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2 col-xs-6 ">
-						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>sales/service">
-								<div class="logo">
-									<i class="menu-icon fa fa-usd"></i>
-								</div>
-								<div class="textModule">
-									Service Entry
-								</div>
-							</a>
-						</div>
-					</div>
-				<?php endif; ?> -->
-				<!-- <?php if (array_search("salesReturn", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2 col-xs-6 ">
-						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>salesReturn">
-								<div class="logo">
-									<i class="menu-icon fa fa-rotate-left"></i>
-								</div>
-								<div class="textModule">
-									Sale Return
-								</div>
-							</a>
-						</div>
-					</div>
-				<?php endif; ?> -->
-				<!-- <?php if (array_search("salesrecord", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2 col-xs-6 ">
-						<div class="col-md-12 section20">
-							<a href="<?php echo base_url(); ?>salesrecord">
-								<div class="logo">
-									<i class="menu-icon fa fa-file"></i>
-								</div>
-								<div class="textModule">
-									Sales Record
-								</div>
-							</a>
-						</div>
-					</div>
-				<?php endif; ?> -->
+			
 				<!-- <?php if (array_search("currentStock", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 					<div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
